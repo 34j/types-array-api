@@ -262,12 +262,14 @@ def generate(body_module: Mapping[str, list[ast.stmt]], out_path: Path) -> None:
         _attributes_to_protocol("ArrayNamespace", attributes).stmt
     )
     
-    class RenameTypevars(ast.NodeTransformer):
-        def visit_Name(self, node: ast.Name) -> ast.Name:
-            if node.id in {t.name for t in typevars}:
-                return ast.Name(id="T" + node.id.capitalize())
-            return node
-    
-    out = RenameTypevars().visit(out)
+    for node in ast.walk(out):
+        for child in ast.iter_child_nodes(node):
+            if isinstance(child, ast.Name) and child.id in {t.name for t in typevars}:
+                if isinstance(node, ast.AnnAssign):
+                    node.annotation = ast.Name(id="T" + child.id.capitalize())
+                else:
+                    child.id = "T" + child.id.capitalize()
+            elif isinstance(child, ast.TypeVar) and child.name in {t.name for t in typevars}:
+                child.name = "T" + child.name.capitalize()
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(ast.unparse(ast.fix_missing_locations(out)), "utf-8")
