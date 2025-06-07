@@ -331,7 +331,8 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
 
     # Add imports
     text = (
-        """"Auto generated Protocol classes (Do not edit)"
+        """from __future__ import annotations
+
 from enum import Enum
 from abc import abstractmethod
 from collections.abc import Sequence

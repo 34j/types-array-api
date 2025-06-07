@@ -1,4 +1,4 @@
-"""Auto generated Protocol classes (Do not edit)."""
+from __future__ import annotations
 
 from abc import abstractmethod
 from collections.abc import Sequence
@@ -6,9 +6,7 @@ from enum import Enum
 from typing import (
     Any,
     Literal,
-    Optional,
     Protocol,
-    Union,
     runtime_checkable,
 )
 
@@ -17,7 +15,7 @@ inf = float("inf")
 
 @runtime_checkable
 class NestedSequence[T_t_co](Protocol):
-    def __getitem__(self, key: int, /) -> "Union[T_t_co, NestedSequence[T_t_co]]": ...
+    def __getitem__(self, key: int, /) -> T_t_co | NestedSequence[T_t_co]: ...
 
     def __len__(self, /) -> int: ...
 
@@ -105,7 +103,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         ...
 
     @property
-    def shape(self: TArray) -> tuple[Optional[int], ...]:
+    def shape(self: TArray) -> tuple[int | None, ...]:
         """
         Array dimensions.
 
@@ -125,7 +123,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         ...
 
     @property
-    def size(self: TArray) -> Optional[int]:
+    def size(self: TArray) -> int | None:
         """
         Number of elements in an array.
 
@@ -163,7 +161,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __array_namespace__(self: TArray, /, *, api_version: Optional[str] = None) -> Any:
+    def __array_namespace__(self: TArray, /, *, api_version: str | None = None) -> Any:
         """
         Returns an object that has all the array API functions on it.
 
@@ -182,7 +180,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __dlpack__(self: TArray, /, *, stream: Optional[Union[int, Any]] = None) -> TPycapsule:
+    def __dlpack__(self: TArray, /, *, stream: int | Any | None = None) -> TPycapsule:
         """
         Exports the array for consumption by :func:`~array_api.from_dlpack` as a DLPack capsule.
 
@@ -281,7 +279,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def to_device(self: TArray, device: TDevice, /, *, stream: Optional[Union[int, Any]] = None) -> TArray:
+    def to_device(self: TArray, device: TDevice, /, *, stream: int | Any | None = None) -> TArray:
         """
         Copy the array from the device on which it currently resides to the specified ``device``.
 
@@ -306,7 +304,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __getitem__(self: TArray, key: Union[int, slice, TEllipsis, None, tuple[Union[int, slice, TEllipsis, None], ...], TArray], /) -> TArray:
+    def __getitem__(self: TArray, key: int | slice | TEllipsis | None | tuple[int | slice | TEllipsis | None, ...] | TArray, /) -> TArray:
         """
         Returns ``self[key]``.
 
@@ -327,7 +325,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __setitem__(self: TArray, key: Union[int, slice, TEllipsis, tuple[Union[int, slice, TEllipsis], ...], TArray], value: Union[int, float, complex, bool, TArray], /) -> None:
+    def __setitem__(self: TArray, key: int | slice | TEllipsis | tuple[int | slice | TEllipsis, ...] | TArray, value: int | float | complex | bool | TArray, /) -> None:
         """
         Sets ``self[key]`` to ``value``.
 
@@ -354,7 +352,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __add__(self: TArray, other: Union[int, float, complex, TArray], /) -> TArray:
+    def __add__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
         """
         Calculates the sum for each element of an array instance with the respective element of the array ``other``.
 
@@ -382,7 +380,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __sub__(self: TArray, other: Union[int, float, complex, TArray], /) -> TArray:
+    def __sub__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
         """
         Calculates the difference for each element of an array instance with the respective element of the array ``other``.
 
@@ -412,7 +410,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __mul__(self: TArray, other: Union[int, float, complex, TArray], /) -> TArray:
+    def __mul__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
         """
         Calculates the product for each element of an array instance with the respective element of the array ``other``.
 
@@ -493,7 +491,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __truediv__(self: TArray, other: Union[int, float, complex, TArray], /) -> TArray:
+    def __truediv__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
         """
         Evaluates ``self_i / other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -526,7 +524,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __floordiv__(self: TArray, other: Union[int, float, TArray], /) -> TArray:
+    def __floordiv__(self: TArray, other: int | float | TArray, /) -> TArray:
         """
         Evaluates ``self_i // other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -552,7 +550,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __mod__(self: TArray, other: Union[int, float, TArray], /) -> TArray:
+    def __mod__(self: TArray, other: int | float | TArray, /) -> TArray:
         """
         Evaluates ``self_i % other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -578,7 +576,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __pow__(self: TArray, other: Union[int, float, complex, TArray], /) -> TArray:
+    def __pow__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
         """
         Calculates an implementation-dependent approximation of exponentiation by raising each element (the base) of an array instance to the power of ``other_i`` (the exponent), where ``other_i`` is the corresponding element of the array ``other``.
 
@@ -611,7 +609,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __lshift__(self: TArray, other: Union[int, TArray], /) -> TArray:
+    def __lshift__(self: TArray, other: int | TArray, /) -> TArray:
         """
         Evaluates ``self_i << other_i`` for each element of an array instance with the respective element  of the array ``other``.
 
@@ -634,7 +632,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __rshift__(self: TArray, other: Union[int, TArray], /) -> TArray:
+    def __rshift__(self: TArray, other: int | TArray, /) -> TArray:
         """
         Evaluates ``self_i >> other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -657,7 +655,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __and__(self: TArray, other: Union[int, bool, TArray], /) -> TArray:
+    def __and__(self: TArray, other: int | bool | TArray, /) -> TArray:
         """
         Evaluates ``self_i & other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -680,7 +678,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __xor__(self: TArray, other: Union[int, bool, TArray], /) -> TArray:
+    def __xor__(self: TArray, other: int | bool | TArray, /) -> TArray:
         """
         Evaluates ``self_i ^ other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -703,7 +701,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __or__(self: TArray, other: Union[int, bool, TArray], /) -> TArray:
+    def __or__(self: TArray, other: int | bool | TArray, /) -> TArray:
         """
         Evaluates ``self_i | other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -833,7 +831,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __lt__(self: TArray, other: Union[int, float, TArray], /) -> TArray:
+    def __lt__(self: TArray, other: int | float | TArray, /) -> TArray:
         """
         Computes the truth value of ``self_i < other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -859,7 +857,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __le__(self: TArray, other: Union[int, float, TArray], /) -> TArray:
+    def __le__(self: TArray, other: int | float | TArray, /) -> TArray:
         """
         Computes the truth value of ``self_i <= other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -885,7 +883,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __eq__(self: TArray, other: Union[int, float, complex, bool, TArray], /) -> TArray:  # type: ignore[override]
+    def __eq__(self: TArray, other: int | float | complex | bool | TArray, /) -> TArray:  # type: ignore[override]
         """
         Computes the truth value of ``self_i == other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -911,7 +909,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __ne__(self: TArray, other: Union[int, float, complex, bool, TArray], /) -> TArray:  # type: ignore[override]
+    def __ne__(self: TArray, other: int | float | complex | bool | TArray, /) -> TArray:  # type: ignore[override]
         """
         Computes the truth value of ``self_i != other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -939,7 +937,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __gt__(self: TArray, other: Union[int, float, TArray], /) -> TArray:
+    def __gt__(self: TArray, other: int | float | TArray, /) -> TArray:
         """
         Computes the truth value of ``self_i > other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -965,7 +963,7 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __ge__(self: TArray, other: Union[int, float, TArray], /) -> TArray:
+    def __ge__(self: TArray, other: int | float | TArray, /) -> TArray:
         """
         Computes the truth value of ``self_i >= other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -1221,7 +1219,7 @@ class can_cast[TArray: Array, TDtype](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, from_: Union[TDtype, TArray], to: TDtype, /) -> bool: ...
+    def __call__(self, from_: TDtype | TArray, to: TDtype, /) -> bool: ...
 
 
 @runtime_checkable
@@ -1277,7 +1275,7 @@ class finfo[TArray: Array, TDtype](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, type: Union[TDtype, TArray], /) -> finfo_object: ...
+    def __call__(self, type: TDtype | TArray, /) -> finfo_object: ...
 
 
 @runtime_checkable
@@ -1316,7 +1314,7 @@ class iinfo[TArray: Array, TDtype](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, type: Union[TDtype, TArray], /) -> iinfo_object: ...
+    def __call__(self, type: TDtype | TArray, /) -> iinfo_object: ...
 
 
 @runtime_checkable
@@ -1362,7 +1360,7 @@ class isdtype[TDtype](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, /, dtype: TDtype, kind: Union[TDtype, str, tuple[Union[TDtype, str], ...]]) -> bool: ...
+    def __call__(self, /, dtype: TDtype, kind: TDtype | str | tuple[TDtype | str, ...]) -> bool: ...
 
 
 @runtime_checkable
@@ -1386,7 +1384,7 @@ class result_type[TArray: Array, TDtype](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, /, *arrays_and_dtypes: Union[TArray, TDtype]) -> TDtype: ...
+    def __call__(self, /, *arrays_and_dtypes: TArray | TDtype) -> TDtype: ...
 
 
 @runtime_checkable
@@ -1425,7 +1423,7 @@ class max[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, axis: Optional[Union[int, tuple[int, ...]]] = None, keepdims: bool = False) -> TArray: ...
+    def __call__(self, x: TArray, /, *, axis: int | tuple[int, ...] | None = None, keepdims: bool = False) -> TArray: ...
 
 
 @runtime_checkable
@@ -1462,7 +1460,7 @@ class mean[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, axis: Optional[Union[int, tuple[int, ...]]] = None, keepdims: bool = False) -> TArray: ...
+    def __call__(self, x: TArray, /, *, axis: int | tuple[int, ...] | None = None, keepdims: bool = False) -> TArray: ...
 
 
 @runtime_checkable
@@ -1501,7 +1499,7 @@ class min[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, axis: Optional[Union[int, tuple[int, ...]]] = None, keepdims: bool = False) -> TArray: ...
+    def __call__(self, x: TArray, /, *, axis: int | tuple[int, ...] | None = None, keepdims: bool = False) -> TArray: ...
 
 
 @runtime_checkable
@@ -1553,7 +1551,7 @@ class prod[TArray: Array, TDtype](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, axis: Optional[Union[int, tuple[int, ...]]] = None, dtype: Optional[TDtype] = None, keepdims: bool = False) -> TArray: ...
+    def __call__(self, x: TArray, /, *, axis: int | tuple[int, ...] | None = None, dtype: TDtype | None = None, keepdims: bool = False) -> TArray: ...
 
 
 @runtime_checkable
@@ -1592,7 +1590,7 @@ class std[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, axis: Optional[Union[int, tuple[int, ...]]] = None, correction: Union[int, float] = 0.0, keepdims: bool = False) -> TArray: ...
+    def __call__(self, x: TArray, /, *, axis: int | tuple[int, ...] | None = None, correction: int | float = 0.0, keepdims: bool = False) -> TArray: ...
 
 
 @runtime_checkable
@@ -1644,7 +1642,7 @@ class sum[TArray: Array, TDtype](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, axis: Optional[Union[int, tuple[int, ...]]] = None, dtype: Optional[TDtype] = None, keepdims: bool = False) -> TArray: ...
+    def __call__(self, x: TArray, /, *, axis: int | tuple[int, ...] | None = None, dtype: TDtype | None = None, keepdims: bool = False) -> TArray: ...
 
 
 @runtime_checkable
@@ -1684,7 +1682,7 @@ class var[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, axis: Optional[Union[int, tuple[int, ...]]] = None, correction: Union[int, float] = 0.0, keepdims: bool = False) -> TArray: ...
+    def __call__(self, x: TArray, /, *, axis: int | tuple[int, ...] | None = None, correction: int | float = 0.0, keepdims: bool = False) -> TArray: ...
 
 
 @runtime_checkable
@@ -1717,7 +1715,7 @@ class arange[TArray: Array, TDevice, TDtype](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, start: Union[int, float], /, stop: Optional[Union[int, float]] = None, step: Union[int, float] = 1, *, dtype: Optional[TDtype] = None, device: Optional[TDevice] = None) -> TArray: ...
+    def __call__(self, start: int | float, /, stop: int | float | None = None, step: int | float = 1, *, dtype: TDtype | None = None, device: TDevice | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -1772,7 +1770,7 @@ class asarray[TSupportsbufferprotocol, TArray: Array, TDevice, TDtype](Protocol)
     """
 
     @abstractmethod
-    def __call__(self, obj: Union[TArray, bool, int, float, complex, NestedSequence, TSupportsbufferprotocol], /, *, dtype: Optional[TDtype] = None, device: Optional[TDevice] = None, copy: Optional[bool] = None) -> TArray: ...
+    def __call__(self, obj: TArray | bool | int | float | complex | NestedSequence | TSupportsbufferprotocol, /, *, dtype: TDtype | None = None, device: TDevice | None = None, copy: bool | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -1797,7 +1795,7 @@ class empty[TArray: Array, TDevice, TDtype](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, /, shape: Union[int, tuple[int, ...]], *, dtype: Optional[TDtype] = None, device: Optional[TDevice] = None) -> TArray: ...
+    def __call__(self, /, shape: int | tuple[int, ...], *, dtype: TDtype | None = None, device: TDevice | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -1822,7 +1820,7 @@ class empty_like[TArray: Array, TDevice, TDtype](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, dtype: Optional[TDtype] = None, device: Optional[TDevice] = None) -> TArray: ...
+    def __call__(self, x: TArray, /, *, dtype: TDtype | None = None, device: TDevice | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -1860,7 +1858,7 @@ class eye[TArray: Array, TDevice, TDtype](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, n_rows: int, n_cols: Optional[int] = None, /, *, k: int = 0, dtype: Optional[TDtype] = None, device: Optional[TDevice] = None) -> TArray: ...
+    def __call__(self, n_rows: int, n_cols: int | None = None, /, *, k: int = 0, dtype: TDtype | None = None, device: TDevice | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -1928,7 +1926,7 @@ class full[TArray: Array, TDevice, TDtype](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, /, shape: Union[int, tuple[int, ...]], fill_value: Union[bool, int, float, complex], *, dtype: Optional[TDtype] = None, device: Optional[TDevice] = None) -> TArray: ...
+    def __call__(self, /, shape: int | tuple[int, ...], fill_value: bool | int | float | complex, *, dtype: TDtype | None = None, device: TDevice | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -1968,7 +1966,7 @@ class full_like[TArray: Array, TDevice, TDtype](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, fill_value: Union[bool, int, float, complex], *, dtype: Optional[TDtype] = None, device: Optional[TDevice] = None) -> TArray: ...
+    def __call__(self, x: TArray, /, fill_value: bool | int | float | complex, *, dtype: TDtype | None = None, device: TDevice | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -2036,7 +2034,7 @@ class linspace[TArray: Array, TDevice, TDtype](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, start: Union[int, float, complex], stop: Union[int, float, complex], /, num: int, *, dtype: Optional[TDtype] = None, device: Optional[TDevice] = None, endpoint: bool = True) -> TArray: ...
+    def __call__(self, start: int | float | complex, stop: int | float | complex, /, num: int, *, dtype: TDtype | None = None, device: TDevice | None = None, endpoint: bool = True) -> TArray: ...
 
 
 @runtime_checkable
@@ -2108,7 +2106,7 @@ class ones[TArray: Array, TDevice, TDtype](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, /, shape: Union[int, tuple[int, ...]], *, dtype: Optional[TDtype] = None, device: Optional[TDevice] = None) -> TArray: ...
+    def __call__(self, /, shape: int | tuple[int, ...], *, dtype: TDtype | None = None, device: TDevice | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -2142,7 +2140,7 @@ class ones_like[TArray: Array, TDevice, TDtype](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, dtype: Optional[TDtype] = None, device: Optional[TDevice] = None) -> TArray: ...
+    def __call__(self, x: TArray, /, *, dtype: TDtype | None = None, device: TDevice | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -2225,7 +2223,7 @@ class zeros[TArray: Array, TDevice, TDtype](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, /, shape: Union[int, tuple[int, ...]], *, dtype: Optional[TDtype] = None, device: Optional[TDevice] = None) -> TArray: ...
+    def __call__(self, /, shape: int | tuple[int, ...], *, dtype: TDtype | None = None, device: TDevice | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -2250,7 +2248,7 @@ class zeros_like[TArray: Array, TDevice, TDtype](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, dtype: Optional[TDtype] = None, device: Optional[TDevice] = None) -> TArray: ...
+    def __call__(self, x: TArray, /, *, dtype: TDtype | None = None, device: TDevice | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -2611,7 +2609,7 @@ class matrix_norm[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, keepdims: bool = False, ord: Optional[Union[int, float, Literal[inf, -inf, "fro", "nuc"]]] = "fro") -> TArray:  # type: ignore[valid-type]
+    def __call__(self, x: TArray, /, *, keepdims: bool = False, ord: int | float | Literal[inf, -inf, "fro", "nuc"] | None = "fro") -> TArray:  # type: ignore[valid-type]
         ...
 
 
@@ -2672,7 +2670,7 @@ class matrix_rank[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, rtol: Optional[Union[float, TArray]] = None) -> TArray: ...
+    def __call__(self, x: TArray, /, *, rtol: float | TArray | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -2746,7 +2744,7 @@ class pinv[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, rtol: Optional[Union[float, TArray]] = None) -> TArray: ...
+    def __call__(self, x: TArray, /, *, rtol: float | TArray | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -3067,7 +3065,7 @@ class trace[TArray: Array, TDtype](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, offset: int = 0, dtype: Optional[TDtype] = None) -> TArray: ...
+    def __call__(self, x: TArray, /, *, offset: int = 0, dtype: TDtype | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -3130,7 +3128,7 @@ class vector_norm[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, axis: Optional[Union[int, tuple[int, ...]]] = None, keepdims: bool = False, ord: Union[int, float, Literal[inf, -inf]] = 2) -> TArray:  # type: ignore[valid-type]
+    def __call__(self, x: TArray, /, *, axis: int | tuple[int, ...] | None = None, keepdims: bool = False, ord: int | float | Literal[inf, -inf] = 2) -> TArray:  # type: ignore[valid-type]
         ...
 
 
@@ -5948,7 +5946,7 @@ class argmax[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, axis: Optional[int] = None, keepdims: bool = False) -> TArray: ...
+    def __call__(self, x: TArray, /, *, axis: int | None = None, keepdims: bool = False) -> TArray: ...
 
 
 @runtime_checkable
@@ -5978,7 +5976,7 @@ class argmin[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, axis: Optional[int] = None, keepdims: bool = False) -> TArray: ...
+    def __call__(self, x: TArray, /, *, axis: int | None = None, keepdims: bool = False) -> TArray: ...
 
 
 @runtime_checkable
@@ -6081,7 +6079,7 @@ class all[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, axis: Optional[Union[int, tuple[int, ...]]] = None, keepdims: bool = False) -> TArray: ...
+    def __call__(self, x: TArray, /, *, axis: int | tuple[int, ...] | None = None, keepdims: bool = False) -> TArray: ...
 
 
 @runtime_checkable
@@ -6121,7 +6119,7 @@ class any[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, axis: Optional[Union[int, tuple[int, ...]]] = None, keepdims: bool = False) -> TArray: ...
+    def __call__(self, x: TArray, /, *, axis: int | tuple[int, ...] | None = None, keepdims: bool = False) -> TArray: ...
 
 
 @runtime_checkable
@@ -6151,7 +6149,7 @@ class take[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, indices: TArray, /, *, axis: Optional[int] = None) -> TArray: ...
+    def __call__(self, x: TArray, indices: TArray, /, *, axis: int | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -6198,7 +6196,7 @@ class fft[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, n: Optional[int] = None, axis: int = -1, norm: Literal["backward", "ortho", "forward"] = "backward") -> TArray: ...
+    def __call__(self, x: TArray, /, *, n: int | None = None, axis: int = -1, norm: Literal["backward", "ortho", "forward"] = "backward") -> TArray: ...
 
 
 @runtime_checkable
@@ -6245,7 +6243,7 @@ class ifft[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, n: Optional[int] = None, axis: int = -1, norm: Literal["backward", "ortho", "forward"] = "backward") -> TArray: ...
+    def __call__(self, x: TArray, /, *, n: int | None = None, axis: int = -1, norm: Literal["backward", "ortho", "forward"] = "backward") -> TArray: ...
 
 
 @runtime_checkable
@@ -6298,7 +6296,7 @@ class fftn[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, s: Optional[Sequence[int]] = None, axes: Optional[Sequence[int]] = None, norm: Literal["backward", "ortho", "forward"] = "backward") -> TArray: ...
+    def __call__(self, x: TArray, /, *, s: Sequence[int] | None = None, axes: Sequence[int] | None = None, norm: Literal["backward", "ortho", "forward"] = "backward") -> TArray: ...
 
 
 @runtime_checkable
@@ -6351,7 +6349,7 @@ class ifftn[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, s: Optional[Sequence[int]] = None, axes: Optional[Sequence[int]] = None, norm: Literal["backward", "ortho", "forward"] = "backward") -> TArray: ...
+    def __call__(self, x: TArray, /, *, s: Sequence[int] | None = None, axes: Sequence[int] | None = None, norm: Literal["backward", "ortho", "forward"] = "backward") -> TArray: ...
 
 
 @runtime_checkable
@@ -6398,7 +6396,7 @@ class rfft[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, n: Optional[int] = None, axis: int = -1, norm: Literal["backward", "ortho", "forward"] = "backward") -> TArray: ...
+    def __call__(self, x: TArray, /, *, n: int | None = None, axis: int = -1, norm: Literal["backward", "ortho", "forward"] = "backward") -> TArray: ...
 
 
 @runtime_checkable
@@ -6446,7 +6444,7 @@ class irfft[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, n: Optional[int] = None, axis: int = -1, norm: Literal["backward", "ortho", "forward"] = "backward") -> TArray: ...
+    def __call__(self, x: TArray, /, *, n: int | None = None, axis: int = -1, norm: Literal["backward", "ortho", "forward"] = "backward") -> TArray: ...
 
 
 @runtime_checkable
@@ -6499,7 +6497,7 @@ class rfftn[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, s: Optional[Sequence[int]] = None, axes: Optional[Sequence[int]] = None, norm: Literal["backward", "ortho", "forward"] = "backward") -> TArray: ...
+    def __call__(self, x: TArray, /, *, s: Sequence[int] | None = None, axes: Sequence[int] | None = None, norm: Literal["backward", "ortho", "forward"] = "backward") -> TArray: ...
 
 
 @runtime_checkable
@@ -6553,7 +6551,7 @@ class irfftn[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, s: Optional[Sequence[int]] = None, axes: Optional[Sequence[int]] = None, norm: Literal["backward", "ortho", "forward"] = "backward") -> TArray: ...
+    def __call__(self, x: TArray, /, *, s: Sequence[int] | None = None, axes: Sequence[int] | None = None, norm: Literal["backward", "ortho", "forward"] = "backward") -> TArray: ...
 
 
 @runtime_checkable
@@ -6597,7 +6595,7 @@ class hfft[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, n: Optional[int] = None, axis: int = -1, norm: Literal["backward", "ortho", "forward"] = "backward") -> TArray: ...
+    def __call__(self, x: TArray, /, *, n: int | None = None, axis: int = -1, norm: Literal["backward", "ortho", "forward"] = "backward") -> TArray: ...
 
 
 @runtime_checkable
@@ -6641,7 +6639,7 @@ class ihfft[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, n: Optional[int] = None, axis: int = -1, norm: Literal["backward", "ortho", "forward"] = "backward") -> TArray: ...
+    def __call__(self, x: TArray, /, *, n: int | None = None, axis: int = -1, norm: Literal["backward", "ortho", "forward"] = "backward") -> TArray: ...
 
 
 @runtime_checkable
@@ -6678,7 +6676,7 @@ class fftfreq[TArray: Array, TDevice](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, n: int, /, *, d: float = 1.0, device: Optional[TDevice] = None) -> TArray: ...
+    def __call__(self, n: int, /, *, d: float = 1.0, device: TDevice | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -6717,7 +6715,7 @@ class rfftfreq[TArray: Array, TDevice](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, n: int, /, *, d: float = 1.0, device: Optional[TDevice] = None) -> TArray: ...
+    def __call__(self, n: int, /, *, d: float = 1.0, device: TDevice | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -6752,7 +6750,7 @@ class fftshift[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, axes: Optional[Union[int, Sequence[int]]] = None) -> TArray: ...
+    def __call__(self, x: TArray, /, *, axes: int | Sequence[int] | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -6785,7 +6783,7 @@ class ifftshift[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, axes: Optional[Union[int, Sequence[int]]] = None) -> TArray: ...
+    def __call__(self, x: TArray, /, *, axes: int | Sequence[int] | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -6908,7 +6906,7 @@ class tensordot[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x1: TArray, x2: TArray, /, *, axes: Union[int, tuple[Sequence[int], Sequence[int]]] = 2) -> TArray: ...
+    def __call__(self, x1: TArray, x2: TArray, /, *, axes: int | tuple[Sequence[int], Sequence[int]] = 2) -> TArray: ...
 
 
 @runtime_checkable
@@ -7025,7 +7023,7 @@ class concat[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, arrays: Union[tuple[TArray, ...], list[TArray]], /, *, axis: Optional[int] = 0) -> TArray: ...
+    def __call__(self, arrays: tuple[TArray, ...] | list[TArray], /, *, axis: int | None = 0) -> TArray: ...
 
 
 @runtime_checkable
@@ -7071,7 +7069,7 @@ class flip[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, axis: Optional[Union[int, tuple[int, ...]]] = None) -> TArray: ...
+    def __call__(self, x: TArray, /, *, axis: int | tuple[int, ...] | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -7119,7 +7117,7 @@ class reshape[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, shape: tuple[int, ...], *, copy: Optional[bool] = None) -> TArray: ...
+    def __call__(self, x: TArray, /, shape: tuple[int, ...], *, copy: bool | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -7144,7 +7142,7 @@ class roll[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, shift: Union[int, tuple[int, ...]], *, axis: Optional[Union[int, tuple[int, ...]]] = None) -> TArray: ...
+    def __call__(self, x: TArray, /, shift: int | tuple[int, ...], *, axis: int | tuple[int, ...] | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -7167,7 +7165,7 @@ class squeeze[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, axis: Union[int, tuple[int, ...]]) -> TArray: ...
+    def __call__(self, x: TArray, /, axis: int | tuple[int, ...]) -> TArray: ...
 
 
 @runtime_checkable
@@ -7193,7 +7191,7 @@ class stack[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, arrays: Union[tuple[TArray, ...], list[TArray]], /, *, axis: int = 0) -> TArray: ...
+    def __call__(self, arrays: tuple[TArray, ...] | list[TArray], /, *, axis: int = 0) -> TArray: ...
 
 
 @runtime_checkable
