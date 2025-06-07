@@ -178,7 +178,7 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
             elif isinstance(b, ast.FunctionDef):
                 if b.name == "__eq__":
                     continue
-                if submodule == "info":
+                if submodule == "info" and b.name == "__array_namespace_info__":
                     continue
                 data = _function_to_protocol(b, typevars)
                 module_attributes[submodule].append(ModuleAttributes(b.name, data.name, None, data.typevars_used))
