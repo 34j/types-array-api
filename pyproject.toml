@@ -43,7 +43,6 @@ dev = [
   "pytest>=8,<9",
   "pytest-cov>=6,<7",
   "ruff>=0.11.13",
-  "ssort>=0.14.0",
 ]
 docs = [
   "furo>=2023.5.20; python_version>='3.11'",

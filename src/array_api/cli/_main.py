@@ -283,6 +283,11 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
             else:
                 warnings.warn(f"Skipping {submodule} {b}", stacklevel=2)
 
+    # Manual addition
+    for d in ["bool", "complex128", "complex64", "float32", "float64", "int16", "int32", "int64", "int8", "uint16", "uint32", "uint64", "uint8"]:
+        module_attributes[""].append(ModuleAttributes(d, ast.Name("float"), None, []))
+    module_attributes[""].append(ModuleAttributes("Device", ast.Name("device"), None, []))
+
     # Create Protocols for the main namespace
     OPTIONAL_SUBMODULES = ["fft", "linalg"]
     main_attributes = [attribute for submodule, attributes in module_attributes.items() for attribute in attributes if submodule not in OPTIONAL_SUBMODULES]

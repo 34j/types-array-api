@@ -16,6 +16,50 @@ inf = float("inf")
 
 
 @runtime_checkable
+class Info[TCapabilities, TDatatypes, TDefaultdatatypes, TArray: Array, TDevice, TDtype](Protocol):
+    """Namespace returned by `__array_namespace_info__`."""
+
+    def capabilities(self) -> TCapabilities: ...
+
+    def default_device(self) -> TDevice: ...
+
+    def default_dtypes(self, *, device: Optional[TDevice]) -> TDefaultdatatypes: ...
+
+    def devices(self) -> list[TDevice]: ...
+
+    def dtypes(self, *, device: Optional[TDevice], kind: Optional[Union[str, tuple[str, ...]]]) -> TDatatypes: ...
+
+
+@runtime_checkable
+class NestedSequence[T_t_co](Protocol):
+    def __getitem__(self, key: int, /) -> "Union[T_t_co, NestedSequence[T_t_co]]": ...
+
+    def __len__(self, /) -> int: ...
+
+
+@runtime_checkable
+class iinfo_object[TDtype](Protocol):
+    """Dataclass returned by `iinfo`."""
+
+    bits: int
+    max: int
+    min: int
+    dtype: TDtype
+
+
+@runtime_checkable
+class finfo_object[TDtype](Protocol):
+    """Dataclass returned by `finfo`."""
+
+    bits: int
+    eps: float
+    max: float
+    min: float
+    smallest_normal: float
+    dtype: TDtype
+
+
+@runtime_checkable
 class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
     def __init__(self: TArray) -> None:
         """Initialize the attributes for the array object class."""
@@ -1360,18 +1404,6 @@ class can_cast[TArray: Array, TDtype](Protocol):
 
 
 @runtime_checkable
-class finfo_object[TDtype](Protocol):
-    """Dataclass returned by `finfo`."""
-
-    bits: int
-    eps: float
-    max: float
-    min: float
-    smallest_normal: float
-    dtype: TDtype
-
-
-@runtime_checkable
 class finfo[TArray: Array, TDtype](Protocol):
     """
     Machine limits for floating-point data types.
@@ -1425,16 +1457,6 @@ class finfo[TArray: Array, TDtype](Protocol):
 
     @abstractmethod
     def __call__(self, type: Union[TDtype, TArray], /) -> finfo_object: ...
-
-
-@runtime_checkable
-class iinfo_object[TDtype](Protocol):
-    """Dataclass returned by `iinfo`."""
-
-    bits: int
-    max: int
-    min: int
-    dtype: TDtype
 
 
 @runtime_checkable
@@ -2004,13 +2026,6 @@ class arange[TArray: Array, TDevice, TDtype](Protocol):
 
     @abstractmethod
     def __call__(self, start: Union[int, float], /, stop: Optional[Union[int, float]] = None, step: Union[int, float] = 1, *, dtype: Optional[TDtype] = None, device: Optional[TDevice] = None) -> TArray: ...
-
-
-@runtime_checkable
-class NestedSequence[T_t_co](Protocol):
-    def __getitem__(self, key: int, /) -> "Union[T_t_co, NestedSequence[T_t_co]]": ...
-
-    def __len__(self, /) -> int: ...
 
 
 @runtime_checkable
@@ -7097,21 +7112,6 @@ class diff[TArray: Array](Protocol):
 
 
 @runtime_checkable
-class Info[TCapabilities, TDatatypes, TDefaultdatatypes, TArray: Array, TDevice, TDtype](Protocol):
-    """Namespace returned by `__array_namespace_info__`."""
-
-    def capabilities(self) -> TCapabilities: ...
-
-    def default_device(self) -> TDevice: ...
-
-    def default_dtypes(self, *, device: Optional[TDevice]) -> TDefaultdatatypes: ...
-
-    def devices(self) -> list[TDevice]: ...
-
-    def dtypes(self, *, device: Optional[TDevice], kind: Optional[Union[str, tuple[str, ...]]]) -> TDatatypes: ...
-
-
-@runtime_checkable
 class __array_namespace_info__[TCapabilities, TDatatypes, TDefaultdatatypes, TArray: Array, TDevice, TDtype](Protocol):
     """
     Returns a namespace with Array API namespace inspection utilities.
@@ -8665,51 +8665,6 @@ class unique_values[TArray: Array](Protocol):
 
 
 @runtime_checkable
-class LinalgNamespace[TArray: Array, TDtype](Protocol):
-    cholesky: cholesky[TArray,]
-    cross: cross[TArray,]
-    det: det[TArray,]
-    diagonal: diagonal[TArray,]
-    eigh: eigh[TArray,]
-    eigvalsh: eigvalsh[TArray,]
-    inv: inv[TArray,]
-    matmul: matmul[TArray,]
-    matrix_norm: matrix_norm[TArray,]
-    matrix_power: matrix_power[TArray,]
-    matrix_rank: matrix_rank[TArray,]
-    matrix_transpose: matrix_transpose[TArray,]
-    outer: outer[TArray,]
-    pinv: pinv[TArray,]
-    qr: qr[TArray,]
-    slogdet: slogdet[TArray,]
-    solve: solve[TArray,]
-    svd: svd[TArray,]
-    svdvals: svdvals[TArray,]
-    tensordot: tensordot[TArray,]
-    trace: trace[TArray, TDtype]
-    vecdot: vecdot[TArray,]
-    vector_norm: vector_norm[TArray,]
-
-
-@runtime_checkable
-class FftNamespace[TArray: Array, TDevice, TDtype](Protocol):
-    fft: fft[TArray,]
-    ifft: ifft[TArray,]
-    fftn: fftn[TArray,]
-    ifftn: ifftn[TArray,]
-    rfft: rfft[TArray,]
-    irfft: irfft[TArray,]
-    rfftn: rfftn[TArray,]
-    irfftn: irfftn[TArray,]
-    hfft: hfft[TArray,]
-    ihfft: ihfft[TArray,]
-    fftfreq: fftfreq[TArray, TDevice, TDtype]
-    rfftfreq: rfftfreq[TArray, TDevice, TDtype]
-    fftshift: fftshift[TArray,]
-    ifftshift: ifftshift[TArray,]
-
-
-@runtime_checkable
 class ArrayNamespace[TCapabilities, TDatatypes, TDefaultdatatypes, TSupportsbufferprotocol, TArray: Array, TDevice, TDtype](Protocol):
     astype: astype[TArray, TDevice, TDtype]
     can_cast: can_cast[TArray, TDtype]
@@ -8842,18 +8797,81 @@ class ArrayNamespace[TCapabilities, TDatatypes, TDefaultdatatypes, TSupportsbuff
     tile: tile[TArray,]
     unstack: unstack[TArray,]
     e: float
+    "\nIEEE 754 floating-point representation of Euler's constant.\n\n``e = 2.71828182845904523536028747135266249775724709369995...``\n"
     inf: float
+    "\nIEEE 754 floating-point representation of (positive) infinity.\n"
     nan: float
+    "\nIEEE 754 floating-point representation of Not a Number (``NaN``).\n"
     newaxis: float
+    "\nAn alias for ``None`` which is useful for indexing arrays.\n"
     pi: float
+    "\nIEEE 754 floating-point representation of the mathematical constant ``π``.\n\n``pi = 3.1415926535897932384626433...``\n"
     unique_all: unique_all[TArray,]
     unique_counts: unique_counts[TArray,]
     unique_inverse: unique_inverse[TArray,]
     unique_values: unique_values[TArray,]
+    bool: float
+    complex128: float
+    complex64: float
+    float32: float
+    float64: float
+    int16: float
+    int32: float
+    int64: float
+    int8: float
+    uint16: float
+    uint32: float
+    uint64: float
+    uint8: float
+    Device: TDevice
+
+
+@runtime_checkable
+class LinalgNamespace[TArray: Array, TDtype](Protocol):
+    cholesky: cholesky[TArray,]
+    cross: cross[TArray,]
+    det: det[TArray,]
+    diagonal: diagonal[TArray,]
+    eigh: eigh[TArray,]
+    eigvalsh: eigvalsh[TArray,]
+    inv: inv[TArray,]
+    matmul: matmul[TArray,]
+    matrix_norm: matrix_norm[TArray,]
+    matrix_power: matrix_power[TArray,]
+    matrix_rank: matrix_rank[TArray,]
+    matrix_transpose: matrix_transpose[TArray,]
+    outer: outer[TArray,]
+    pinv: pinv[TArray,]
+    qr: qr[TArray,]
+    slogdet: slogdet[TArray,]
+    solve: solve[TArray,]
+    svd: svd[TArray,]
+    svdvals: svdvals[TArray,]
+    tensordot: tensordot[TArray,]
+    trace: trace[TArray, TDtype]
+    vecdot: vecdot[TArray,]
+    vector_norm: vector_norm[TArray,]
+
+
+@runtime_checkable
+class FftNamespace[TArray: Array, TDevice, TDtype](Protocol):
+    fft: fft[TArray,]
+    ifft: ifft[TArray,]
+    fftn: fftn[TArray,]
+    ifftn: ifftn[TArray,]
+    rfft: rfft[TArray,]
+    irfft: irfft[TArray,]
+    rfftn: rfftn[TArray,]
+    irfftn: irfftn[TArray,]
+    hfft: hfft[TArray,]
+    ihfft: ihfft[TArray,]
+    fftfreq: fftfreq[TArray, TDevice, TDtype]
+    rfftfreq: rfftfreq[TArray, TDevice, TDtype]
+    fftshift: fftshift[TArray,]
+    ifftshift: ifftshift[TArray,]
+
+
+@runtime_checkable
+class ArrayNamespaceFull[TCapabilities, TDatatypes, TDefaultdatatypes, TSupportsbufferprotocol, TArray: Array, TDevice, TDtype](ArrayNamespace[TCapabilities, TDatatypes, TDefaultdatatypes, TSupportsbufferprotocol, TArray, TDevice, TDtype], Protocol):
     linalg: LinalgNamespace[TArray, TDtype]
     fft: FftNamespace[TArray, TDevice, TDtype]
-    "\nIEEE 754 floating-point representation of Euler's constant.\n\n``e = 2.71828182845904523536028747135266249775724709369995...``\n"
-    "\nIEEE 754 floating-point representation of (positive) infinity.\n"
-    "\nIEEE 754 floating-point representation of Not a Number (``NaN``).\n"
-    "\nAn alias for ``None`` which is useful for indexing arrays.\n"
-    "\nIEEE 754 floating-point representation of the mathematical constant ``π``.\n\n``pi = 3.1415926535897932384626433...``\n"
