@@ -16,9 +16,6 @@ class ProtocolData:
     name: str
 
 
-# def _class_to_protocol(
-#     stmt: ast.ClassDef, typevars: list[str]
-# ) -> ProtocolData:
 
 
 def _function_to_protocol(stmt: ast.FunctionDef, typevars: list[str]) -> ProtocolData:
@@ -49,7 +46,7 @@ def _function_to_protocol(stmt: ast.FunctionDef, typevars: list[str]) -> Protoco
     typevars = [typevar for typevar in typevars if typevar in args]
 
     # Construct the protocol
-    cls_def = ast.ClassDef(
+    stmt_new = ast.ClassDef(
         name=name,
         decorator_list=[ast.Name(id="runtime_checkable")],
         keywords=[],
@@ -59,17 +56,30 @@ def _function_to_protocol(stmt: ast.FunctionDef, typevars: list[str]) -> Protoco
                 slice=ast.Tuple(elts=[ast.Name(typevar) for typevar in typevars]),
             )
         ],
-        body=[stmt],
+        body=([ast.Expr(value=ast.Constant(docstring, kind=None))] if docstring is not None else []) + [stmt],
         type_params=[],
     )  # type: ignore[call-arg]
-    if docstring is not None:
-        cls_def.body.insert(0, ast.Expr(value=ast.Constant(docstring, kind=None)))
     return ProtocolData(
-        stmt=cls_def,
+        stmt=stmt_new,
         typevars_used=typevars,
         name=name + (f"[{', '.join(typevars)}]" if typevars else ""),
     )
 
+def _class_to_protocol(
+    stmt: ast.ClassDef, typevars: list[str]
+) -> ProtocolData:
+    typevars = [typevar for typevar in typevars if typevar in ast.unparse(stmt)]
+    stmt.bases = [
+        ast.Subscript(
+            value=ast.Name(id="Protocol"),
+            slice=ast.Tuple(elts=[ast.Name(typevar) for typevar in typevars]),
+        )
+    ]
+    return ProtocolData(
+        stmt=stmt,
+        typevars_used=typevars,
+        name=stmt.name + (f"[{', '.join(typevars)}]" if typevars else ""),
+    )
 
 def _attributes_to_protocol(
     name, attributes: list[tuple[str, str, str | None, list]], typevars: list[str]
@@ -195,7 +205,11 @@ def generate(body_module: Mapping[str, list[ast.stmt]], out_path: Path) -> None:
                                 docstring = docstring_expr.value.value
                     module_attributes[submodule].append((id, "float", docstring, []))
             elif isinstance(b, ast.ClassDef):
-                pass
+                data = _class_to_protocol(b, typevars)
+                out.body.append(data.stmt)
+                module_attributes[submodule].append(
+                    (b.name, data.name, None, data.typevars_used)
+                )
             elif isinstance(b, ast.Expr):
                 pass
             else:
