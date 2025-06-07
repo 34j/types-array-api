@@ -244,6 +244,9 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
                 # __init__.py
                 if id == "__all__":
                     continue
+                # weird assignment
+                if id == "array":
+                    continue
                 # get docstring
                 docstring = None
                 if i != len(body) - 1:

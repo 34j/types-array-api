@@ -7527,7 +7527,6 @@ class ArrayNamespace[TSupportsbufferprotocol, TArray: _array, TDevice, TDtype](P
     all: all[TArray,]
     any: any[TArray,]
     take: take[TArray,]
-    array: TArray
     matmul: matmul[TArray,]
     matrix_transpose: matrix_transpose[TArray,]
     tensordot: tensordot[TArray,]
