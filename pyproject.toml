@@ -71,6 +71,7 @@ lint.ignore = [
   "D401", # First line of docstring should be in imperative mood
   "S603",
   "S607",
+  "E501"
 ]
 lint.per-file-ignores."conftest.py" = [ "D100" ]
 lint.per-file-ignores."docs/conf.py" = [ "D100" ]

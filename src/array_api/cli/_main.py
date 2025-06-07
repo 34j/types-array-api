@@ -1,24 +1,29 @@
 from __future__ import annotations
 
 import ast
-import sys
 from collections import defaultdict
+from collections.abc import Mapping, Sequence
 from copy import deepcopy
 from pathlib import Path
-from typing import Mapping, Sequence
+
 import attrs
+
+
 @attrs.frozen()
 class ProtocolData:
     stmt: ast.ClassDef
     typevars_used: Sequence[str]
     name: str
-    
-    
 
-def _function_to_protocol(
-    stmt: ast.FunctionDef, typevars: list[str]
-) -> ProtocolData:
-    """Convert a function definition to a Protocol class.
+
+# def _class_to_protocol(
+#     stmt: ast.ClassDef, typevars: list[str]
+# ) -> ProtocolData:
+
+
+def _function_to_protocol(stmt: ast.FunctionDef, typevars: list[str]) -> ProtocolData:
+    """
+    Convert a function definition to a Protocol class.
 
     Parameters
     ----------
@@ -31,12 +36,13 @@ def _function_to_protocol(
     -------
     ProtocolData
         A ProtocolData object.
+
     """
     stmt = deepcopy(stmt)
     name = stmt.name
     docstring = ast.get_docstring(stmt)
     stmt.name = "__call__"
-    stmt.body = [ast.Raise(exc=ast.Name(id="NotImplementedError"), cause=None)]
+    stmt.body = [ast.Expr(value=ast.Constant(value=Ellipsis))]
     stmt.args.posonlyargs.insert(0, ast.arg(arg="self"))
     stmt.decorator_list.append(ast.Name(id="abstractmethod"))
     args = ast.unparse(stmt.args)
@@ -54,13 +60,16 @@ def _function_to_protocol(
             )
         ],
         body=[stmt],
-        type_params=[]
-    ) # type: ignore[call-arg]
+        type_params=[],
+    )  # type: ignore[call-arg]
     if docstring is not None:
         cls_def.body.insert(0, ast.Expr(value=ast.Constant(docstring, kind=None)))
     return ProtocolData(
-        stmt=cls_def, typevars_used=typevars, name=name + (f"[{', '.join(typevars)}]" if typevars else "")
+        stmt=cls_def,
+        typevars_used=typevars,
+        name=name + (f"[{', '.join(typevars)}]" if typevars else ""),
     )
+
 
 def _attributes_to_protocol(
     name, attributes: list[tuple[str, str, str | None, list]], typevars: list[str]
@@ -96,12 +105,17 @@ def _attributes_to_protocol(
         name=name + (f"[{', '.join(typevars)}]" if typevars else ""),
     )
 
-def generate_all(cache_dir: Path | str = ".cache", out_path = "src/array-api", out_name: str = "_namespace.py") -> None:
+
+def generate_all(
+    cache_dir: Path | str = ".cache",
+    out_path="src/array-api",
+    out_name: str = "_namespace.py",
+) -> None:
     import subprocess as sp
 
     Path(cache_dir).mkdir(exist_ok=True)
     sp.run(["git", "clone", "https://github.com/data-apis/array-api", ".cache"])
-    
+
     for dir_path in (Path(cache_dir) / Path("src") / "array_api_stubs").glob("**/"):
         # get module bodies
         body_module = {
@@ -109,9 +123,10 @@ def generate_all(cache_dir: Path | str = ".cache", out_path = "src/array-api", o
             for path in dir_path.rglob("*.py")
         }
         generate(body_module, Path(out_path) / dir_path.name / out_name)
-    
+
+
 def generate(body_module: Mapping[str, list[ast.stmt]], out_path: Path) -> None:
-    body_typevars = body_module.pop("_types")
+    body_typevars = body_module.get("_types")
     body_module.pop("__init__")
 
     # Get all TypeVars
@@ -136,8 +151,9 @@ def generate(body_module: Mapping[str, list[ast.stmt]], out_path: Path) -> None:
         ast.ImportFrom(
             module="typing",
             names=[
-                ast.alias(name="Protocol", alias=None),
-                ast.alias(name="runtime_checkable", alias=None),
+                # ast.alias(name="Protocol", alias=None),
+                # ast.alias(name="runtime_checkable", alias=None),
+                ast.alias(name="*")
             ],
             level=0,
         ),
@@ -154,12 +170,19 @@ def generate(body_module: Mapping[str, list[ast.stmt]], out_path: Path) -> None:
     for submodule, body in body_module.items():
         for i, b in enumerate(body):
             if isinstance(b, (ast.Import, ast.ImportFrom)):
-                out.body.insert(0, b)
+                pass
+                # out.body.insert(0, b)
             elif isinstance(b, ast.FunctionDef):
+                if b.name.startswith("_"):
+                    continue
                 data = _function_to_protocol(b, typevars)
-                module_attributes[submodule].append((b.name, data.name, None, data.typevars_used))
+                module_attributes[submodule].append(
+                    (b.name, data.name, None, data.typevars_used)
+                )
                 out.body.append(data.stmt)
             elif isinstance(b, ast.Assign):
+                if submodule == "_types":
+                    continue
                 id = b.targets[0].id
                 if id == "__all__":
                     pass
@@ -171,6 +194,8 @@ def generate(body_module: Mapping[str, list[ast.stmt]], out_path: Path) -> None:
                             if isinstance(docstring_expr.value, ast.Constant):
                                 docstring = docstring_expr.value.value
                     module_attributes[submodule].append((id, "float", docstring, []))
+            elif isinstance(b, ast.ClassDef):
+                pass
             elif isinstance(b, ast.Expr):
                 pass
             else:
@@ -196,6 +221,8 @@ def generate(body_module: Mapping[str, list[ast.stmt]], out_path: Path) -> None:
         for attribute in attributes
         if submodule not in OPTIONAL_SUBMODULES
     ] + submodules
-    out.body.append(_attributes_to_protocol("ArrayNamespace", attributes, typevars).stmt)
+    out.body.append(
+        _attributes_to_protocol("ArrayNamespace", attributes, typevars).stmt
+    )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(ast.unparse(out), "utf-8")
