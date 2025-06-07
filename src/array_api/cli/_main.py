@@ -283,5 +283,3 @@ def generate_all(
 
     sys.argv = ["ssort", "src/array_api"]
     runpy.run_module("ssort")
-    sys.argv = ["ruff", "src/array_api", "format", "src/array_api"]
-    runpy.run_module("ruff")

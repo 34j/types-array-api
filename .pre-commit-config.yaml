@@ -14,15 +14,15 @@ repos:
       - id: commitizen
         stages: [commit-msg]
   # run .pre-commit/update_array_namespace.py
-  - repo: local
-    hooks:
-      - id: update-array-namespace
-        name: Update array namespace
-        entry: python -m src.array_api
-        language: python
-        additional_dependencies: ["attrs", "typer", "ssort", "ruff"]
-        require_serial: true
-        pass_filenames: false
+  # - repo: local
+  #   hooks:
+  #     - id: update-array-namespace
+  #       name: Update array namespace
+  #       entry: python -m src.array_api
+  #       language: python
+  #       additional_dependencies: ["attrs", "typer", "ssort", "ruff"]
+  #       require_serial: true
+  #       pass_filenames: false
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
