@@ -1,0 +1,24 @@
+# Changes here will be overwritten by Copier
+_commit: 2e4f7d0
+_src_path: gh:34j/pypackage-template
+add_me_as_contributor: false
+cli_name: array-api
+copyright_year: '2025'
+documentation: true
+email: 34j.95a2p@simplelogin.com
+full_name: 34j
+github_app_installation_ids: 31487150,37771054
+github_username: 34j
+has_cli: true
+initial_commit: false
+is_django_package: false
+open_source_license: Apache Software License 2.0
+open_with_editor: true
+package_name: array_api
+project_name: Python array API standard typing
+project_short_description: Typing for array API and array-api-compat
+project_slug: array-api
+run_uv_sync: false
+setup_github: false
+setup_pre_commit: false
+
