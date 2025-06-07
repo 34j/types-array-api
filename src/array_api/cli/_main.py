@@ -219,33 +219,43 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
             if isinstance(b, (ast.Import, ast.ImportFrom)):
                 pass
             elif isinstance(b, ast.FunctionDef):
+                # implemented in object rather than Namespace
                 if b.name == "__eq__":
                     continue
+                # info.py conntains functions which are not part of the Namespace (but Info class)
                 if submodule == "info" and b.name != "__array_namespace_info__":
                     continue
                 data = _function_to_protocol(b, typevars)
+                # add to module attributes
                 module_attributes[submodule].append(ModuleAttributes(b.name, data.name, None, data.typevars_used))
+                # some functions are duplicated in linalg and fft, skip them
+                # their docstrings are unhelpful, e.g. "Alias for ..."
                 if "Alias" in (ast.get_docstring(b) or ""):
                     continue
+                # add to output
                 out.body.append(data.stmt)
             elif isinstance(b, ast.Assign):
+                # _types.py contains Assigns which are not part of the Namespace
                 if submodule == "_types":
                     continue
                 if not isinstance(b.targets[0], ast.Name):
                     continue
                 id = b.targets[0].id
+                # __init__.py
                 if id == "__all__":
-                    pass
-                else:
-                    docstring = None
-                    if i != len(body) - 1:
-                        docstring_expr = body[i + 1]
-                        if isinstance(docstring_expr, ast.Expr):
-                            if isinstance(docstring_expr.value, ast.Constant):
-                                docstring = docstring_expr.value.value
-                    module_attributes[submodule].append(ModuleAttributes(id, ast.Name(id="float"), docstring, []))
+                    continue
+                # get docstring
+                docstring = None
+                if i != len(body) - 1:
+                    docstring_expr = body[i + 1]
+                    if isinstance(docstring_expr, ast.Expr):
+                        if isinstance(docstring_expr.value, ast.Constant):
+                            docstring = docstring_expr.value.value
+                # add to module attributes
+                module_attributes[submodule].append(ModuleAttributes(id, ast.Name(id="float"), docstring, []))
             elif isinstance(b, ast.ClassDef):
                 data = _class_to_protocol(b, typevars)
+                # add to output, do not add to module attributes
                 out.body.append(data.stmt)
             elif isinstance(b, ast.Expr):
                 pass
@@ -267,6 +277,7 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
     attributes = [attribute for submodule, attributes in module_attributes.items() for attribute in attributes if submodule not in OPTIONAL_SUBMODULES] + submodules
     out.body.append(_attributes_to_protocol("ArrayNamespace", attributes).stmt)
 
+    # Replace TypeVars because of the name conflicts like "array: array"
     for node in ast.walk(out):
         for child in ast.iter_child_nodes(node):
             if isinstance(child, ast.Name) and child.id in {t.name for t in typevars}:
@@ -277,7 +288,10 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
             elif isinstance(child, ast.TypeVar) and child.name in {t.name for t in typevars}:
                 child.name = "T" + child.name.capitalize()
 
+    # Manual modifications (easier than AST manipulations)
     text = ast.unparse(ast.fix_missing_locations(out))
+
+    # Add imports
     text = (
         """"Auto generated Protocol classes (Do not edit)"
 from enum import Enum
@@ -297,8 +311,12 @@ inf = float("inf")
 """
         + text
     )
+
+    # Fix self-references in typing
     ns = "Union[T_t_co, NestedSequence[T_t_co]]"
     text = text.replace(ns, f'"{ns}"')
+
+    # write to the output path
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(text, "utf-8")
 
@@ -324,6 +342,7 @@ def generate_all(
     sp.run(["git", "clone", "https://github.com/data-apis/array-api", ".cache"])
 
     for dir_path in (Path(cache_dir) / Path("src") / "array_api_stubs").iterdir():
+        # skip non-directory entries
         if not dir_path.is_dir():
             continue
         # 2021 is broken (no self keyword in `_array`` methods)
@@ -335,5 +354,6 @@ def generate_all(
 
     import sys
 
+    # run ssort, otherwise it is broken
     sys.argv = ["ssort", "src/array_api"]
     runpy.run_module("ssort")
