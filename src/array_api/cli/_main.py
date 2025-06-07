@@ -5,7 +5,7 @@ import sys
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
-from typing import Sequence
+from typing import Mapping, Sequence
 import attrs
 @attrs.frozen()
 class ProtocolData:
@@ -96,21 +96,21 @@ def _attributes_to_protocol(
         name=name + (f"[{', '.join(typevars)}]" if typevars else ""),
     )
 
-
-def generate(cache_dir: Path | str = ".cache", out_name: str = "_namespace.py") -> None:
+def generate_all(cache_dir: Path | str = ".cache", out_path = "src/array-api", out_name: str = "_namespace.py") -> None:
     import subprocess as sp
 
     Path(cache_dir).mkdir(exist_ok=True)
     sp.run(["git", "clone", "https://github.com/data-apis/array-api", ".cache"])
-    # main working directory
-    draft_path = Path(cache_dir) / Path("src") / "array_api_stubs" / "_draft"
-
-    # get module bodies
-    body_module = {
-        path.stem: ast.parse(path.read_text("utf-8")).body
-        for path in draft_path.rglob("*.py")
-        if path.name != out_name
-    }
+    
+    for dir_path in (Path(cache_dir) / Path("src") / "array_api_stubs").glob("**/"):
+        # get module bodies
+        body_module = {
+            path.stem: ast.parse(path.read_text("utf-8")).body
+            for path in dir_path.rglob("*.py")
+        }
+        generate(body_module, Path(out_path) / dir_path.name / out_name)
+    
+def generate(body_module: Mapping[str, list[ast.stmt]], out_path: Path) -> None:
     body_typevars = body_module.pop("_types")
     body_module.pop("__init__")
 
@@ -197,6 +197,5 @@ def generate(cache_dir: Path | str = ".cache", out_name: str = "_namespace.py") 
         if submodule not in OPTIONAL_SUBMODULES
     ] + submodules
     out.body.append(_attributes_to_protocol("ArrayNamespace", attributes, typevars).stmt)
-
-    out_path = draft_path / out_name
+    out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(ast.unparse(out), "utf-8")

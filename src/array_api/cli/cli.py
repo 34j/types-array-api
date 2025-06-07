@@ -1,6 +1,6 @@
 import typer
 
-from ._main import generate
+from ._main import generate_all
 
 app = typer.Typer()
 
@@ -8,4 +8,4 @@ app = typer.Typer()
 @app.command()
 def main() -> None:
     """Add the arguments and print the result."""
-    generate()
+    generate_all()
