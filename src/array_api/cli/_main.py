@@ -176,7 +176,9 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
                 pass
                 # out.body.insert(0, b)
             elif isinstance(b, ast.FunctionDef):
-                if b.name.startswith("_"):
+                # if b.name.startswith("_"):
+                #     continue
+                if submodule == "info":
                     continue
                 data = _function_to_protocol(b, typevars)
                 module_attributes[submodule].append(ModuleAttributes(b.name, data.name, None, data.typevars_used))
