@@ -230,12 +230,7 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
             submodules.append(ModuleAttributes(submodule, data.name, None, []))
 
     # Create Protocols for the main namespace
-    attributes = [
-        attribute
-        for submodule, attributes in module_attributes.items()
-        for attribute in attributes
-        if submodule not in OPTIONAL_SUBMODULES
-    ] + submodules
+    attributes = [attribute for submodule, attributes in module_attributes.items() for attribute in attributes if submodule not in OPTIONAL_SUBMODULES] + submodules
     out.body.append(_attributes_to_protocol("ArrayNamespace", attributes).stmt)
 
     for node in ast.walk(out):
@@ -288,10 +283,7 @@ def generate_all(
         if "2021" in dir_path.name:
             continue
         # get module bodies
-        body_module = {
-            path.stem: ast.parse(path.read_text("utf-8").replace("Dtype", "dtype").replace("Device", "device")).body
-            for path in dir_path.rglob("*.py")
-        }
+        body_module = {path.stem: ast.parse(path.read_text("utf-8").replace("Dtype", "dtype").replace("Device", "device")).body for path in dir_path.rglob("*.py")}
         generate(body_module, (Path(out_path) / dir_path.name).with_suffix(".py"))
 
     runpy.run_module("ssort")
