@@ -44,7 +44,7 @@ def _function_to_protocol(stmt: ast.FunctionDef, typevars: list[TypeVarInfo]) ->
     stmt.body = [ast.Expr(value=ast.Constant(value=Ellipsis))]
     stmt.args.posonlyargs.insert(0, ast.arg(arg="self"))
     stmt.decorator_list.append(ast.Name(id="abstractmethod"))
-    args = ast.unparse(stmt.args)
+    args = ast.unparse(stmt.args) + (ast.unparse(stmt.returns) if stmt.returns else "")
     typevars = [typevar for typevar in typevars if typevar.name in args]
 
     # Construct the protocol
@@ -71,13 +71,18 @@ def _function_to_protocol(stmt: ast.FunctionDef, typevars: list[TypeVarInfo]) ->
 
 
 def _class_to_protocol(stmt: ast.ClassDef, typevars: list[TypeVarInfo]) -> ProtocolData:
-    typevars = [typevar for typevar in typevars if typevar.name in ast.unparse(stmt)]
+    unp = ast.unparse(stmt)
+    typevars = [typevar for typevar in typevars if typevar.name in unp]
     stmt.bases = [
                   ast.Name(id="Protocol"),
     ]
+    stmt.body.append(
+        ast.Expr(ast.Constant(value=Ellipsis, kind=None))
+    )
     stmt.type_params = [
         ast.TypeVar(name=t.name, bound=ast.Name(id=t.bound) if t.bound else None) for t in typevars
     ]
+    stmt.decorator_list = [ast.Name(id="runtime_checkable")]
     return ProtocolData(
         stmt=stmt,
         typevars_used=typevars,
@@ -185,18 +190,6 @@ def generate(body_module: Mapping[str, list[ast.stmt]], out_path: Path) -> None:
             level=0,
         ),
     )
-
-    # for typevar in typevars:
-    #     out.body.append(
-    #         ast.Assign(
-    #             targets=[ast.Name(id=typevar, ctx=ast.Store())],
-    #             value=ast.Call(
-    #                 func=ast.Name(id="TypeVar", ctx=ast.Load()),
-    #                 args=[ast.Constant(value=typevar)],
-    #                 keywords=[],
-    #             ),
-    #         )
-    #     )
 
     # Create Protocols with __call__, representing functions
     for submodule, body in body_module.items():
