@@ -176,9 +176,8 @@ def _attributes_to_protocol(name: str, attributes: Sequence[ModuleAttributes], b
             name=name,
             decorator_list=[ast.Name(id="runtime_checkable")],
             keywords=[],
-            bases=bases
-            if bases
-            else [
+            bases=(bases if bases else [])
+            + [
                 ast.Name(id="Protocol"),
             ],
             body=body,
