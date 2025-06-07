@@ -2,21 +2,25 @@ from __future__ import annotations
 
 import ast
 from collections import defaultdict
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from copy import deepcopy
 from pathlib import Path
 
 import attrs
 
+@attrs.frozen()
+class TypeVarInfo:
+    name: str
+    bound: str | None = None
 
 @attrs.frozen()
 class ProtocolData:
     stmt: ast.ClassDef
-    typevars_used: Sequence[str]
+    typevars_used: Iterable[TypeVarInfo]
     name: str
 
 
-def _function_to_protocol(stmt: ast.FunctionDef, typevars: list[str]) -> ProtocolData:
+def _function_to_protocol(stmt: ast.FunctionDef, typevars: list[TypeVarInfo]) -> ProtocolData:
     """
     Convert a function definition to a Protocol class.
 
@@ -41,7 +45,7 @@ def _function_to_protocol(stmt: ast.FunctionDef, typevars: list[str]) -> Protoco
     stmt.args.posonlyargs.insert(0, ast.arg(arg="self"))
     stmt.decorator_list.append(ast.Name(id="abstractmethod"))
     args = ast.unparse(stmt.args)
-    typevars = [typevar for typevar in typevars if typevar in args]
+    typevars = [typevar for typevar in typevars if typevar.name in args]
 
     # Construct the protocol
     stmt_new = ast.ClassDef(
@@ -49,10 +53,7 @@ def _function_to_protocol(stmt: ast.FunctionDef, typevars: list[str]) -> Protoco
         decorator_list=[ast.Name(id="runtime_checkable")],
         keywords=[],
         bases=[
-            ast.Subscript(
-                value=ast.Name(id="Protocol"),
-                slice=ast.Tuple(elts=[ast.Name(typevar) for typevar in typevars]),
-            )
+            ast.Name(id="Protocol"),
         ],
         body=(
             [ast.Expr(value=ast.Constant(docstring, kind=None))]
@@ -60,32 +61,32 @@ def _function_to_protocol(stmt: ast.FunctionDef, typevars: list[str]) -> Protoco
             else []
         )
         + [stmt],
-        type_params=[],
+        type_params=[ast.TypeVar(name=t.name, bound=ast.Name(id=t.bound) if t.bound else None) for t in typevars],
     )  # type: ignore[call-arg]
     return ProtocolData(
         stmt=stmt_new,
         typevars_used=typevars,
-        name=name + (f"[{', '.join(typevars)}]" if typevars else ""),
+        name=name + (f"[{', '.join([t.name for t in typevars])}]" if typevars else ""),
     )
 
 
-def _class_to_protocol(stmt: ast.ClassDef, typevars: list[str]) -> ProtocolData:
-    typevars = [typevar for typevar in typevars if typevar in ast.unparse(stmt)]
+def _class_to_protocol(stmt: ast.ClassDef, typevars: list[TypeVarInfo]) -> ProtocolData:
+    typevars = [typevar for typevar in typevars if typevar.name in ast.unparse(stmt)]
     stmt.bases = [
-        ast.Subscript(
-            value=ast.Name(id="Protocol"),
-            slice=ast.Tuple(elts=[ast.Name(typevar) for typevar in typevars]),
-        )
+                  ast.Name(id="Protocol"),
+    ]
+    stmt.type_params = [
+        ast.TypeVar(name=t.name, bound=ast.Name(id=t.bound) if t.bound else None) for t in typevars
     ]
     return ProtocolData(
         stmt=stmt,
         typevars_used=typevars,
-        name=stmt.name + (f"[{', '.join(typevars)}]" if typevars else ""),
+        name=stmt.name + (f"[{', '.join([t.name for t in typevars])}]" if typevars else ""),
     )
 
 
 def _attributes_to_protocol(
-    name, attributes: list[tuple[str, str, str | None, list]], typevars: list[str]
+    name, attributes: list[tuple[str, str, str | None, list[TypeVarInfo]]]
 ) -> ProtocolData:
     body = []
     for attribute, type, docstring, _ in attributes:
@@ -106,16 +107,15 @@ def _attributes_to_protocol(
             decorator_list=[ast.Name(id="runtime_checkable")],
             keywords=[],
             bases=[
-                ast.Subscript(
-                    value=ast.Name(id="Protocol"),
-                    slice=ast.Tuple(elts=[ast.Name(typevar) for typevar in typevars]),
-                )
+                ast.Name(id="Protocol"),
             ],
             body=body,
-            type_params=[],
+            type_params=[
+                ast.TypeVar(name=t.name, bound=ast.Name(id=t.bound) if t.bound else None) for t in typevars
+            ],
         ),
         typevars_used=typevars,
-        name=name + (f"[{', '.join(typevars)}]" if typevars else ""),
+        name=name + (f"[{', '.join([t.name for t in typevars])}]" if typevars else ""),
     )
 
 
@@ -147,14 +147,14 @@ def generate(body_module: Mapping[str, list[ast.stmt]], out_path: Path) -> None:
     body_module.pop("__init__")
 
     # Get all TypeVars
-    typevars: list[str] = []
+    typevars: list[TypeVarInfo] = []
     for b in body_typevars:
         if isinstance(b, ast.Assign):
             value = b.value
             if isinstance(value, ast.Call):
                 if value.func.id == "TypeVar":
                     name = value.args[0].s
-                    typevars.append(name)
+                    typevars.append(TypeVarInfo(name=name, bound=None))
     print(typevars)
 
     # Dict of module attributes per submodule
@@ -184,17 +184,17 @@ def generate(body_module: Mapping[str, list[ast.stmt]], out_path: Path) -> None:
         ),
     )
 
-    for typevar in typevars:
-        out.body.append(
-            ast.Assign(
-                targets=[ast.Name(id=typevar, ctx=ast.Store())],
-                value=ast.Call(
-                    func=ast.Name(id="TypeVar", ctx=ast.Load()),
-                    args=[ast.Constant(value=typevar)],
-                    keywords=[],
-                ),
-            )
-        )
+    # for typevar in typevars:
+    #     out.body.append(
+    #         ast.Assign(
+    #             targets=[ast.Name(id=typevar, ctx=ast.Store())],
+    #             value=ast.Call(
+    #                 func=ast.Name(id="TypeVar", ctx=ast.Load()),
+    #                 args=[ast.Constant(value=typevar)],
+    #                 keywords=[],
+    #             ),
+    #         )
+    #     )
 
     # Create Protocols with __call__, representing functions
     for submodule, body in body_module.items():
@@ -244,7 +244,7 @@ def generate(body_module: Mapping[str, list[ast.stmt]], out_path: Path) -> None:
         if submodule not in OPTIONAL_SUBMODULES:
             continue
         data = _attributes_to_protocol(
-            submodule[0].upper() + submodule[1:] + "Namespace", attributes, typevars
+            submodule[0].upper() + submodule[1:] + "Namespace", attributes
         )
         out.body.append(data.stmt)
         if submodule in OPTIONAL_SUBMODULES:
@@ -258,7 +258,7 @@ def generate(body_module: Mapping[str, list[ast.stmt]], out_path: Path) -> None:
         if submodule not in OPTIONAL_SUBMODULES
     ] + submodules
     out.body.append(
-        _attributes_to_protocol("ArrayNamespace", attributes, typevars).stmt
+        _attributes_to_protocol("ArrayNamespace", attributes).stmt
     )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(ast.unparse(ast.fix_missing_locations(out)), "utf-8")
