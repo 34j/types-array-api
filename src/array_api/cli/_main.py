@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import ast
-import runpy
 import warnings
 from collections import defaultdict
 from collections.abc import Iterable, Sequence
@@ -138,7 +137,7 @@ def _class_to_protocol(stmt: ast.ClassDef, typevars: Sequence[TypeVarInfo]) -> P
     )
 
 
-def _attributes_to_protocol(name: str, attributes: Sequence[ModuleAttributes]) -> ProtocolData:
+def _attributes_to_protocol(name: str, attributes: Sequence[ModuleAttributes], bases: list[ast.expr] | None = None, typevars: Sequence[TypeVarInfo] | None = None) -> ProtocolData:
     """
     Convert a list of module attributes to a Protocol class.
 
@@ -148,6 +147,10 @@ def _attributes_to_protocol(name: str, attributes: Sequence[ModuleAttributes]) -
         The name of the Protocol class.
     attributes : Sequence[ModuleAttributes]
         The attributes to include in the Protocol class.
+    bases : list[ast.expr] | None, optional
+        The base classes for the Protocol class, by default None, which defaults to [Protocol].
+    typevars : Sequence[TypeVarInfo] | None, optional
+        The type variables used in the Protocol class, by default None, which defaults to the type variables used in the attributes.
 
     Returns
     -------
@@ -166,14 +169,16 @@ def _attributes_to_protocol(name: str, attributes: Sequence[ModuleAttributes]) -
         )
         if a.docstring is not None:
             body.append(ast.Expr(value=ast.Constant(a.docstring)))
-
-    typevars = sorted({x for attribute in attributes for x in attribute.typevars_used}, key=lambda x: x.name)
+    if typevars is None:
+        typevars = sorted({x for attribute in attributes for x in attribute.typevars_used}, key=lambda x: x.name)
     return ProtocolData(
         stmt=ast.ClassDef(
             name=name,
             decorator_list=[ast.Name(id="runtime_checkable")],
             keywords=[],
-            bases=[
+            bases=bases
+            if bases
+            else [
                 ast.Name(id="Protocol"),
             ],
             body=body,
@@ -272,26 +277,31 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
             elif isinstance(b, ast.ClassDef):
                 data = _class_to_protocol(b, typevars)
                 # add to output, do not add to module attributes
-                out.body.append(data.stmt)
+                # add to first position
+                out.body.insert(0, data.stmt)
             elif isinstance(b, ast.Expr):
                 pass
             else:
                 warnings.warn(f"Skipping {submodule} {b}", stacklevel=2)
 
+    # Create Protocols for the main namespace
+    OPTIONAL_SUBMODULES = ["fft", "linalg"]
+    main_attributes = [attribute for submodule, attributes in module_attributes.items() for attribute in attributes if submodule not in OPTIONAL_SUBMODULES]
+    main_protocol = _attributes_to_protocol("ArrayNamespace", main_attributes).stmt
+    out.body.append(main_protocol)
+
     # Create Protocols for fft and linalg
     submodules: list[ModuleAttributes] = []
-    OPTIONAL_SUBMODULES = ["fft", "linalg"]
     for submodule, attributes in module_attributes.items():
         if submodule not in OPTIONAL_SUBMODULES:
             continue
         data = _attributes_to_protocol(submodule[0].upper() + submodule[1:] + "Namespace", attributes)
         out.body.append(data.stmt)
         if submodule in OPTIONAL_SUBMODULES:
-            submodules.append(ModuleAttributes(submodule, data.name, None, []))
+            submodules.append(ModuleAttributes(submodule, data.name, None, [t for t in typevars if any(t in attr.typevars_used for attr in attributes)]))
 
-    # Create Protocols for the main namespace
-    attributes = [attribute for submodule, attributes in module_attributes.items() for attribute in attributes if submodule not in OPTIONAL_SUBMODULES] + submodules
-    out.body.append(_attributes_to_protocol("ArrayNamespace", attributes).stmt)
+    # Create Full Protocol for the main namespace
+    out.body.append(_attributes_to_protocol("ArrayNamespaceFull", submodules, [ast.Subscript(ast.Name("ArrayNamespace"), ast.Tuple([ast.Name(t.name) for t in main_protocol.type_params]))], typevars=[t for t in typevars if t.name in [s.name for s in main_protocol.type_params]]).stmt)  # type: ignore
 
     # Replace TypeVars because of the name conflicts like "array: array"
     for node in ast.walk(out):
@@ -374,9 +384,3 @@ def generate_all(
         # get module bodies
         body_module = {path.stem: ast.parse(path.read_text("utf-8").replace("Dtype", "dtype").replace("Device", "device")).body for path in dir_path.rglob("*.py")}
         generate(body_module, (Path(out_path) / dir_path.name).with_suffix(".py"))
-
-    import sys
-
-    # run ssort, otherwise it is broken
-    sys.argv = ["ssort", "src/array_api"]
-    runpy.run_module("ssort")
