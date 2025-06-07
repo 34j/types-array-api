@@ -7,7 +7,7 @@ name = "array-api"
 version = "0.0.0"
 description = "Typing for array API and array-api-compat"
 readme = "README.md"
-license = { text = "Apache Software License 2.0" }
+license = "MIT AND Apache-2.0"
 authors = [
   { name = "34j", email = "34j.95a2p@simplelogin.com" },
 ]
@@ -26,6 +26,7 @@ classifiers = [
 ]
 
 dependencies = [
+  "attrs>=25.3.0",
   "rich>=10",
   "typer>=0.15,<1",
 ]
@@ -37,8 +38,11 @@ scripts.array-api = "array_api.cli:app"
 
 [dependency-groups]
 dev = [
+  "array-api-compat>=1.11.2",
+  "array-api-strict>=2.3.1",
   "pytest>=8,<9",
   "pytest-cov>=6,<7",
+  "ruff>=0.11.13",
 ]
 docs = [
   "furo>=2023.5.20; python_version>='3.11'",
@@ -48,7 +52,7 @@ docs = [
 ]
 
 [tool.ruff]
-line-length = 88
+line-length = 320
 lint.select = [
   "B",   # flake8-bugbear
   "D",   # flake8-docstrings
@@ -68,6 +72,9 @@ lint.ignore = [
   "D104", # Missing docstring in public package
   "D107", # Missing docstring in `__init__`
   "D401", # First line of docstring should be in imperative mood
+  "S603",
+  "S607",
+  "E501"
 ]
 lint.per-file-ignores."conftest.py" = [ "D100" ]
 lint.per-file-ignores."docs/conf.py" = [ "D100" ]
@@ -106,7 +113,7 @@ exclude_lines = [
 
 [tool.mypy]
 check_untyped_defs = true
-disallow_any_generics = true
+disallow_any_generics = false
 disallow_incomplete_defs = true
 disallow_untyped_defs = true
 mypy_path = "src/"
