@@ -140,13 +140,14 @@ def generate(body_module: Mapping[str, list[ast.stmt]], out_path: Path) -> None:
     body_module.pop("__init__")
 
     # Get all TypeVars
-    typevars = []
+    typevars: list[str] = []
     for b in body_typevars:
         if isinstance(b, ast.Assign):
             value = b.value
             if isinstance(value, ast.Call):
                 if value.func.id == "TypeVar":
-                    typevars.append(value.args[0].s)
+                    name = value.args[0].s
+                    typevars.append(name)
     print(typevars)
 
     # Dict of module attributes per submodule
@@ -175,6 +176,18 @@ def generate(body_module: Mapping[str, list[ast.stmt]], out_path: Path) -> None:
             level=0,
         ),
     )
+    
+    for typevar in typevars:
+        out.body.append(
+            ast.Assign(
+                targets=[ast.Name(id=typevar, ctx=ast.Store())],
+                value=ast.Call(
+                    func=ast.Name(id="TypeVar", ctx=ast.Load()),
+                    args=[ast.Constant(value=typevar)],
+                    keywords=[],
+                ),
+            )
+        )
 
     # Create Protocols with __call__, representing functions
     for submodule, body in body_module.items():
@@ -239,4 +252,4 @@ def generate(body_module: Mapping[str, list[ast.stmt]], out_path: Path) -> None:
         _attributes_to_protocol("ArrayNamespace", attributes, typevars).stmt
     )
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(ast.unparse(out), "utf-8")
+    out_path.write_text(ast.unparse(ast.fix_missing_locations(out)), "utf-8")
