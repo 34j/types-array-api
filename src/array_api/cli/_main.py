@@ -65,10 +65,8 @@ def _function_to_protocol(stmt: ast.FunctionDef, typevars: Sequence[TypeVarInfo]
     stmt.body = [ast.Expr(value=ast.Constant(value=Ellipsis))]
     stmt.args.posonlyargs.insert(0, ast.arg(arg="self"))
     stmt.decorator_list.append(ast.Name(id="abstractmethod"))
-    for arg in stmt.args.args:
-        if arg.arg == "ord":
-            arg.type_comment = "ignore[valid-type]"
-            print(arg)
+    if "norm" in name:
+        stmt.type_comment = "ignore[valid-type]"
     args = ast.unparse(stmt.args) + (ast.unparse(stmt.returns) if stmt.returns else "")
     typevars = [typevar for typevar in typevars if typevar.name in args]
 
