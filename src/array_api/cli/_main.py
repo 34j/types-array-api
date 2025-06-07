@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import runpy
 from collections import defaultdict
 from collections.abc import Iterable, Sequence
 from copy import deepcopy
@@ -40,9 +41,7 @@ class ModuleAttributes:
     typevars_used: Iterable[TypeVarInfo]
 
 
-def _function_to_protocol(
-    stmt: ast.FunctionDef, typevars: Sequence[TypeVarInfo]
-) -> ProtocolData:
+def _function_to_protocol(stmt: ast.FunctionDef, typevars: Sequence[TypeVarInfo]) -> ProtocolData:
     """
     Convert a function definition to a Protocol class.
 
@@ -66,6 +65,10 @@ def _function_to_protocol(
     stmt.body = [ast.Expr(value=ast.Constant(value=Ellipsis))]
     stmt.args.posonlyargs.insert(0, ast.arg(arg="self"))
     stmt.decorator_list.append(ast.Name(id="abstractmethod"))
+    for arg in stmt.args.args:
+        if arg.arg == "ord":
+            arg.type_comment = "ignore[valid-type]"
+            print(arg)
     args = ast.unparse(stmt.args) + (ast.unparse(stmt.returns) if stmt.returns else "")
     typevars = [typevar for typevar in typevars if typevar.name in args]
 
@@ -77,16 +80,8 @@ def _function_to_protocol(
         bases=[
             ast.Name(id="Protocol"),
         ],
-        body=(
-            [ast.Expr(value=ast.Constant(docstring, kind=None))]
-            if docstring is not None
-            else []
-        )
-        + [stmt],
-        type_params=[
-            ast.TypeVar(name=t.name, bound=ast.Name(id=t.bound) if t.bound else None)
-            for t in typevars
-        ],
+        body=([ast.Expr(value=ast.Constant(docstring, kind=None))] if docstring is not None else []) + [stmt],
+        type_params=[ast.TypeVar(name=t.name, bound=ast.Name(id=t.bound) if t.bound else None) for t in typevars],
     )
     return ProtocolData(
         stmt=stmt_new,
@@ -94,19 +89,21 @@ def _function_to_protocol(
     )
 
 
-def _class_to_protocol(
-    stmt: ast.ClassDef, typevars: Sequence[TypeVarInfo]
-) -> ProtocolData:
+def _class_to_protocol(stmt: ast.ClassDef, typevars: Sequence[TypeVarInfo]) -> ProtocolData:
     unp = ast.unparse(stmt)
     typevars = [typevar for typevar in typevars if typevar.name in unp]
     stmt.bases = [
         ast.Name(id="Protocol"),
     ]
-    stmt.body.append(ast.Expr(ast.Constant(value=Ellipsis, kind=None)))
-    stmt.type_params = [
-        ast.TypeVar(name=t.name, bound=ast.Name(id=t.bound) if t.bound else None)
-        for t in typevars
-    ]
+    for b in stmt.body:
+        if isinstance(b, ast.FunctionDef):
+            if getattr(b.body[-1].value, "value", None) is Ellipsis:
+                pass
+            else:
+                b.body.append(ast.Expr(value=ast.Constant(value=Ellipsis)))
+            if b.name in ["__eq__", "__ne__"]:
+                b.type_comment = "ignore[override]"
+    stmt.type_params = [ast.TypeVar(name=t.name, bound=ast.Name(id=t.bound) if t.bound else None) for t in typevars]
     stmt.decorator_list = [ast.Name(id="runtime_checkable")]
     return ProtocolData(
         stmt=stmt,
@@ -114,9 +111,7 @@ def _class_to_protocol(
     )
 
 
-def _attributes_to_protocol(
-    name: str, attributes: Sequence[ModuleAttributes]
-) -> ProtocolData:
+def _attributes_to_protocol(name: str, attributes: Sequence[ModuleAttributes]) -> ProtocolData:
     body: list[ast.stmt] = []
     for a in attributes:
         body.append(
@@ -129,7 +124,7 @@ def _attributes_to_protocol(
         if a.docstring is not None:
             body.append(ast.Expr(value=ast.Constant(a.docstring)))
 
-    typevars = {x for attribute in attributes for x in attribute.typevars_used}
+    typevars = sorted({x for attribute in attributes for x in attribute.typevars_used}, key=lambda x: x.name)
     return ProtocolData(
         stmt=ast.ClassDef(
             name=name,
@@ -139,12 +134,7 @@ def _attributes_to_protocol(
                 ast.Name(id="Protocol"),
             ],
             body=body,
-            type_params=[
-                ast.TypeVar(
-                    name=t.name, bound=ast.Name(id=t.bound) if t.bound else None
-                )
-                for t in typevars
-            ],
+            type_params=[ast.TypeVar(name=t.name, bound=ast.Name(id=t.bound) if t.bound else None) for t in typevars],
         ),
         typevars_used=typevars,
     )
@@ -164,31 +154,23 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
                     if value.func.id == "TypeVar":
                         if isinstance(value.args[0], ast.Constant):
                             name = value.args[0].s
-                            typevars.append(TypeVarInfo(name=name, bound=None))
-    typevars += [
-        TypeVarInfo(name=x) for x in ["Capabilities", "DefaultDataTypes", "DataTypes"]
-    ]
-    print(typevars)
+                            typevars.append(
+                                TypeVarInfo(
+                                    name=name,
+                                    bound={
+                                        "array": "_array",
+                                    }.get(name, None),
+                                )
+                            )
+    typevars += [TypeVarInfo(name=x) for x in ["Capabilities", "DefaultDataTypes", "DataTypes"]]
+    typevars = sorted(typevars, key=lambda x: x.name)
 
     # Dict of module attributes per submodule
     module_attributes: defaultdict[str, list[ModuleAttributes]] = defaultdict(list)
 
     # Import `abc.abstractmethod`, `typing.Protocol` and `typing.runtime_checkable`
     out = ast.Module(body=[], type_ignores=[])
-    out.body.append(
-        ast.Expr(value=ast.Constant("Auto generated Protocol classes (Do not edit)"))
-    )
-    out.body.append(
-        ast.ImportFrom(
-            module="typing",
-            names=[
-                # ast.alias(name="Protocol", alias=None),
-                # ast.alias(name="runtime_checkable", alias=None),
-                ast.alias(name="*")
-            ],
-            level=0,
-        ),
-    )
+    out.body.append(ast.Expr(value=ast.Constant("Auto generated Protocol classes (Do not edit)")))
     out.body.append(
         ast.ImportFrom(
             module="abc",
@@ -207,9 +189,7 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
                 if b.name.startswith("_"):
                     continue
                 data = _function_to_protocol(b, typevars)
-                module_attributes[submodule].append(
-                    ModuleAttributes(b.name, data.name, None, data.typevars_used)
-                )
+                module_attributes[submodule].append(ModuleAttributes(b.name, data.name, None, data.typevars_used))
                 if "Alias" in (ast.get_docstring(b) or ""):
                     continue
                 out.body.append(data.stmt)
@@ -228,15 +208,13 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
                         if isinstance(docstring_expr, ast.Expr):
                             if isinstance(docstring_expr.value, ast.Constant):
                                 docstring = docstring_expr.value.value
-                    module_attributes[submodule].append(
-                        ModuleAttributes(id, ast.Name(id="float"), docstring, [])
-                    )
+                    module_attributes[submodule].append(ModuleAttributes(id, ast.Name(id="float"), docstring, []))
             elif isinstance(b, ast.ClassDef):
                 data = _class_to_protocol(b, typevars)
                 out.body.append(data.stmt)
-                module_attributes[submodule].append(
-                    ModuleAttributes(b.name, data.name, None, data.typevars_used)
-                )
+                # module_attributes[submodule].append(
+                #     ModuleAttributes(b.name, data.name, None, data.typevars_used)
+                # )
             elif isinstance(b, ast.Expr):
                 pass
             else:
@@ -248,9 +226,7 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
     for submodule, attributes in module_attributes.items():
         if submodule not in OPTIONAL_SUBMODULES:
             continue
-        data = _attributes_to_protocol(
-            submodule[0].upper() + submodule[1:] + "Namespace", attributes
-        )
+        data = _attributes_to_protocol(submodule[0].upper() + submodule[1:] + "Namespace", attributes)
         out.body.append(data.stmt)
         if submodule in OPTIONAL_SUBMODULES:
             submodules.append(ModuleAttributes(submodule, data.name, None, []))
@@ -271,15 +247,26 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
                     node.annotation = ast.Name(id="T" + child.id.capitalize())
                 else:
                     child.id = "T" + child.id.capitalize()
-            elif isinstance(child, ast.TypeVar) and child.name in {
-                t.name for t in typevars
-            }:
+            elif isinstance(child, ast.TypeVar) and child.name in {t.name for t in typevars}:
                 child.name = "T" + child.name.capitalize()
 
     text = ast.unparse(ast.fix_missing_locations(out))
     text = (
         """from enum import Enum
-inf = float("inf")\n"""
+from abc import abstractmethod
+from collections.abc import Sequence
+from typing import (
+    Any,
+    Literal,
+    Optional,
+    Protocol,
+    Union,
+    Tuple,
+    List,
+    runtime_checkable,
+)
+inf = float("inf")
+"""
         + text
     )
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -298,13 +285,14 @@ def generate_all(
     for dir_path in (Path(cache_dir) / Path("src") / "array_api_stubs").iterdir():
         if not dir_path.is_dir():
             continue
+        if "2021" in dir_path.name:
+            continue
         # get module bodies
         body_module = {
-            path.stem: ast.parse(
-                path.read_text("utf-8")
-                .replace("Dtype", "dtype")
-                .replace("Device", "device")
-            ).body
+            path.stem: ast.parse(path.read_text("utf-8").replace("Dtype", "dtype").replace("Device", "device")).body
             for path in dir_path.rglob("*.py")
         }
         generate(body_module, (Path(out_path) / dir_path.name).with_suffix(".py"))
+
+    runpy.run_module("ssort")
+    runpy.run_module("ruff")

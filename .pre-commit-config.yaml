@@ -18,8 +18,11 @@ repos:
     hooks:
       - id: update-array-namespace
         name: Update array namespace
-        entry: .pre-commit/update_array_namespace.py
+        entry: python -m src.array_api
         language: python
+        additional_dependencies: ["attrs", "typer", "ssort", "ruff"]
+        require_serial: true
+        pass_filenames: false
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
