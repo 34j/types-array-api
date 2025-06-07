@@ -17,7 +17,16 @@ class TypeVarInfo:
 class ProtocolData:
     stmt: ast.ClassDef
     typevars_used: Iterable[TypeVarInfo]
-    name: str
+    @property
+    def name(self) -> ast.Subscript:
+        return ast.Subscript(
+            value=ast.Name(id=self.stmt.name, ctx=ast.Load()),
+            slice=ast.Tuple(
+                elts=[ast.Name(id=t.name) for t in self.typevars_used],
+                ctx=ast.Load(),
+            ),
+            ctx=ast.Load(),
+        )
 
 
 def _function_to_protocol(stmt: ast.FunctionDef, typevars: list[TypeVarInfo]) -> ProtocolData:
@@ -66,7 +75,6 @@ def _function_to_protocol(stmt: ast.FunctionDef, typevars: list[TypeVarInfo]) ->
     return ProtocolData(
         stmt=stmt_new,
         typevars_used=typevars,
-        name=name + (f"[{', '.join([t.name for t in typevars])}]" if typevars else ""),
     )
 
 
@@ -86,19 +94,18 @@ def _class_to_protocol(stmt: ast.ClassDef, typevars: list[TypeVarInfo]) -> Proto
     return ProtocolData(
         stmt=stmt,
         typevars_used=typevars,
-        name=stmt.name + (f"[{', '.join([t.name for t in typevars])}]" if typevars else ""),
     )
 
 
 def _attributes_to_protocol(
-    name, attributes: list[tuple[str, str, str | None, list[TypeVarInfo]]]
+    name, attributes: list[tuple[str, ast.expr, str | None, list[TypeVarInfo]]]
 ) -> ProtocolData:
     body = []
     for attribute, type, docstring, _ in attributes:
         body.append(
             ast.AnnAssign(
                 target=ast.Name(id=attribute),
-                annotation=ast.Name(id=type) if type is not None else None,
+                annotation=type,
                 simple=1,
             )
         )
@@ -120,7 +127,6 @@ def _attributes_to_protocol(
             ],
         ),
         typevars_used=typevars,
-        name=name + (f"[{', '.join([t.name for t in typevars])}]" if typevars else ""),
     )
 
 
@@ -220,7 +226,7 @@ def generate(body_module: Mapping[str, list[ast.stmt]], out_path: Path) -> None:
                         if isinstance(docstring_expr, ast.Expr):
                             if isinstance(docstring_expr.value, ast.Constant):
                                 docstring = docstring_expr.value.value
-                    module_attributes[submodule].append((id, "float", docstring, []))
+                    module_attributes[submodule].append((id, ast.Name(id="float"), docstring, []))
             elif isinstance(b, ast.ClassDef):
                 data = _class_to_protocol(b, typevars)
                 out.body.append(data.stmt)
@@ -255,5 +261,13 @@ def generate(body_module: Mapping[str, list[ast.stmt]], out_path: Path) -> None:
     out.body.append(
         _attributes_to_protocol("ArrayNamespace", attributes).stmt
     )
+    
+    class RenameTypevars(ast.NodeTransformer):
+        def visit_Name(self, node: ast.Name) -> ast.Name:
+            if node.id in {t.name for t in typevars}:
+                return ast.Name(id="T" + node.id.capitalize())
+            return node
+    
+    out = RenameTypevars().visit(out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(ast.unparse(ast.fix_missing_locations(out)), "utf-8")
