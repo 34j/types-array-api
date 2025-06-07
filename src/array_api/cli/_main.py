@@ -175,7 +175,6 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
         for i, b in enumerate(body):
             if isinstance(b, (ast.Import, ast.ImportFrom)):
                 pass
-                # out.body.insert(0, b)
             elif isinstance(b, ast.FunctionDef):
                 if b.name == "__eq__":
                     continue
