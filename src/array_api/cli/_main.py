@@ -243,8 +243,9 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
                 if submodule == "info" and b.name != "__array_namespace_info__":
                     continue
                 data = _function_to_protocol(b, typevars)
+                docstring = ast.get_docstring(b)
                 # add to module attributes
-                module_attributes[submodule].append(ModuleAttributes(b.name, data.name, None, data.typevars_used))
+                module_attributes[submodule].append(ModuleAttributes(b.name, data.name, docstring, data.typevars_used))
                 # some functions are duplicated in linalg and fft, skip them
                 # their docstrings are unhelpful, e.g. "Alias for ..."
                 if "Alias" in (ast.get_docstring(b) or ""):
