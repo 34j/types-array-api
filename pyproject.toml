@@ -7,7 +7,7 @@ name = "array-api"
 version = "0.0.0"
 description = "Typing for array API and array-api-compat"
 readme = "README.md"
-license = { text = "Apache Software License 2.0" }
+license = "MIT AND Apache-2.0"
 authors = [
   { name = "34j", email = "34j.95a2p@simplelogin.com" },
 ]
