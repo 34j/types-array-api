@@ -66,10 +66,21 @@ def _function_to_protocol(stmt: ast.FunctionDef, typevars: Sequence[TypeVarInfo]
     stmt.body = [ast.Expr(value=ast.Constant(value=Ellipsis))]
     stmt.args.posonlyargs.insert(0, ast.arg(arg="self"))
     stmt.decorator_list.append(ast.Name(id="abstractmethod"))
+    # Literal[inf] not allowed
     if "norm" in name:
         stmt.type_comment = "ignore[valid-type]"
+    # __array_namespace_info__ is a special case
+    if isinstance(stmt.returns, ast.Name) and stmt.returns.id == "Info":
+        stmt.returns = ast.Subscript(
+            value=ast.Name(id="Info"),
+            slice=ast.Tuple(
+                elts=[ast.Name(id=t.name) for t in typevars if t.name in ["Capabilities", "DefaultDataTypes", "DataTypes", "array", "device", "dtype"]],
+                ctx=ast.Load(),
+            ),
+        )
     args = ast.unparse(stmt.args) + (ast.unparse(stmt.returns) if stmt.returns else "")
     typevars = [typevar for typevar in typevars if typevar.name in args]
+    typevars = sorted(typevars, key=lambda x: x.name)
 
     # Construct the protocol
     stmt_new = ast.ClassDef(
@@ -107,6 +118,7 @@ def _class_to_protocol(stmt: ast.ClassDef, typevars: Sequence[TypeVarInfo]) -> P
     """
     unp = ast.unparse(stmt)
     typevars = [typevar for typevar in typevars if typevar.name in unp]
+    typevars = sorted(typevars, key=lambda x: x.name)
     stmt.bases = [
         ast.Name(id="Protocol"),
     ]
@@ -206,6 +218,7 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
                             )
     typevars += [TypeVarInfo(name=x) for x in ["Capabilities", "DefaultDataTypes", "DataTypes"]]
     typevars = sorted(typevars, key=lambda x: x.name)
+    print(list(typevars))
 
     # Dict of module attributes per submodule
     module_attributes: defaultdict[str, list[ModuleAttributes]] = defaultdict(list)
@@ -290,6 +303,13 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
                     child.id = "T" + child.id.capitalize()
             elif isinstance(child, ast.TypeVar) and child.name in {t.name for t in typevars}:
                 child.name = "T" + child.name.capitalize()
+
+    # Replace _array with Array
+    for node in ast.walk(out):
+        if isinstance(node, ast.Name) and node.id == "_array":
+            node.id = "Array"
+        if isinstance(node, ast.ClassDef) and node.name == "_array":
+            node.name = "Array"
 
     # Manual modifications (easier than AST manipulations)
     text = ast.unparse(ast.fix_missing_locations(out))

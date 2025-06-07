@@ -16,7 +16,7 @@ inf = float("inf")
 
 
 @runtime_checkable
-class _array[TPycapsule, TArray: _array, TDevice, TDtype, TEllipsis](Protocol):
+class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
     def __init__(self: TArray) -> None:
         """Initialize the attributes for the array object class."""
         ...
@@ -1275,7 +1275,7 @@ class _array[TPycapsule, TArray: _array, TDevice, TDtype, TEllipsis](Protocol):
 
 
 @runtime_checkable
-class astype[TArray: _array, TDevice, TDtype](Protocol):
+class astype[TArray: Array, TDevice, TDtype](Protocol):
     """
     Copies an array to a specified data type irrespective of :ref:`type-promotion` rules.
 
@@ -1329,7 +1329,7 @@ class astype[TArray: _array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class can_cast[TArray: _array, TDtype](Protocol):
+class can_cast[TArray: Array, TDtype](Protocol):
     """
     Determines if one data type can be cast to another data type according to type promotion rules (see :ref:`type-promotion`).
 
@@ -1372,7 +1372,7 @@ class finfo_object[TDtype](Protocol):
 
 
 @runtime_checkable
-class finfo[TArray: _array, TDtype](Protocol):
+class finfo[TArray: Array, TDtype](Protocol):
     """
     Machine limits for floating-point data types.
 
@@ -1438,7 +1438,7 @@ class iinfo_object[TDtype](Protocol):
 
 
 @runtime_checkable
-class iinfo[TArray: _array, TDtype](Protocol):
+class iinfo[TArray: Array, TDtype](Protocol):
     """
     Machine limits for integer data types.
 
@@ -1523,7 +1523,7 @@ class isdtype[TDtype](Protocol):
 
 
 @runtime_checkable
-class result_type[TArray: _array, TDtype](Protocol):
+class result_type[TArray: Array, TDtype](Protocol):
     """
     Returns the dtype that results from applying type promotion rules (see :ref:`type-promotion`) to the arguments.
 
@@ -1557,7 +1557,7 @@ class result_type[TArray: _array, TDtype](Protocol):
 
 
 @runtime_checkable
-class cumulative_prod[TArray: _array, TDtype](Protocol):
+class cumulative_prod[TArray: Array, TDtype](Protocol):
     """
     Calculates the cumulative product of elements in the input array ``x``.
 
@@ -1608,7 +1608,7 @@ class cumulative_prod[TArray: _array, TDtype](Protocol):
 
 
 @runtime_checkable
-class cumulative_sum[TArray: _array, TDtype](Protocol):
+class cumulative_sum[TArray: Array, TDtype](Protocol):
     """
     Calculates the cumulative sum of elements in the input array ``x``.
 
@@ -1662,7 +1662,7 @@ class cumulative_sum[TArray: _array, TDtype](Protocol):
 
 
 @runtime_checkable
-class max[TArray: _array](Protocol):
+class max[TArray: Array](Protocol):
     """
     Calculates the maximum value of the input array ``x``.
 
@@ -1704,7 +1704,7 @@ class max[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class mean[TArray: _array](Protocol):
+class mean[TArray: Array](Protocol):
     """
     Calculates the arithmetic mean of the input array ``x``.
 
@@ -1753,7 +1753,7 @@ class mean[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class min[TArray: _array](Protocol):
+class min[TArray: Array](Protocol):
     """
     Calculates the minimum value of the input array ``x``.
 
@@ -1795,7 +1795,7 @@ class min[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class prod[TArray: _array, TDtype](Protocol):
+class prod[TArray: Array, TDtype](Protocol):
     """
     Calculates the product of input array ``x`` elements.
 
@@ -1845,7 +1845,7 @@ class prod[TArray: _array, TDtype](Protocol):
 
 
 @runtime_checkable
-class std[TArray: _array](Protocol):
+class std[TArray: Array](Protocol):
     """
     Calculates the standard deviation of the input array ``x``.
 
@@ -1884,7 +1884,7 @@ class std[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class sum[TArray: _array, TDtype](Protocol):
+class sum[TArray: Array, TDtype](Protocol):
     """
     Calculates the sum of the input array ``x``.
 
@@ -1934,7 +1934,7 @@ class sum[TArray: _array, TDtype](Protocol):
 
 
 @runtime_checkable
-class var[TArray: _array](Protocol):
+class var[TArray: Array](Protocol):
     """
     Calculates the variance of the input array ``x``.
 
@@ -1974,7 +1974,7 @@ class var[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class arange[TArray: _array, TDevice, TDtype](Protocol):
+class arange[TArray: Array, TDevice, TDtype](Protocol):
     """
     Returns evenly spaced values within the half-open interval ``[start, stop)`` as a one-dimensional array.
 
@@ -2014,7 +2014,7 @@ class NestedSequence[T_t_co](Protocol):
 
 
 @runtime_checkable
-class asarray[TSupportsbufferprotocol, TArray: _array, TDevice, TDtype](Protocol):
+class asarray[TSupportsbufferprotocol, TArray: Array, TDevice, TDtype](Protocol):
     r"""
     Convert the input to an array.
 
@@ -2064,7 +2064,7 @@ class asarray[TSupportsbufferprotocol, TArray: _array, TDevice, TDtype](Protocol
 
 
 @runtime_checkable
-class empty[TArray: _array, TDevice, TDtype](Protocol):
+class empty[TArray: Array, TDevice, TDtype](Protocol):
     """
     Returns an uninitialized array having a specified `shape`.
 
@@ -2089,7 +2089,7 @@ class empty[TArray: _array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class empty_like[TArray: _array, TDevice, TDtype](Protocol):
+class empty_like[TArray: Array, TDevice, TDtype](Protocol):
     """
     Returns an uninitialized array with the same ``shape`` as an input array ``x``.
 
@@ -2114,7 +2114,7 @@ class empty_like[TArray: _array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class eye[TArray: _array, TDevice, TDtype](Protocol):
+class eye[TArray: Array, TDevice, TDtype](Protocol):
     r"""
     Returns a two-dimensional array with ones on the ``k``\\th diagonal and zeros elsewhere.
 
@@ -2152,7 +2152,7 @@ class eye[TArray: _array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class from_dlpack[TArray: _array, TDevice](Protocol):
+class from_dlpack[TArray: Array, TDevice](Protocol):
     """
     Returns a new array containing the data from another (array) object with a ``__dlpack__`` method.
 
@@ -2234,7 +2234,7 @@ class from_dlpack[TArray: _array, TDevice](Protocol):
 
 
 @runtime_checkable
-class full[TArray: _array, TDevice, TDtype](Protocol):
+class full[TArray: Array, TDevice, TDtype](Protocol):
     """
     Returns a new array having a specified ``shape`` and filled with ``fill_value``.
 
@@ -2276,7 +2276,7 @@ class full[TArray: _array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class full_like[TArray: _array, TDevice, TDtype](Protocol):
+class full_like[TArray: Array, TDevice, TDtype](Protocol):
     """
     Returns a new array filled with ``fill_value`` and having the same ``shape`` as an input array ``x``.
 
@@ -2316,7 +2316,7 @@ class full_like[TArray: _array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class linspace[TArray: _array, TDevice, TDtype](Protocol):
+class linspace[TArray: Array, TDevice, TDtype](Protocol):
     r"""
     Returns evenly spaced numbers over a specified interval.
 
@@ -2384,7 +2384,7 @@ class linspace[TArray: _array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class meshgrid[TArray: _array](Protocol):
+class meshgrid[TArray: Array](Protocol):
     """
     Returns coordinate matrices from coordinate vectors.
 
@@ -2422,7 +2422,7 @@ class meshgrid[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class ones[TArray: _array, TDevice, TDtype](Protocol):
+class ones[TArray: Array, TDevice, TDtype](Protocol):
     """
     Returns a new array having a specified ``shape`` and filled with ones.
 
@@ -2456,7 +2456,7 @@ class ones[TArray: _array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class ones_like[TArray: _array, TDevice, TDtype](Protocol):
+class ones_like[TArray: Array, TDevice, TDtype](Protocol):
     """
     Returns a new array filled with ones and having the same ``shape`` as an input array ``x``.
 
@@ -2490,7 +2490,7 @@ class ones_like[TArray: _array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class tril[TArray: _array](Protocol):
+class tril[TArray: Array](Protocol):
     """
     Returns the lower triangular part of a matrix (or a stack of matrices) ``x``.
 
@@ -2519,7 +2519,7 @@ class tril[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class triu[TArray: _array](Protocol):
+class triu[TArray: Array](Protocol):
     """
     Returns the upper triangular part of a matrix (or a stack of matrices) ``x``.
 
@@ -2548,7 +2548,7 @@ class triu[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class zeros[TArray: _array, TDevice, TDtype](Protocol):
+class zeros[TArray: Array, TDevice, TDtype](Protocol):
     """
     Returns a new array having a specified ``shape`` and filled with zeros.
 
@@ -2573,7 +2573,7 @@ class zeros[TArray: _array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class zeros_like[TArray: _array, TDevice, TDtype](Protocol):
+class zeros_like[TArray: Array, TDevice, TDtype](Protocol):
     """
     Returns a new array filled with zeros and having the same ``shape`` as an input array ``x``.
 
@@ -2598,7 +2598,7 @@ class zeros_like[TArray: _array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class cholesky[TArray: _array](Protocol):
+class cholesky[TArray: Array](Protocol):
     r"""
     Returns the lower (upper) Cholesky decomposition of a complex Hermitian or real symmetric positive-definite matrix ``x``.
 
@@ -2648,7 +2648,7 @@ class cholesky[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class cross[TArray: _array](Protocol):
+class cross[TArray: Array](Protocol):
     """
     Returns the cross product of 3-element vectors.
 
@@ -2695,7 +2695,7 @@ class cross[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class det[TArray: _array](Protocol):
+class det[TArray: Array](Protocol):
     """
     Returns the determinant of a square matrix (or a stack of square matrices) ``x``.
 
@@ -2722,7 +2722,7 @@ class det[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class diagonal[TArray: _array](Protocol):
+class diagonal[TArray: Array](Protocol):
     """
     Returns the specified diagonals of a matrix (or a stack of matrices) ``x``.
 
@@ -2751,7 +2751,7 @@ class diagonal[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class eigh[TArray: _array](Protocol):
+class eigh[TArray: Array](Protocol):
     r"""
     Returns an eigenvalue decomposition of a complex Hermitian or real symmetric matrix (or a stack of matrices) ``x``.
 
@@ -2807,7 +2807,7 @@ class eigh[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class eigvalsh[TArray: _array](Protocol):
+class eigvalsh[TArray: Array](Protocol):
     r"""
     Returns the eigenvalues of a complex Hermitian or real symmetric matrix (or a stack of matrices) ``x``.
 
@@ -2855,7 +2855,7 @@ class eigvalsh[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class inv[TArray: _array](Protocol):
+class inv[TArray: Array](Protocol):
     r"""
     Returns the multiplicative inverse of a square matrix (or a stack of square matrices) ``x``.
 
@@ -2895,7 +2895,7 @@ class inv[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class matrix_norm[TArray: _array](Protocol):
+class matrix_norm[TArray: Array](Protocol):
     """
     Computes the matrix norm of a matrix (or a stack of matrices) ``x``.
 
@@ -2961,7 +2961,7 @@ class matrix_norm[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class matrix_power[TArray: _array](Protocol):
+class matrix_power[TArray: Array](Protocol):
     """
     Raises a square matrix (or a stack of square matrices) ``x`` to an integer power ``n``.
 
@@ -2990,7 +2990,7 @@ class matrix_power[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class matrix_rank[TArray: _array](Protocol):
+class matrix_rank[TArray: Array](Protocol):
     """
     Returns the rank (i.e., number of non-zero singular values) of a matrix (or a stack of matrices).
 
@@ -3021,7 +3021,7 @@ class matrix_rank[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class outer[TArray: _array](Protocol):
+class outer[TArray: Array](Protocol):
     """
     Returns the outer product of two vectors ``x1`` and ``x2``.
 
@@ -3050,7 +3050,7 @@ class outer[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class pinv[TArray: _array](Protocol):
+class pinv[TArray: Array](Protocol):
     r"""
     Returns the (Moore-Penrose) pseudo-inverse of a matrix (or a stack of matrices) ``x``.
 
@@ -3095,7 +3095,7 @@ class pinv[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class qr[TArray: _array](Protocol):
+class qr[TArray: Array](Protocol):
     r"""
     Returns the QR decomposition of a full column rank matrix (or a stack of matrices).
 
@@ -3163,7 +3163,7 @@ class qr[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class slogdet[TArray: _array](Protocol):
+class slogdet[TArray: Array](Protocol):
     r"""
     Returns the sign and the natural logarithm of the absolute value of the determinant of a square matrix (or a stack of square matrices) ``x``.
 
@@ -3223,7 +3223,7 @@ class slogdet[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class solve[TArray: _array](Protocol):
+class solve[TArray: Array](Protocol):
     r"""
     Returns the solution of a square system of linear equations with a unique solution.
 
@@ -3269,7 +3269,7 @@ class solve[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class svd[TArray: _array](Protocol):
+class svd[TArray: Array](Protocol):
     r"""
     Returns a singular value decomposition (SVD) of a matrix (or a stack of matrices) ``x``.
 
@@ -3329,7 +3329,7 @@ class svd[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class svdvals[TArray: _array](Protocol):
+class svdvals[TArray: Array](Protocol):
     """
     Returns the singular values of a matrix (or a stack of matrices) ``x``.
 
@@ -3358,7 +3358,7 @@ class svdvals[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class trace[TArray: _array, TDtype](Protocol):
+class trace[TArray: Array, TDtype](Protocol):
     """
     Returns the sum along the specified diagonals of a matrix (or a stack of matrices) ``x``.
 
@@ -3416,7 +3416,7 @@ class trace[TArray: _array, TDtype](Protocol):
 
 
 @runtime_checkable
-class vector_norm[TArray: _array](Protocol):
+class vector_norm[TArray: Array](Protocol):
     r"""
     Computes the vector norm of a vector (or batch of vectors) ``x``.
 
@@ -3480,7 +3480,7 @@ class vector_norm[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class argsort[TArray: _array](Protocol):
+class argsort[TArray: Array](Protocol):
     """
     Returns the indices that sort an array ``x`` along a specified axis.
 
@@ -3511,7 +3511,7 @@ class argsort[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class sort[TArray: _array](Protocol):
+class sort[TArray: Array](Protocol):
     """
     Returns a sorted copy of an input array ``x``.
 
@@ -3542,7 +3542,7 @@ class sort[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class abs[TArray: _array](Protocol):
+class abs[TArray: Array](Protocol):
     r"""
     Calculates the absolute value for each element ``x_i`` of the input array ``x``.
 
@@ -3603,7 +3603,7 @@ class abs[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class acos[TArray: _array](Protocol):
+class acos[TArray: Array](Protocol):
     r"""
     Calculates an implementation-dependent approximation of the principal value of the inverse cosine for each element ``x_i`` of the input array ``x``.
 
@@ -3676,7 +3676,7 @@ class acos[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class acosh[TArray: _array](Protocol):
+class acosh[TArray: Array](Protocol):
     r"""
     Calculates an implementation-dependent approximation to the inverse hyperbolic cosine for each element ``x_i`` of the input array ``x``.
 
@@ -3754,7 +3754,7 @@ class acosh[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class add[TArray: _array](Protocol):
+class add[TArray: Array](Protocol):
     """
     Calculates the sum for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.
 
@@ -3831,7 +3831,7 @@ class add[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class asin[TArray: _array](Protocol):
+class asin[TArray: Array](Protocol):
     r"""
     Calculates an implementation-dependent approximation of the principal value of the inverse sine for each element ``x_i`` of the input array ``x``.
 
@@ -3892,7 +3892,7 @@ class asin[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class asinh[TArray: _array](Protocol):
+class asinh[TArray: Array](Protocol):
     r"""
     Calculates an implementation-dependent approximation to the inverse hyperbolic sine for each element ``x_i`` in the input array ``x``.
 
@@ -3961,7 +3961,7 @@ class asinh[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class atan[TArray: _array](Protocol):
+class atan[TArray: Array](Protocol):
     r"""
     Calculates an implementation-dependent approximation of the principal value of the inverse tangent for each element ``x_i`` of the input array ``x``.
 
@@ -4017,7 +4017,7 @@ class atan[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class atan2[TArray: _array](Protocol):
+class atan2[TArray: Array](Protocol):
     """
     Calculates an implementation-dependent approximation of the inverse tangent of the quotient ``x1/x2``, having domain ``[-infinity, +infinity] x [-infinity, +infinity]`` (where the ``x`` notation denotes the set of ordered pairs of elements ``(x1_i, x2_i)``) and codomain ``[-π, +π]``, for each pair of elements ``(x1_i, x2_i)`` of the input arrays ``x1`` and ``x2``, respectively. Each element-wise result is expressed in radians.
 
@@ -4082,7 +4082,7 @@ class atan2[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class atanh[TArray: _array](Protocol):
+class atanh[TArray: Array](Protocol):
     r"""
     Calculates an implementation-dependent approximation to the inverse hyperbolic tangent for each element ``x_i`` of the input array ``x``.
 
@@ -4155,7 +4155,7 @@ class atanh[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class bitwise_and[TArray: _array](Protocol):
+class bitwise_and[TArray: Array](Protocol):
     """
     Computes the bitwise AND of the underlying binary representation of each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.
 
@@ -4185,7 +4185,7 @@ class bitwise_and[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class bitwise_left_shift[TArray: _array](Protocol):
+class bitwise_left_shift[TArray: Array](Protocol):
     """
     Shifts the bits of each element ``x1_i`` of the input array ``x1`` to the left by appending ``x2_i`` (i.e., the respective element in the input array ``x2``) zeros to the right of ``x1_i``.
 
@@ -4215,7 +4215,7 @@ class bitwise_left_shift[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class bitwise_invert[TArray: _array](Protocol):
+class bitwise_invert[TArray: Array](Protocol):
     """
     Inverts (flips) each bit for each element ``x_i`` of the input array ``x``.
 
@@ -4236,7 +4236,7 @@ class bitwise_invert[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class bitwise_or[TArray: _array](Protocol):
+class bitwise_or[TArray: Array](Protocol):
     """
     Computes the bitwise OR of the underlying binary representation of each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.
 
@@ -4266,7 +4266,7 @@ class bitwise_or[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class bitwise_right_shift[TArray: _array](Protocol):
+class bitwise_right_shift[TArray: Array](Protocol):
     """
     Shifts the bits of each element ``x1_i`` of the input array ``x1`` to the right according to the respective element ``x2_i`` of the input array ``x2``.
 
@@ -4299,7 +4299,7 @@ class bitwise_right_shift[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class bitwise_xor[TArray: _array](Protocol):
+class bitwise_xor[TArray: Array](Protocol):
     """
     Computes the bitwise XOR of the underlying binary representation of each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.
 
@@ -4329,7 +4329,7 @@ class bitwise_xor[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class ceil[TArray: _array](Protocol):
+class ceil[TArray: Array](Protocol):
     """
     Rounds each element ``x_i`` of the input array ``x`` to the smallest (i.e., closest to ``-infinity``) integer-valued number that is not less than ``x_i``.
 
@@ -4364,7 +4364,7 @@ class ceil[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class clip[TArray: _array](Protocol):
+class clip[TArray: Array](Protocol):
     """
     Clamps each element ``x_i`` of the input array ``x`` to the range ``[min, max]``.
 
@@ -4415,7 +4415,7 @@ class clip[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class conj[TArray: _array](Protocol):
+class conj[TArray: Array](Protocol):
     """
     Returns the complex conjugate for each element ``x_i`` of the input array ``x``.
 
@@ -4457,7 +4457,7 @@ class conj[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class copysign[TArray: _array](Protocol):
+class copysign[TArray: Array](Protocol):
     """
     Composes a floating-point value with the magnitude of ``x1_i`` and the sign of ``x2_i`` for each element of the input array ``x1``.
 
@@ -4507,7 +4507,7 @@ class copysign[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class cos[TArray: _array](Protocol):
+class cos[TArray: Array](Protocol):
     r"""
     Calculates an implementation-dependent approximation to the cosine for each element ``x_i`` of the input array ``x``.
 
@@ -4558,7 +4558,7 @@ class cos[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class cosh[TArray: _array](Protocol):
+class cosh[TArray: Array](Protocol):
     r"""
     Calculates an implementation-dependent approximation to the hyperbolic cosine for each element ``x_i`` in the input array ``x``.
 
@@ -4625,7 +4625,7 @@ class cosh[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class divide[TArray: _array](Protocol):
+class divide[TArray: Array](Protocol):
     r"""
     Calculates the division of each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.
 
@@ -4716,7 +4716,7 @@ class divide[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class equal[TArray: _array](Protocol):
+class equal[TArray: Array](Protocol):
     """
     Computes the truth value of ``x1_i == x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.
 
@@ -4775,7 +4775,7 @@ class equal[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class exp[TArray: _array](Protocol):
+class exp[TArray: Array](Protocol):
     """
     Calculates an implementation-dependent approximation to the exponential function for each element ``x_i`` of the input array ``x`` (``e`` raised to the power of ``x_i``, where ``e`` is the base of the natural logarithm).
 
@@ -4835,7 +4835,7 @@ class exp[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class expm1[TArray: _array](Protocol):
+class expm1[TArray: Array](Protocol):
     """
     Calculates an implementation-dependent approximation to ``exp(x)-1`` for each element ``x_i`` of the input array ``x``.
 
@@ -4898,7 +4898,7 @@ class expm1[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class floor[TArray: _array](Protocol):
+class floor[TArray: Array](Protocol):
     """
     Rounds each element ``x_i`` of the input array ``x`` to the greatest (i.e., closest to ``+infinity``) integer-valued number that is not greater than ``x_i``.
 
@@ -4933,7 +4933,7 @@ class floor[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class floor_divide[TArray: _array](Protocol):
+class floor_divide[TArray: Array](Protocol):
     r"""
     Rounds the result of dividing each element ``x1_i`` of the input array ``x1`` by the respective element ``x2_i`` of the input array ``x2`` to the greatest (i.e., closest to `+infinity`) integer-value number that is not greater than the division result.
 
@@ -5000,7 +5000,7 @@ class floor_divide[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class greater[TArray: _array](Protocol):
+class greater[TArray: Array](Protocol):
     """
     Computes the truth value of ``x1_i > x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.
 
@@ -5035,7 +5035,7 @@ class greater[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class greater_equal[TArray: _array](Protocol):
+class greater_equal[TArray: Array](Protocol):
     """
     Computes the truth value of ``x1_i >= x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.
 
@@ -5070,7 +5070,7 @@ class greater_equal[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class hypot[TArray: _array](Protocol):
+class hypot[TArray: Array](Protocol):
     """
     Computes the square root of the sum of squares for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.
 
@@ -5125,7 +5125,7 @@ class hypot[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class imag[TArray: _array](Protocol):
+class imag[TArray: Array](Protocol):
     """
     Returns the imaginary component of a complex number for each element ``x_i`` of the input array ``x``.
 
@@ -5151,7 +5151,7 @@ class imag[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class isfinite[TArray: _array](Protocol):
+class isfinite[TArray: Array](Protocol):
     """
     Tests each element ``x_i`` of the input array ``x`` to determine if finite.
 
@@ -5192,7 +5192,7 @@ class isfinite[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class isinf[TArray: _array](Protocol):
+class isinf[TArray: Array](Protocol):
     """
     Tests each element ``x_i`` of the input array ``x`` to determine if equal to positive or negative infinity.
 
@@ -5231,7 +5231,7 @@ class isinf[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class isnan[TArray: _array](Protocol):
+class isnan[TArray: Array](Protocol):
     """
     Tests each element ``x_i`` of the input array ``x`` to determine whether the element is ``NaN``.
 
@@ -5269,7 +5269,7 @@ class isnan[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class less[TArray: _array](Protocol):
+class less[TArray: Array](Protocol):
     """
     Computes the truth value of ``x1_i < x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.
 
@@ -5304,7 +5304,7 @@ class less[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class less_equal[TArray: _array](Protocol):
+class less_equal[TArray: Array](Protocol):
     """
     Computes the truth value of ``x1_i <= x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.
 
@@ -5339,7 +5339,7 @@ class less_equal[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class log[TArray: _array](Protocol):
+class log[TArray: Array](Protocol):
     r"""
     Calculates an implementation-dependent approximation to the natural (base ``e``) logarithm for each element ``x_i`` of the input array ``x``.
 
@@ -5405,7 +5405,7 @@ class log[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class log1p[TArray: _array](Protocol):
+class log1p[TArray: Array](Protocol):
     r"""
     Calculates an implementation-dependent approximation to ``log(1+x)``, where ``log`` refers to the natural (base ``e``) logarithm, for each element ``x_i`` of the input array ``x``.
 
@@ -5471,7 +5471,7 @@ class log1p[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class log2[TArray: _array](Protocol):
+class log2[TArray: Array](Protocol):
     r"""
     Calculates an implementation-dependent approximation to the base ``2`` logarithm for each element ``x_i`` of the input array ``x``.
 
@@ -5517,7 +5517,7 @@ class log2[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class log10[TArray: _array](Protocol):
+class log10[TArray: Array](Protocol):
     r"""
     Calculates an implementation-dependent approximation to the base ``10`` logarithm for each element ``x_i`` of the input array ``x``.
 
@@ -5563,7 +5563,7 @@ class log10[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class logaddexp[TArray: _array](Protocol):
+class logaddexp[TArray: Array](Protocol):
     """
     Calculates the logarithm of the sum of exponentiations ``log(exp(x1) + exp(x2))`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.
 
@@ -5601,7 +5601,7 @@ class logaddexp[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class logical_and[TArray: _array](Protocol):
+class logical_and[TArray: Array](Protocol):
     """
     Computes the logical AND for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.
 
@@ -5634,7 +5634,7 @@ class logical_and[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class logical_not[TArray: _array](Protocol):
+class logical_not[TArray: Array](Protocol):
     """
     Computes the logical NOT for each element ``x_i`` of the input array ``x``.
 
@@ -5658,7 +5658,7 @@ class logical_not[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class logical_or[TArray: _array](Protocol):
+class logical_or[TArray: Array](Protocol):
     """
     Computes the logical OR for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.
 
@@ -5691,7 +5691,7 @@ class logical_or[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class logical_xor[TArray: _array](Protocol):
+class logical_xor[TArray: Array](Protocol):
     """
     Computes the logical XOR for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.
 
@@ -5724,7 +5724,7 @@ class logical_xor[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class maximum[TArray: _array](Protocol):
+class maximum[TArray: Array](Protocol):
     """
     Computes the maximum value for each element ``x1_i`` of the input array ``x1`` relative to the respective element ``x2_i`` of the input array ``x2``.
 
@@ -5764,7 +5764,7 @@ class maximum[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class minimum[TArray: _array](Protocol):
+class minimum[TArray: Array](Protocol):
     """
     Computes the minimum value for each element ``x1_i`` of the input array ``x1`` relative to the respective element ``x2_i`` of the input array ``x2``.
 
@@ -5804,7 +5804,7 @@ class minimum[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class multiply[TArray: _array](Protocol):
+class multiply[TArray: Array](Protocol):
     r"""
     Calculates the product for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.
 
@@ -5881,7 +5881,7 @@ class multiply[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class negative[TArray: _array](Protocol):
+class negative[TArray: Array](Protocol):
     """
     Computes the numerical negative of each element ``x_i`` (i.e., ``y_i = -x_i``) of the input array ``x``.
 
@@ -5914,7 +5914,7 @@ class negative[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class nextafter[TArray: _array](Protocol):
+class nextafter[TArray: Array](Protocol):
     """
     Returns the next representable floating-point value for each element ``x1_i`` of the input array ``x1`` in the direction of the respective element ``x2_i`` of the input array ``x2``.
 
@@ -5951,7 +5951,7 @@ class nextafter[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class not_equal[TArray: _array](Protocol):
+class not_equal[TArray: Array](Protocol):
     """
     Computes the truth value of ``x1_i != x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.
 
@@ -6008,7 +6008,7 @@ class not_equal[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class positive[TArray: _array](Protocol):
+class positive[TArray: Array](Protocol):
     """
     Computes the numerical positive of each element ``x_i`` (i.e., ``y_i = +x_i``) of the input array ``x``.
 
@@ -6035,7 +6035,7 @@ class positive[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class pow[TArray: _array](Protocol):
+class pow[TArray: Array](Protocol):
     r"""
     Calculates an implementation-dependent approximation of exponentiation by raising each element ``x1_i`` (the base) of the input array ``x1`` to the power of ``x2_i`` (the exponent), where ``x2_i`` is the corresponding element of the input array ``x2``.
 
@@ -6112,7 +6112,7 @@ class pow[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class real[TArray: _array](Protocol):
+class real[TArray: Array](Protocol):
     """
     Returns the real component of a complex number for each element ``x_i`` of the input array ``x``.
 
@@ -6142,7 +6142,7 @@ class real[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class reciprocal[TArray: _array](Protocol):
+class reciprocal[TArray: Array](Protocol):
     """
     Returns the reciprocal for each element ``x_i`` of the input array ``x``.
 
@@ -6171,7 +6171,7 @@ class reciprocal[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class remainder[TArray: _array](Protocol):
+class remainder[TArray: Array](Protocol):
     """
     Returns the remainder of division for each element ``x1_i`` of the input array ``x1`` and the respective element ``x2_i`` of the input array ``x2``.
 
@@ -6233,7 +6233,7 @@ class remainder[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class round[TArray: _array](Protocol):
+class round[TArray: Array](Protocol):
     """
     Rounds each element ``x_i`` of the input array ``x`` to the nearest integer-valued number.
 
@@ -6280,7 +6280,7 @@ class round[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class sign[TArray: _array](Protocol):
+class sign[TArray: Array](Protocol):
     r"""
     Returns an indication of the sign of a number for each element ``x_i`` of the input array ``x``.
 
@@ -6331,7 +6331,7 @@ class sign[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class signbit[TArray: _array](Protocol):
+class signbit[TArray: Array](Protocol):
     """
     Determines whether the sign bit is set for each element ``x_i`` of the input array ``x``.
 
@@ -6371,7 +6371,7 @@ class signbit[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class sin[TArray: _array](Protocol):
+class sin[TArray: Array](Protocol):
     r"""
     Calculates an implementation-dependent approximation to the sine for each element ``x_i`` of the input array ``x``.
 
@@ -6421,7 +6421,7 @@ class sin[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class sinh[TArray: _array](Protocol):
+class sinh[TArray: Array](Protocol):
     r"""
     Calculates an implementation-dependent approximation to the hyperbolic sine for each element ``x_i`` of the input array ``x``.
 
@@ -6488,7 +6488,7 @@ class sinh[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class square[TArray: _array](Protocol):
+class square[TArray: Array](Protocol):
     r"""
     Squares each element ``x_i`` of the input array ``x``.
 
@@ -6523,7 +6523,7 @@ class square[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class sqrt[TArray: _array](Protocol):
+class sqrt[TArray: Array](Protocol):
     r"""
     Calculates the principal square root for each element ``x_i`` of the input array ``x``.
 
@@ -6586,7 +6586,7 @@ class sqrt[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class subtract[TArray: _array](Protocol):
+class subtract[TArray: Array](Protocol):
     """
     Calculates the difference for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.
 
@@ -6620,7 +6620,7 @@ class subtract[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class tan[TArray: _array](Protocol):
+class tan[TArray: Array](Protocol):
     r"""
     Calculates an implementation-dependent approximation to the tangent for each element ``x_i`` of the input array ``x``.
 
@@ -6670,7 +6670,7 @@ class tan[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class tanh[TArray: _array](Protocol):
+class tanh[TArray: Array](Protocol):
     r"""
     Calculates an implementation-dependent approximation to the hyperbolic tangent for each element ``x_i`` of the input array ``x``.
 
@@ -6741,7 +6741,7 @@ class tanh[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class trunc[TArray: _array](Protocol):
+class trunc[TArray: Array](Protocol):
     """
     Rounds each element ``x_i`` of the input array ``x`` to the nearest integer-valued number that is closer to zero than ``x_i``.
 
@@ -6776,7 +6776,7 @@ class trunc[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class argmax[TArray: _array](Protocol):
+class argmax[TArray: Array](Protocol):
     """
     Returns the indices of the maximum values along a specified axis.
 
@@ -6807,7 +6807,7 @@ class argmax[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class argmin[TArray: _array](Protocol):
+class argmin[TArray: Array](Protocol):
     """
     Returns the indices of the minimum values along a specified axis.
 
@@ -6838,7 +6838,7 @@ class argmin[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class count_nonzero[TArray: _array](Protocol):
+class count_nonzero[TArray: Array](Protocol):
     """
     Counts the number of array elements which are non-zero.
 
@@ -6870,7 +6870,7 @@ class count_nonzero[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class nonzero[TArray: _array](Protocol):
+class nonzero[TArray: Array](Protocol):
     """
     Returns the indices of the array elements which are non-zero.
 
@@ -6904,7 +6904,7 @@ class nonzero[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class searchsorted[TArray: _array](Protocol):
+class searchsorted[TArray: Array](Protocol):
     """
     Finds the indices into ``x1`` such that, if the corresponding elements in ``x2`` were inserted before the indices, the order of ``x1``, when sorted in ascending order, would be preserved.
 
@@ -6952,7 +6952,7 @@ class searchsorted[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class where[TArray: _array](Protocol):
+class where[TArray: Array](Protocol):
     """
     Returns elements chosen from ``x1`` or ``x2`` depending on ``condition``.
 
@@ -6988,7 +6988,7 @@ class where[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class all[TArray: _array](Protocol):
+class all[TArray: Array](Protocol):
     """
     Tests whether all input array elements evaluate to ``True`` along a specified axis.
 
@@ -7022,7 +7022,7 @@ class all[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class any[TArray: _array](Protocol):
+class any[TArray: Array](Protocol):
     """
     Tests whether any input array element evaluates to ``True`` along a specified axis.
 
@@ -7056,7 +7056,7 @@ class any[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class diff[TArray: _array](Protocol):
+class diff[TArray: Array](Protocol):
     """
     Calculates the n-th discrete forward difference along a specified axis.
 
@@ -7097,7 +7097,7 @@ class diff[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class Info[TCapabilities, TDatatypes, TDefaultdatatypes, TArray: _array, TDevice, TDtype](Protocol):
+class Info[TCapabilities, TDatatypes, TDefaultdatatypes, TArray: Array, TDevice, TDtype](Protocol):
     """Namespace returned by `__array_namespace_info__`."""
 
     def capabilities(self) -> TCapabilities: ...
@@ -7112,7 +7112,7 @@ class Info[TCapabilities, TDatatypes, TDefaultdatatypes, TArray: _array, TDevice
 
 
 @runtime_checkable
-class __array_namespace_info__(Protocol):
+class __array_namespace_info__[TCapabilities, TDatatypes, TDefaultdatatypes, TArray: Array, TDevice, TDtype](Protocol):
     """
     Returns a namespace with Array API namespace inspection utilities.
 
@@ -7141,11 +7141,11 @@ class __array_namespace_info__(Protocol):
     """
 
     @abstractmethod
-    def __call__(self, /) -> Info: ...
+    def __call__(self, /) -> Info[TCapabilities, TDatatypes, TDefaultdatatypes, TArray, TDevice, TDtype]: ...
 
 
 @runtime_checkable
-class take[TArray: _array](Protocol):
+class take[TArray: Array](Protocol):
     """
     Returns elements of an array along an axis.
 
@@ -7189,7 +7189,7 @@ class take[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class take_along_axis[TArray: _array](Protocol):
+class take_along_axis[TArray: Array](Protocol):
     """
     Returns elements from an array at the one-dimensional indices specified by ``indices`` along a provided ``axis``.
 
@@ -7220,7 +7220,7 @@ class take_along_axis[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class fft[TArray: _array](Protocol):
+class fft[TArray: Array](Protocol):
     """
     Computes the one-dimensional discrete Fourier transform.
 
@@ -7270,7 +7270,7 @@ class fft[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class ifft[TArray: _array](Protocol):
+class ifft[TArray: Array](Protocol):
     """
     Computes the one-dimensional inverse discrete Fourier transform.
 
@@ -7320,7 +7320,7 @@ class ifft[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class fftn[TArray: _array](Protocol):
+class fftn[TArray: Array](Protocol):
     """
     Computes the n-dimensional discrete Fourier transform.
 
@@ -7376,7 +7376,7 @@ class fftn[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class ifftn[TArray: _array](Protocol):
+class ifftn[TArray: Array](Protocol):
     """
     Computes the n-dimensional inverse discrete Fourier transform.
 
@@ -7432,7 +7432,7 @@ class ifftn[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class rfft[TArray: _array](Protocol):
+class rfft[TArray: Array](Protocol):
     """
     Computes the one-dimensional discrete Fourier transform for real-valued input.
 
@@ -7479,7 +7479,7 @@ class rfft[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class irfft[TArray: _array](Protocol):
+class irfft[TArray: Array](Protocol):
     """
     Computes the one-dimensional inverse of ``rfft`` for complex-valued input.
 
@@ -7530,7 +7530,7 @@ class irfft[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class rfftn[TArray: _array](Protocol):
+class rfftn[TArray: Array](Protocol):
     """
     Computes the n-dimensional discrete Fourier transform for real-valued input.
 
@@ -7583,7 +7583,7 @@ class rfftn[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class irfftn[TArray: _array](Protocol):
+class irfftn[TArray: Array](Protocol):
     """
     Computes the n-dimensional inverse of ``rfftn`` for complex-valued input.
 
@@ -7640,7 +7640,7 @@ class irfftn[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class hfft[TArray: _array](Protocol):
+class hfft[TArray: Array](Protocol):
     """
     Computes the one-dimensional discrete Fourier transform of a signal with Hermitian symmetry.
 
@@ -7687,7 +7687,7 @@ class hfft[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class ihfft[TArray: _array](Protocol):
+class ihfft[TArray: Array](Protocol):
     """
     Computes the one-dimensional inverse discrete Fourier transform of a signal with Hermitian symmetry.
 
@@ -7731,7 +7731,7 @@ class ihfft[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class fftfreq[TArray: _array, TDevice, TDtype](Protocol):
+class fftfreq[TArray: Array, TDevice, TDtype](Protocol):
     """
     Computes the discrete Fourier transform sample frequencies.
 
@@ -7776,7 +7776,7 @@ class fftfreq[TArray: _array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class rfftfreq[TArray: _array, TDevice, TDtype](Protocol):
+class rfftfreq[TArray: Array, TDevice, TDtype](Protocol):
     """
     Computes the discrete Fourier transform sample frequencies (for ``rfft`` and ``irfft``).
 
@@ -7823,7 +7823,7 @@ class rfftfreq[TArray: _array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class fftshift[TArray: _array](Protocol):
+class fftshift[TArray: Array](Protocol):
     """
     Shifts the zero-frequency component to the center of the spectrum.
 
@@ -7858,7 +7858,7 @@ class fftshift[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class ifftshift[TArray: _array](Protocol):
+class ifftshift[TArray: Array](Protocol):
     """
     Inverse of ``fftshift``.
 
@@ -7891,7 +7891,7 @@ class ifftshift[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class matmul[TArray: _array](Protocol):
+class matmul[TArray: Array](Protocol):
     """
     Computes the matrix product.
 
@@ -7943,7 +7943,7 @@ class matmul[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class matrix_transpose[TArray: _array](Protocol):
+class matrix_transpose[TArray: Array](Protocol):
     """
     Transposes a matrix (or a stack of matrices) ``x``.
 
@@ -7964,7 +7964,7 @@ class matrix_transpose[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class tensordot[TArray: _array](Protocol):
+class tensordot[TArray: Array](Protocol):
     """
     Returns a tensor contraction of ``x1`` and ``x2`` over specific axes.
 
@@ -8017,7 +8017,7 @@ class tensordot[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class vecdot[TArray: _array](Protocol):
+class vecdot[TArray: Array](Protocol):
     r"""
     Computes the (vector) dot product of two arrays.
 
@@ -8065,7 +8065,7 @@ class vecdot[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class broadcast_arrays[TArray: _array](Protocol):
+class broadcast_arrays[TArray: Array](Protocol):
     """
     Broadcasts one or more arrays against one another.
 
@@ -8086,7 +8086,7 @@ class broadcast_arrays[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class broadcast_to[TArray: _array](Protocol):
+class broadcast_to[TArray: Array](Protocol):
     """
     Broadcasts an array to a specified shape.
 
@@ -8112,7 +8112,7 @@ class broadcast_to[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class concat[TArray: _array](Protocol):
+class concat[TArray: Array](Protocol):
     """
     Joins a sequence of arrays along an existing axis.
 
@@ -8138,7 +8138,7 @@ class concat[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class expand_dims[TArray: _array](Protocol):
+class expand_dims[TArray: Array](Protocol):
     """
     Expands the shape of an array by inserting a new axis (dimension) of size one at the position specified by ``axis``.
 
@@ -8166,7 +8166,7 @@ class expand_dims[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class flip[TArray: _array](Protocol):
+class flip[TArray: Array](Protocol):
     """
     Reverses the order of elements in an array along the given axis. The shape of the array must be preserved.
 
@@ -8189,7 +8189,7 @@ class flip[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class moveaxis[TArray: _array](Protocol):
+class moveaxis[TArray: Array](Protocol):
     """
     Moves array axes (dimensions) to new positions, while leaving other axes in their original positions.
 
@@ -8219,7 +8219,7 @@ class moveaxis[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class permute_dims[TArray: _array](Protocol):
+class permute_dims[TArray: Array](Protocol):
     """
     Permutes the axes (dimensions) of an array ``x``.
 
@@ -8242,7 +8242,7 @@ class permute_dims[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class repeat[TArray: _array](Protocol):
+class repeat[TArray: Array](Protocol):
     """
     Repeats each element of an array a specified number of times on a per-element basis.
 
@@ -8293,7 +8293,7 @@ class repeat[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class reshape[TArray: _array](Protocol):
+class reshape[TArray: Array](Protocol):
     """
     Reshapes an array without changing its data.
 
@@ -8324,7 +8324,7 @@ class reshape[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class roll[TArray: _array](Protocol):
+class roll[TArray: Array](Protocol):
     """
     Rolls array elements along a specified axis. Array elements that roll beyond the last position are re-introduced at the first position. Array elements that roll beyond the first position are re-introduced at the last position.
 
@@ -8349,7 +8349,7 @@ class roll[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class squeeze[TArray: _array](Protocol):
+class squeeze[TArray: Array](Protocol):
     """
     Removes singleton dimensions (axes) from ``x``.
 
@@ -8378,7 +8378,7 @@ class squeeze[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class stack[TArray: _array](Protocol):
+class stack[TArray: Array](Protocol):
     """
     Joins a sequence of arrays along a new axis.
 
@@ -8404,7 +8404,7 @@ class stack[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class tile[TArray: _array](Protocol):
+class tile[TArray: Array](Protocol):
     """
     Constructs an array by tiling an input array.
 
@@ -8438,7 +8438,7 @@ class tile[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class unstack[TArray: _array](Protocol):
+class unstack[TArray: Array](Protocol):
     """
     Splits an array into a sequence of arrays along the given axis.
 
@@ -8466,7 +8466,7 @@ class unstack[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class unique_all[TArray: _array](Protocol):
+class unique_all[TArray: Array](Protocol):
     """
     Returns the unique elements of an input array ``x``, the first occurring indices for each unique element in ``x``, the indices from the set of unique elements that reconstruct ``x``, and the corresponding counts for each unique element in ``x``.
 
@@ -8520,7 +8520,7 @@ class unique_all[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class unique_counts[TArray: _array](Protocol):
+class unique_counts[TArray: Array](Protocol):
     """
     Returns the unique elements of an input array ``x`` and the corresponding counts for each unique element in ``x``.
 
@@ -8570,7 +8570,7 @@ class unique_counts[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class unique_inverse[TArray: _array](Protocol):
+class unique_inverse[TArray: Array](Protocol):
     """
     Returns the unique elements of an input array ``x`` and the indices from the set of unique elements that reconstruct ``x``.
 
@@ -8620,7 +8620,7 @@ class unique_inverse[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class unique_values[TArray: _array](Protocol):
+class unique_values[TArray: Array](Protocol):
     """
     Returns the unique elements of an input array ``x``.
 
@@ -8665,7 +8665,7 @@ class unique_values[TArray: _array](Protocol):
 
 
 @runtime_checkable
-class LinalgNamespace[TArray: _array, TDtype](Protocol):
+class LinalgNamespace[TArray: Array, TDtype](Protocol):
     cholesky: cholesky[TArray,]
     cross: cross[TArray,]
     det: det[TArray,]
@@ -8692,7 +8692,7 @@ class LinalgNamespace[TArray: _array, TDtype](Protocol):
 
 
 @runtime_checkable
-class FftNamespace[TArray: _array, TDevice, TDtype](Protocol):
+class FftNamespace[TArray: Array, TDevice, TDtype](Protocol):
     fft: fft[TArray,]
     ifft: ifft[TArray,]
     fftn: fftn[TArray,]
@@ -8710,7 +8710,7 @@ class FftNamespace[TArray: _array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class ArrayNamespace[TSupportsbufferprotocol, TArray: _array, TDevice, TDtype](Protocol):
+class ArrayNamespace[TCapabilities, TDatatypes, TDefaultdatatypes, TSupportsbufferprotocol, TArray: Array, TDevice, TDtype](Protocol):
     astype: astype[TArray, TDevice, TDtype]
     can_cast: can_cast[TArray, TDtype]
     finfo: finfo[TArray, TDtype]
@@ -8820,7 +8820,7 @@ class ArrayNamespace[TSupportsbufferprotocol, TArray: _array, TDevice, TDtype](P
     all: all[TArray,]
     any: any[TArray,]
     diff: diff[TArray,]
-    __array_namespace_info__: __array_namespace_info__[()]
+    __array_namespace_info__: __array_namespace_info__[TCapabilities, TDatatypes, TDefaultdatatypes, TArray, TDevice, TDtype]
     take: take[TArray,]
     take_along_axis: take_along_axis[TArray,]
     matmul: matmul[TArray,]
