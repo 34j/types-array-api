@@ -60,6 +60,9 @@ import array_api_compat
 xp = array_api_compat.array_namespace(x)
 ```
 
+![Screenshot 1](https://raw.githubusercontent.com/34j/array-api/main/docs/_static/screenshot1.png)
+![Screenshot 2](https://raw.githubusercontent.com/34j/array-api/main/docs/_static/screenshot2.png)
+
 ### Array Type
 
 ```python
