@@ -5,11 +5,33 @@ import sys
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
-
+from typing import Sequence
+import attrs
+@attrs.frozen()
+class ProtocolData:
+    stmt: ast.ClassDef
+    typevars_used: Sequence[str]
+    name: str
+    
+    
 
 def _function_to_protocol(
     stmt: ast.FunctionDef, typevars: list[str]
-) -> tuple[ast.ClassDef, list[str], str]:
+) -> ProtocolData:
+    """Convert a function definition to a Protocol class.
+
+    Parameters
+    ----------
+    stmt : ast.FunctionDef
+        The function definition to convert.
+    typevars : list[str]
+        The list of TypeVars to include in the Protocol.
+
+    Returns
+    -------
+    ProtocolData
+        A ProtocolData object.
+    """
     stmt = deepcopy(stmt)
     name = stmt.name
     docstring = ast.get_docstring(stmt)
@@ -32,18 +54,17 @@ def _function_to_protocol(
             )
         ],
         body=[stmt],
-        type_params=[],
-    )
+        type_params=[]
+    ) # type: ignore[call-arg]
     if docstring is not None:
         cls_def.body.insert(0, ast.Expr(value=ast.Constant(docstring, kind=None)))
-    if sys.version_info >= (3, 12):
-        cls_def.type_params = []
-    return cls_def, typevars, name + (f"[{', '.join(typevars)}]" if typevars else "")
-
+    return ProtocolData(
+        stmt=cls_def, typevars_used=typevars, name=name + (f"[{', '.join(typevars)}]" if typevars else "")
+    )
 
 def _attributes_to_protocol(
     name, attributes: list[tuple[str, str, str | None, list]], typevars: list[str]
-) -> tuple[ast.ClassDef, set[str], str]:
+) -> ProtocolData:
     body = []
     for attribute, type, docstring, _ in attributes:
         body.append(
@@ -57,8 +78,8 @@ def _attributes_to_protocol(
             body.append(ast.Expr(value=ast.Constant(docstring)))
 
     typevars = {x for attribute in attributes for x in attribute[3]}
-    return (
-        ast.ClassDef(
+    return ProtocolData(
+        stmt=ast.ClassDef(
             name=name,
             decorator_list=[ast.Name(id="runtime_checkable")],
             keywords=[],
@@ -71,8 +92,8 @@ def _attributes_to_protocol(
             body=body,
             type_params=[],
         ),
-        typevars,
-        name + (f"[{', '.join(typevars)}]" if typevars else ""),
+        typevars_used=typevars,
+        name=name + (f"[{', '.join(typevars)}]" if typevars else ""),
     )
 
 
@@ -131,28 +152,29 @@ def generate(cache_dir: Path | str = ".cache", out_name: str = "_namespace.py") 
 
     # Create Protocols with __call__, representing functions
     for submodule, body in body_module.items():
-        for b in body:
+        for i, b in enumerate(body):
             if isinstance(b, (ast.Import, ast.ImportFrom)):
                 out.body.insert(0, b)
             elif isinstance(b, ast.FunctionDef):
-                cls_def, typevars_, type = _function_to_protocol(b, typevars)
-                module_attributes[submodule].append((b.name, type, None, typevars_))
-                out.body.append(cls_def)
+                data = _function_to_protocol(b, typevars)
+                module_attributes[submodule].append((b.name, data.name, None, data.typevars_used))
+                out.body.append(data.stmt)
             elif isinstance(b, ast.Assign):
                 id = b.targets[0].id
                 if id == "__all__":
                     pass
                 else:
                     docstring = None
-                    docstring_expr = body[body.index(b) + 1]
-                    if isinstance(docstring_expr, ast.Expr):
-                        if isinstance(docstring_expr.value, ast.Constant):
-                            docstring = docstring_expr.value.value
+                    if i != len(body) - 1:
+                        docstring_expr = body[i + 1]
+                        if isinstance(docstring_expr, ast.Expr):
+                            if isinstance(docstring_expr.value, ast.Constant):
+                                docstring = docstring_expr.value.value
                     module_attributes[submodule].append((id, "float", docstring, []))
             elif isinstance(b, ast.Expr):
                 pass
             else:
-                print(f"Skipping {submodule} {b} {ast.dump(b)} \n\n")
+                print(f"Skipping {submodule} {b} \n\n")
 
     # Create Protocols for fft and linalg
     submodules = []
@@ -160,12 +182,12 @@ def generate(cache_dir: Path | str = ".cache", out_name: str = "_namespace.py") 
     for submodule, attributes in module_attributes.items():
         if submodule not in OPTIONAL_SUBMODULES:
             continue
-        cls_def, typevars_, type = _attributes_to_protocol(
+        data = _attributes_to_protocol(
             submodule[0].upper() + submodule[1:] + "Namespace", attributes, typevars
         )
-        out.body.append(cls_def)
+        out.body.append(data.stmt)
         if submodule in OPTIONAL_SUBMODULES:
-            submodules.append((submodule, type, None, []))
+            submodules.append((submodule, data.name, None, []))
 
     # Create Protocols for the main namespace
     attributes = [
@@ -174,7 +196,7 @@ def generate(cache_dir: Path | str = ".cache", out_name: str = "_namespace.py") 
         for attribute in attributes
         if submodule not in OPTIONAL_SUBMODULES
     ] + submodules
-    out.body.append(_attributes_to_protocol("ArrayNamespace", attributes, typevars)[0])
+    out.body.append(_attributes_to_protocol("ArrayNamespace", attributes, typevars).stmt)
 
     out_path = draft_path / out_name
     out_path.write_text(ast.unparse(out), "utf-8")
