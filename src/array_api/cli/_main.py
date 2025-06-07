@@ -56,7 +56,7 @@ def _function_to_protocol(stmt: ast.FunctionDef, typevars: Sequence[TypeVarInfo]
     Returns
     -------
     ProtocolData
-        A ProtocolData object.
+        A ProtocolData object containing the converted function definition.
 
     """
     stmt = deepcopy(stmt)
@@ -89,6 +89,22 @@ def _function_to_protocol(stmt: ast.FunctionDef, typevars: Sequence[TypeVarInfo]
 
 
 def _class_to_protocol(stmt: ast.ClassDef, typevars: Sequence[TypeVarInfo]) -> ProtocolData:
+    """
+    Convert a class definition to a Protocol class.
+
+    Parameters
+    ----------
+    stmt : ast.ClassDef
+        The class definition to convert.
+    typevars : Sequence[TypeVarInfo]
+        The type variables used in the class.
+
+    Returns
+    -------
+    ProtocolData
+        The ProtocolData object containing the converted class definition.
+
+    """
     unp = ast.unparse(stmt)
     typevars = [typevar for typevar in typevars if typevar.name in unp]
     stmt.bases = [
@@ -111,6 +127,22 @@ def _class_to_protocol(stmt: ast.ClassDef, typevars: Sequence[TypeVarInfo]) -> P
 
 
 def _attributes_to_protocol(name: str, attributes: Sequence[ModuleAttributes]) -> ProtocolData:
+    """
+    Convert a list of module attributes to a Protocol class.
+
+    Parameters
+    ----------
+    name : str
+        The name of the Protocol class.
+    attributes : Sequence[ModuleAttributes]
+        The attributes to include in the Protocol class.
+
+    Returns
+    -------
+    ProtocolData
+        The ProtocolData object containing the converted attributes.
+
+    """
     body: list[ast.stmt] = []
     for a in attributes:
         body.append(
@@ -140,6 +172,17 @@ def _attributes_to_protocol(name: str, attributes: Sequence[ModuleAttributes]) -
 
 
 def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
+    """
+    Generate Protocol classes from the given module body.
+
+    Parameters
+    ----------
+    body_module : dict[str, list[ast.stmt]]
+        The module body containing the AST statements for each submodule.
+    out_path : Path
+        The output path where the generated Protocol classes will be saved.
+
+    """
     body_typevars = body_module["_types"]
     del body_module["__init__"]
 
@@ -264,6 +307,17 @@ def generate_all(
     cache_dir: Path | str = ".cache",
     out_path: Path | str = "src/array_api",
 ) -> None:
+    """
+    Clone the array-api repository and generate Protocol classes for all versions.
+
+    Parameters
+    ----------
+    cache_dir : Path | str, optional
+        The directory where the array-api repository will be cloned, by default ".cache"
+    out_path : Path | str, optional
+        The output path where the generated Protocol classes will be saved, by default "src/array_api"
+
+    """
     import subprocess as sp
 
     Path(cache_dir).mkdir(exist_ok=True)
