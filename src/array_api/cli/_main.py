@@ -150,31 +150,6 @@ def _attributes_to_protocol(
     )
 
 
-def generate_all(
-    cache_dir: Path | str = ".cache",
-    out_path: Path | str = "src/array-api",
-    out_name: str = "_namespace.py",
-) -> None:
-    import subprocess as sp
-
-    Path(cache_dir).mkdir(exist_ok=True)
-    sp.run(["git", "clone", "https://github.com/data-apis/array-api", ".cache"])
-
-    for dir_path in (Path(cache_dir) / Path("src") / "array_api_stubs").iterdir():
-        if not dir_path.is_dir():
-            continue
-        # get module bodies
-        body_module = {
-            path.stem: ast.parse(
-                path.read_text("utf-8")
-                .replace("Dtype", "dtype")
-                .replace("Device", "device")
-            ).body
-            for path in dir_path.rglob("*.py")
-        }
-        generate(body_module, Path(out_path) / dir_path.name / out_name)
-
-
 def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
     body_typevars = body_module["_types"]
     del body_module["__init__"]
@@ -309,3 +284,27 @@ inf = float("inf")\n"""
     )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(text, "utf-8")
+
+
+def generate_all(
+    cache_dir: Path | str = ".cache",
+    out_path: Path | str = "src/array_api",
+) -> None:
+    import subprocess as sp
+
+    Path(cache_dir).mkdir(exist_ok=True)
+    sp.run(["git", "clone", "https://github.com/data-apis/array-api", ".cache"])
+
+    for dir_path in (Path(cache_dir) / Path("src") / "array_api_stubs").iterdir():
+        if not dir_path.is_dir():
+            continue
+        # get module bodies
+        body_module = {
+            path.stem: ast.parse(
+                path.read_text("utf-8")
+                .replace("Dtype", "dtype")
+                .replace("Device", "device")
+            ).body
+            for path in dir_path.rglob("*.py")
+        }
+        generate(body_module, (Path(out_path) / dir_path.name).with_suffix(".py"))

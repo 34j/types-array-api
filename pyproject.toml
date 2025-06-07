@@ -38,6 +38,7 @@ scripts.array-api = "array_api.cli:app"
 
 [dependency-groups]
 dev = [
+  "array-api-strict>=2.3.1",
   "pytest>=8,<9",
   "pytest-cov>=6,<7",
 ]

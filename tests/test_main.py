@@ -1,6 +1,5 @@
-from array_api.main import add
-
-
-def test_add():
-    """Adding two number works as expected."""
-    assert add(1, 1) == 2
+from array_api._2024_12 import ArrayNamespace, add
+import array_api_strict
+def test_main():
+    assert isinstance(array_api_strict.add, add)
+    assert isinstance(array_api_strict, ArrayNamespace)
