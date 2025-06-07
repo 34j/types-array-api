@@ -267,7 +267,7 @@ inf = float("inf")
 """
         + text
     )
-    ns = "NestedSequence[T_t_co]"
+    ns = "Union[T_t_co, NestedSequence[T_t_co]]"
     text = text.replace(ns, f'"{ns}"')
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(text, "utf-8")
