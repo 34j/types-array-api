@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ast
 import runpy
+import warnings
 from collections import defaultdict
 from collections.abc import Iterable, Sequence
 from copy import deepcopy
@@ -204,13 +205,10 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
             elif isinstance(b, ast.ClassDef):
                 data = _class_to_protocol(b, typevars)
                 out.body.append(data.stmt)
-                # module_attributes[submodule].append(
-                #     ModuleAttributes(b.name, data.name, None, data.typevars_used)
-                # )
             elif isinstance(b, ast.Expr):
                 pass
             else:
-                print(f"Skipping {submodule} {b} \n\n")
+                warnings.warn(f"Skipping {submodule} {b}", stacklevel=2)
 
     # Create Protocols for fft and linalg
     submodules: list[ModuleAttributes] = []
