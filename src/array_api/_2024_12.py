@@ -1,3 +1,5 @@
+"""Auto generated Protocol classes (Do not edit)."""
+
 from abc import abstractmethod
 from collections.abc import Sequence
 from enum import Enum
@@ -11,7 +13,6 @@ from typing import (
 )
 
 inf = float("inf")
-"""Auto generated Protocol classes (Do not edit)"""
 
 
 @runtime_checkable
