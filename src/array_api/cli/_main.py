@@ -129,7 +129,9 @@ def generate_all(
     Path(cache_dir).mkdir(exist_ok=True)
     sp.run(["git", "clone", "https://github.com/data-apis/array-api", ".cache"])
 
-    for dir_path in (Path(cache_dir) / Path("src") / "array_api_stubs").glob("**/"):
+    for dir_path in (Path(cache_dir) / Path("src") / "array_api_stubs").iterdir():
+        if not dir_path.is_dir():
+            continue
         # get module bodies
         body_module = {
             path.stem: ast.parse(
@@ -209,7 +211,7 @@ def generate(body_module: Mapping[str, list[ast.stmt]], out_path: Path) -> None:
                 module_attributes[submodule].append(
                     (b.name, data.name, None, data.typevars_used)
                 )
-                if "alias" in (ast.get_docstring(b) or ""):
+                if "Alias" in (ast.get_docstring(b) or ""):
                     continue
                 out.body.append(data.stmt)
             elif isinstance(b, ast.Assign):
