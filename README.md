@@ -60,7 +60,17 @@ import array_api_compat
 xp = array_api_compat.array_namespace(x)
 ```
 
-### Types
+### Array Type
+
+```python
+from array_api._2024_12 import Array
+
+
+def my_function[TArray: Array](x: TArray) -> TArray:
+    return x + 1
+```
+
+### Namespace Type
 
 You can test if an object matches the Protocol by:
 
