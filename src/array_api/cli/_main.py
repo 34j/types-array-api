@@ -272,6 +272,7 @@ def generate_all(
     for dir_path in (Path(cache_dir) / Path("src") / "array_api_stubs").iterdir():
         if not dir_path.is_dir():
             continue
+        # 2021 is broken (no self keyword in `_array`` methods)
         if "2021" in dir_path.name:
             continue
         # get module bodies
