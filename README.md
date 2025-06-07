@@ -44,7 +44,37 @@ Typing for array API and array-api-compat
 
 Install this via pip (or your favourite package manager):
 
-`pip install array-api`
+```shell
+pip install array-api
+```
+
+## Usage
+
+### Type stubs
+
+Provices type stubs for [`array-api-compat`](https://data-apis.org/array-api-compat/).
+
+```python
+import array_api_compat
+
+xp = array_api_compat.array_namespace(x)
+```
+
+### Types
+
+You can test if an object matches the Protocol by:
+
+```python
+import array_api_strict
+
+from array_api._2024_12 import ArrayNamespace, ArrayNamespaceFull
+
+
+assert isinstance(array_api_strict, ArrayNamespace)
+# Full version contains fft and linalg
+# fft and linalg are not included by default in array_api_strict
+assert not isinstance(array_api_strict, ArrayNamespaceFull)
+```
 
 ## Contributors ✨
 
