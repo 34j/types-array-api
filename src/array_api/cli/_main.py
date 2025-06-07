@@ -95,7 +95,7 @@ def _class_to_protocol(stmt: ast.ClassDef, typevars: Sequence[TypeVarInfo]) -> P
     ]
     for b in stmt.body:
         if isinstance(b, ast.FunctionDef):
-            if getattr(getattr(b.body[-1], "value"), "value", None) is Ellipsis:
+            if getattr(b.body[-1].value, "value", None) is Ellipsis:
                 pass
             else:
                 b.body.append(ast.Expr(value=ast.Constant(value=Ellipsis)))
@@ -286,5 +286,7 @@ def generate_all(
         body_module = {path.stem: ast.parse(path.read_text("utf-8").replace("Dtype", "dtype").replace("Device", "device")).body for path in dir_path.rglob("*.py")}
         generate(body_module, (Path(out_path) / dir_path.name).with_suffix(".py"))
 
+    import sys
+    sys.argv = ["ssort", "src/array_api"]
     runpy.run_module("ssort")
     runpy.run_module("ruff")
