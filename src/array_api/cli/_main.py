@@ -168,14 +168,6 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
 
     # Import `abc.abstractmethod`, `typing.Protocol` and `typing.runtime_checkable`
     out = ast.Module(body=[], type_ignores=[])
-    out.body.append(ast.Expr(value=ast.Constant("Auto generated Protocol classes (Do not edit)")))
-    out.body.append(
-        ast.ImportFrom(
-            module="abc",
-            names=[ast.alias(name="abstractmethod")],
-            level=0,
-        ),
-    )
 
     # Create Protocols with __call__, representing functions
     for submodule, body in body_module.items():
@@ -245,7 +237,8 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
 
     text = ast.unparse(ast.fix_missing_locations(out))
     text = (
-        """from enum import Enum
+        """"Auto generated Protocol classes (Do not edit)"
+from enum import Enum
 from abc import abstractmethod
 from collections.abc import Sequence
 from typing import (
