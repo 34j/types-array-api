@@ -95,7 +95,7 @@ def _class_to_protocol(stmt: ast.ClassDef, typevars: Sequence[TypeVarInfo]) -> P
     ]
     for b in stmt.body:
         if isinstance(b, ast.FunctionDef):
-            if getattr(b.body[-1].value, "value", None) is Ellipsis:
+            if getattr(getattr(b.body[-1], "value"), "value", None) is Ellipsis:
                 pass
             else:
                 b.body.append(ast.Expr(value=ast.Constant(value=Ellipsis)))
