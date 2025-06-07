@@ -16,8 +16,6 @@ class ProtocolData:
     name: str
 
 
-
-
 def _function_to_protocol(stmt: ast.FunctionDef, typevars: list[str]) -> ProtocolData:
     """
     Convert a function definition to a Protocol class.
@@ -56,7 +54,12 @@ def _function_to_protocol(stmt: ast.FunctionDef, typevars: list[str]) -> Protoco
                 slice=ast.Tuple(elts=[ast.Name(typevar) for typevar in typevars]),
             )
         ],
-        body=([ast.Expr(value=ast.Constant(docstring, kind=None))] if docstring is not None else []) + [stmt],
+        body=(
+            [ast.Expr(value=ast.Constant(docstring, kind=None))]
+            if docstring is not None
+            else []
+        )
+        + [stmt],
         type_params=[],
     )  # type: ignore[call-arg]
     return ProtocolData(
@@ -65,9 +68,8 @@ def _function_to_protocol(stmt: ast.FunctionDef, typevars: list[str]) -> Protoco
         name=name + (f"[{', '.join(typevars)}]" if typevars else ""),
     )
 
-def _class_to_protocol(
-    stmt: ast.ClassDef, typevars: list[str]
-) -> ProtocolData:
+
+def _class_to_protocol(stmt: ast.ClassDef, typevars: list[str]) -> ProtocolData:
     typevars = [typevar for typevar in typevars if typevar in ast.unparse(stmt)]
     stmt.bases = [
         ast.Subscript(
@@ -80,6 +82,7 @@ def _class_to_protocol(
         typevars_used=typevars,
         name=stmt.name + (f"[{', '.join(typevars)}]" if typevars else ""),
     )
+
 
 def _attributes_to_protocol(
     name, attributes: list[tuple[str, str, str | None, list]], typevars: list[str]
@@ -129,7 +132,11 @@ def generate_all(
     for dir_path in (Path(cache_dir) / Path("src") / "array_api_stubs").glob("**/"):
         # get module bodies
         body_module = {
-            path.stem: ast.parse(path.read_text("utf-8")).body
+            path.stem: ast.parse(
+                path.read_text("utf-8")
+                .replace("Dtype", "dtype")
+                .replace("Device", "device")
+            ).body
             for path in dir_path.rglob("*.py")
         }
         generate(body_module, Path(out_path) / dir_path.name / out_name)
@@ -176,7 +183,7 @@ def generate(body_module: Mapping[str, list[ast.stmt]], out_path: Path) -> None:
             level=0,
         ),
     )
-    
+
     for typevar in typevars:
         out.body.append(
             ast.Assign(
@@ -202,6 +209,8 @@ def generate(body_module: Mapping[str, list[ast.stmt]], out_path: Path) -> None:
                 module_attributes[submodule].append(
                     (b.name, data.name, None, data.typevars_used)
                 )
+                if "alias" in (ast.get_docstring(b) or ""):
+                    continue
                 out.body.append(data.stmt)
             elif isinstance(b, ast.Assign):
                 if submodule == "_types":
