@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.2-rc.1 (2025-06-16)
+
+### Bug fixes
+
+- Make dependencies optional ([`2320acf`](https://github.com/34j/types-array-api/commit/2320acfc0c2a82b235e73669b40f01743740934c))
+
 ## v1.1.1 (2025-06-16)
 
 ### Bug fixes
