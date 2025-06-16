@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.1.0-rc.1 (2025-06-16)
+
+### Features
+
+- Rename package ([`e599909`](https://github.com/34j/types-array-api/commit/e599909a1e8daca6a9c49e7bf43987e85a26c081))
+- Rename package ([`132e5f0`](https://github.com/34j/types-array-api/commit/132e5f076607e1d87141dc5cee4e8df6cbf62523))
+
 ## v1.0.0 (2025-06-13)
 
 ### Documentation
