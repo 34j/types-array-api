@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.0 (2025-06-16)
+
+### Features
+
+- Rename package ([`f32f717`](https://github.com/34j/types-array-api/commit/f32f7173deb4623e5df17f71c718d2567b53b260))
+
 ## v1.0.0 (2025-06-13)
 
 ### Documentation
