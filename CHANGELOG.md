@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.1 (2025-06-16)
+
+### Bug fixes
+
+- Fix multiple issues ([`e35e59f`](https://github.com/34j/types-array-api/commit/e35e59f148380741e13da347dbe5accca65cd774))
+
 ## v1.1.0 (2025-06-16)
 
 ### Features
