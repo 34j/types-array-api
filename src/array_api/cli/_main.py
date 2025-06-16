@@ -60,7 +60,7 @@ def _function_to_protocol(stmt: ast.FunctionDef, typevars: Sequence[TypeVarInfo]
     """
     stmt = deepcopy(stmt)
     name = stmt.name
-    docstring = ast.get_docstring(stmt)
+    docstring = ast.get_docstring(stmt, False)
     stmt.name = "__call__"
     stmt.body = [ast.Expr(value=ast.Constant(value=Ellipsis))]
     stmt.args.posonlyargs.insert(0, ast.arg(arg="self"))
@@ -79,7 +79,6 @@ def _function_to_protocol(stmt: ast.FunctionDef, typevars: Sequence[TypeVarInfo]
         )
     args = ast.unparse(stmt.args) + (ast.unparse(stmt.returns) if stmt.returns else "")
     typevars = [typevar for typevar in typevars if typevar.name in args]
-    typevars = sorted(typevars, key=lambda x: x.name)
 
     # Construct the protocol
     stmt_new = ast.ClassDef(
@@ -89,7 +88,7 @@ def _function_to_protocol(stmt: ast.FunctionDef, typevars: Sequence[TypeVarInfo]
         bases=[
             ast.Name(id="Protocol"),
         ],
-        body=([ast.Expr(value=ast.Constant(docstring, kind=None))] if docstring is not None else []) + [stmt],
+        body=([ast.Expr(value=ast.Constant(docstring))] if docstring is not None else []) + [stmt],
         type_params=[ast.TypeVar(name=t.name, bound=ast.Name(id=t.bound) if t.bound else None) for t in typevars],
     )
     return ProtocolData(
@@ -117,7 +116,6 @@ def _class_to_protocol(stmt: ast.ClassDef, typevars: Sequence[TypeVarInfo]) -> P
     """
     unp = ast.unparse(stmt)
     typevars = [typevar for typevar in typevars if typevar.name in unp]
-    typevars = sorted(typevars, key=lambda x: x.name)
     stmt.bases = [
         ast.Name(id="Protocol"),
     ]
@@ -137,7 +135,7 @@ def _class_to_protocol(stmt: ast.ClassDef, typevars: Sequence[TypeVarInfo]) -> P
     )
 
 
-def _attributes_to_protocol(name: str, attributes: Sequence[ModuleAttributes], bases: list[ast.expr] | None = None, typevars: Sequence[TypeVarInfo] | None = None) -> ProtocolData:
+def _attributes_to_protocol(name: str, attributes: Sequence[ModuleAttributes], /, *, typevars: Sequence[TypeVarInfo], bases: list[ast.expr] | None = None, typevars_force: Sequence[TypeVarInfo] | None = None) -> ProtocolData:
     """
     Convert a list of module attributes to a Protocol class.
 
@@ -149,7 +147,9 @@ def _attributes_to_protocol(name: str, attributes: Sequence[ModuleAttributes], b
         The attributes to include in the Protocol class.
     bases : list[ast.expr] | None, optional
         The base classes for the Protocol class, by default None, which defaults to [Protocol].
-    typevars : Sequence[TypeVarInfo] | None, optional
+    typevars : Sequence[TypeVarInfo]
+        The type variables used in the class.
+    typevars_force : Sequence[TypeVarInfo] | None, optional
         The type variables used in the Protocol class, by default None, which defaults to the type variables used in the attributes.
 
     Returns
@@ -169,8 +169,8 @@ def _attributes_to_protocol(name: str, attributes: Sequence[ModuleAttributes], b
         )
         if a.docstring is not None:
             body.append(ast.Expr(value=ast.Constant(a.docstring)))
-    if typevars is None:
-        typevars = sorted({x for attribute in attributes for x in attribute.typevars_used}, key=lambda x: x.name)
+    if typevars_force is None:
+        typevars_force = [t for t in typevars if any(t in attr.typevars_used for attr in attributes)]
     return ProtocolData(
         stmt=ast.ClassDef(
             name=name,
@@ -181,9 +181,9 @@ def _attributes_to_protocol(name: str, attributes: Sequence[ModuleAttributes], b
                 ast.Name(id="Protocol"),
             ],
             body=body,
-            type_params=[ast.TypeVar(name=t.name, bound=ast.Name(id=t.bound) if t.bound else None) for t in typevars],
+            type_params=[ast.TypeVar(name=t.name, bound=ast.Name(id=t.bound) if t.bound else None) for t in typevars_force],
         ),
-        typevars_used=typevars,
+        typevars_used=typevars_force,
     )
 
 
@@ -199,30 +199,11 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
         The output path where the generated Protocol classes will be saved.
 
     """
-    body_typevars = body_module["_types"]
+    body_module["_types"]
     del body_module["__init__"]
 
     # Get all TypeVars
-    typevars: list[TypeVarInfo] = []
-    for b in body_typevars:
-        if isinstance(b, ast.Assign):
-            value = b.value
-            if isinstance(value, ast.Call):
-                if isinstance(value.func, ast.Name):
-                    if value.func.id == "TypeVar":
-                        if isinstance(value.args[0], ast.Constant):
-                            name = value.args[0].s
-                            typevars.append(
-                                TypeVarInfo(
-                                    name=name,
-                                    bound={
-                                        "array": "_array",
-                                    }.get(name, None),
-                                )
-                            )
-    typevars += [TypeVarInfo(name=x) for x in ["Capabilities", "DefaultDataTypes", "DataTypes"]]
-    typevars = sorted(typevars, key=lambda x: x.name)
-    print(list(typevars))
+    typevars = [TypeVarInfo("array", "_array"), TypeVarInfo("dtype"), TypeVarInfo("device"), TypeVarInfo("_T_co")]
 
     # Dict of module attributes per submodule
     module_attributes: defaultdict[str, list[ModuleAttributes]] = defaultdict(list)
@@ -255,6 +236,9 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
             elif isinstance(b, ast.Assign):
                 # _types.py contains Assigns which are not part of the Namespace
                 if submodule == "_types":
+                    if isinstance(b.targets[0], ast.Name) and b.targets[0].id in ["Capabilities", "DefaultDataTypes", "DataTypes"]:
+                        b = ast.parse(ast.unparse(b).replace("dtype", "Any"))  # type: ignore
+                        out.body = [b, *out.body]
                     continue
                 if not isinstance(b.targets[0], ast.Name):
                     continue
@@ -273,7 +257,7 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
                         if isinstance(docstring_expr.value, ast.Constant):
                             docstring = docstring_expr.value.value
                 # add to module attributes
-                module_attributes[submodule].append(ModuleAttributes(id, ast.Name(id="float"), docstring, []))
+                module_attributes[submodule].append(ModuleAttributes(id, ast.Name(id="array"), docstring, []))
             elif isinstance(b, ast.ClassDef):
                 data = _class_to_protocol(b, typevars)
                 # add to output, do not add to module attributes
@@ -286,13 +270,13 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
 
     # Manual addition
     for d in ["bool", "complex128", "complex64", "float32", "float64", "int16", "int32", "int64", "int8", "uint16", "uint32", "uint64", "uint8"]:
-        module_attributes[""].append(ModuleAttributes(d, ast.Name("float"), None, []))
+        module_attributes[""].append(ModuleAttributes(d, ast.Name("dtype"), None, []))
     module_attributes[""].append(ModuleAttributes("Device", ast.Name("device"), None, []))
 
     # Create Protocols for the main namespace
     OPTIONAL_SUBMODULES = ["fft", "linalg"]
     main_attributes = [attribute for submodule, attributes in module_attributes.items() for attribute in attributes if submodule not in OPTIONAL_SUBMODULES]
-    main_protocol = _attributes_to_protocol("ArrayNamespace", main_attributes).stmt
+    main_protocol = _attributes_to_protocol("ArrayNamespace", main_attributes, typevars=typevars).stmt
     out.body.append(main_protocol)
 
     # Create Protocols for fft and linalg
@@ -300,13 +284,13 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
     for submodule, attributes in module_attributes.items():
         if submodule not in OPTIONAL_SUBMODULES:
             continue
-        data = _attributes_to_protocol(submodule[0].upper() + submodule[1:] + "Namespace", attributes)
+        data = _attributes_to_protocol(submodule[0].upper() + submodule[1:] + "Namespace", attributes, typevars=typevars)
         out.body.append(data.stmt)
         if submodule in OPTIONAL_SUBMODULES:
             submodules.append(ModuleAttributes(submodule, data.name, None, [t for t in typevars if any(t in attr.typevars_used for attr in attributes)]))
 
     # Create Full Protocol for the main namespace
-    out.body.append(_attributes_to_protocol("ArrayNamespaceFull", submodules, [ast.Subscript(ast.Name("ArrayNamespace"), ast.Tuple([ast.Name(t.name) for t in main_protocol.type_params]))], typevars=[t for t in typevars if t.name in [s.name for s in main_protocol.type_params]]).stmt)  # type: ignore
+    out.body.append(_attributes_to_protocol("ArrayNamespaceFull", submodules, bases=[ast.Subscript(ast.Name("ArrayNamespace"), ast.Tuple([ast.Name(t.name) for t in main_protocol.type_params]))], typevars=typevars, typevars_force=[t for t in typevars if t.name in [s.name for s in main_protocol.type_params]]).stmt)  # type: ignore
 
     # Replace TypeVars because of the name conflicts like "array: array"
     for node in ast.walk(out):
@@ -345,8 +329,13 @@ from typing import (
     Tuple,
     List,
     runtime_checkable,
+    TypedDict
 )
+from types import EllipsisType as ellipsis
+from typing_extensions import CapsuleType as PyCapsule
+from collections.abc import Buffer as SupportsBufferProtocol
 inf = float("inf")
+
 """
         + text
     )
@@ -388,5 +377,5 @@ def generate_all(
         if "2021" in dir_path.name:
             continue
         # get module bodies
-        body_module = {path.stem: ast.parse(path.read_text("utf-8").replace("Dtype", "dtype").replace("Device", "device")).body for path in dir_path.rglob("*.py")}
+        body_module = {path.stem: ast.parse(path.read_text("utf-8").replace("self: array", "self").replace("Dtype", "dtype").replace("Device", "device")).body for path in dir_path.rglob("*.py")}
         generate(body_module, (Path(out_path) / dir_path.name).with_suffix(".py"))
