@@ -26,10 +26,12 @@ classifiers = [
 ]
 
 dependencies = [
-  "attrs>=25.3.0",
-  "rich>=10",
-  "typer>=0.15,<1",
   "typing-extensions>=4.14.0",
+]
+optional-dependencies.cli = [
+  "attrs>=25.3.0",
+  "rich>=14",
+  "typer>=0.16",
 ]
 urls."Bug Tracker" = "https://github.com/34j/types-array-api/issues"
 urls.Changelog = "https://github.com/34j/types-array-api/blob/main/CHANGELOG.md"
@@ -41,9 +43,12 @@ scripts.array-api = "array_api.cli:app"
 dev = [
   "array-api-compat>=1.11.2",
   "array-api-strict>=2.3.1",
+  "attrs>=25.3.0",
   "pytest>=8,<9",
   "pytest-cov>=6,<7",
+  "rich>=14.0.0",
   "ruff>=0.11.13",
+  "typer>=0.16.0",
 ]
 docs = [
   "furo>=2023.5.20; python_version>='3.11'",
