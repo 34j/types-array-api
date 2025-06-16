@@ -1,7 +1,7 @@
 # Python array API standard typing
 
 <p align="center">
-  <a href="https://github.com/34j/array-api/actions/workflows/ci.yml?query=branch%3Amain">
+  <a href="https://github.com/34j/types-array-api/actions/workflows/ci.yml?query=branch%3Amain">
     <img src="https://img.shields.io/github/actions/workflow/status/34j/array-api/ci.yml?branch=main&label=CI&logo=github&style=flat-square" alt="CI Status" >
   </a>
   <a href="https://array-api.readthedocs.io">
@@ -34,7 +34,7 @@
 
 **Documentation**: <a href="https://array-api.readthedocs.io" target="_blank">https://array-api.readthedocs.io </a>
 
-**Source Code**: <a href="https://github.com/34j/array-api" target="_blank">https://github.com/34j/array-api </a>
+**Source Code**: <a href="https://github.com/34j/types-array-api" target="_blank">https://github.com/34j/types-array-api </a>
 
 ---
 
@@ -45,7 +45,7 @@ Typing for array API and array-api-compat
 Install this via pip (or your favourite package manager):
 
 ```shell
-pip install array-api
+pip install types-array-api
 ```
 
 ## Usage
