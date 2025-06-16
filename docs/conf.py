@@ -15,7 +15,7 @@ from sphinx.ext import apidoc
 project = "Python array API standard typing"
 copyright = "2025, 34j"
 author = "34j"
-release = "1.1.0"
+release = "1.0.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -77,6 +77,7 @@ def run_apidoc(_: Any) -> None:
         [
             "--force",
             "--module-first",
+            "--private",
             "-o",
             docs_path.as_posix(),
             module_path.as_posix(),
