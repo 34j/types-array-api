@@ -272,7 +272,7 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
                         if isinstance(docstring_expr.value, ast.Constant):
                             docstring = docstring_expr.value.value
                 # add to module attributes
-                module_attributes[submodule].append(ModuleAttributes(id, ast.Name(id="float"), docstring, []))
+                module_attributes[submodule].append(ModuleAttributes(id, ast.Name(id="array"), docstring, []))
             elif isinstance(b, ast.ClassDef):
                 data = _class_to_protocol(b, typevars)
                 # add to output, do not add to module attributes
