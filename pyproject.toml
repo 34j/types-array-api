@@ -3,7 +3,7 @@ build-backend = "setuptools.build_meta"
 requires = [ "setuptools" ]
 
 [project]
-name = "array-api"
+name = "types-array-api"
 version = "1.0.0"
 description = "Typing for array API and array-api-compat"
 readme = "README.md"
@@ -30,10 +30,10 @@ dependencies = [
   "rich>=10",
   "typer>=0.15,<1",
 ]
-urls."Bug Tracker" = "https://github.com/34j/array-api/issues"
-urls.Changelog = "https://github.com/34j/array-api/blob/main/CHANGELOG.md"
+urls."Bug Tracker" = "https://github.com/34j/types-array-api/issues"
+urls.Changelog = "https://github.com/34j/types-array-api/blob/main/CHANGELOG.md"
 urls.documentation = "https://array-api.readthedocs.io"
-urls.repository = "https://github.com/34j/array-api"
+urls.repository = "https://github.com/34j/types-array-api"
 scripts.array-api = "array_api.cli:app"
 
 [dependency-groups]
