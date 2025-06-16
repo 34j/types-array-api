@@ -60,7 +60,7 @@ def _function_to_protocol(stmt: ast.FunctionDef, typevars: Sequence[TypeVarInfo]
     """
     stmt = deepcopy(stmt)
     name = stmt.name
-    docstring = ast.get_docstring(stmt)
+    docstring = ast.get_docstring(stmt, False)
     stmt.name = "__call__"
     stmt.body = [ast.Expr(value=ast.Constant(value=Ellipsis))]
     stmt.args.posonlyargs.insert(0, ast.arg(arg="self"))
