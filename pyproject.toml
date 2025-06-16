@@ -29,6 +29,7 @@ dependencies = [
   "attrs>=25.3.0",
   "rich>=10",
   "typer>=0.15,<1",
+  "typing-extensions>=4.14.0",
 ]
 urls."Bug Tracker" = "https://github.com/34j/types-array-api/issues"
 urls.Changelog = "https://github.com/34j/types-array-api/blob/main/CHANGELOG.md"

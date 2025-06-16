@@ -168,7 +168,7 @@ def _attributes_to_protocol(name: str, attributes: Sequence[ModuleAttributes], b
         if a.docstring is not None:
             body.append(ast.Expr(value=ast.Constant(a.docstring)))
     if typevars is None:
-        typevars = sorted({x for attribute in attributes for x in attribute.typevars_used}, key=lambda x: x.name)
+        typevars = sorted({x for attribute in attributes for x in attribute.typevars_used}, key=lambda x: x.name.lower())
     return ProtocolData(
         stmt=ast.ClassDef(
             name=name,
@@ -219,6 +219,8 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
                                 )
                             )
     typevars += [TypeVarInfo(name=x) for x in ["Capabilities", "DefaultDataTypes", "DataTypes"]]
+    typevars = [t for t in typevars if t.name not in ["ellipsis", "PyCapsule", "SupportsBufferProtocol"]]
+    print(typevars)
     typevars = sorted(typevars, key=lambda x: x.name.lower())
 
     # Dict of module attributes per submodule
@@ -283,7 +285,7 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
 
     # Manual addition
     for d in ["bool", "complex128", "complex64", "float32", "float64", "int16", "int32", "int64", "int8", "uint16", "uint32", "uint64", "uint8"]:
-        module_attributes[""].append(ModuleAttributes(d, ast.Name("float"), None, []))
+        module_attributes[""].append(ModuleAttributes(d, ast.Name("dtype"), None, []))
     module_attributes[""].append(ModuleAttributes("Device", ast.Name("device"), None, []))
 
     # Create Protocols for the main namespace
@@ -343,7 +345,11 @@ from typing import (
     List,
     runtime_checkable,
 )
+from types import EllipsisType as ellipsis
+from typing_extensions import CapsuleType as PyCapsule
+from collections.abc import Buffer as SupportsBufferProtocol
 inf = float("inf")
+
 """
         + text
     )
@@ -385,5 +391,5 @@ def generate_all(
         if "2021" in dir_path.name:
             continue
         # get module bodies
-        body_module = {path.stem: ast.parse(path.read_text("utf-8").replace("Dtype", "dtype").replace("Device", "device")).body for path in dir_path.rglob("*.py")}
+        body_module = {path.stem: ast.parse(path.read_text("utf-8").replace("self: array", "self").replace("Dtype", "dtype").replace("Device", "device")).body for path in dir_path.rglob("*.py")}
         generate(body_module, (Path(out_path) / dir_path.name).with_suffix(".py"))

@@ -1,14 +1,18 @@
 from __future__ import annotations
 
 from abc import abstractmethod
+from collections.abc import Buffer as SupportsBufferProtocol
 from collections.abc import Sequence
 from enum import Enum
+from types import EllipsisType as ellipsis
 from typing import (
     Any,
     Literal,
     Protocol,
     runtime_checkable,
 )
+
+from typing_extensions import CapsuleType as PyCapsule
 
 inf = float("inf")
 
@@ -58,13 +62,13 @@ class finfo_object[TDtype](Protocol):
 
 
 @runtime_checkable
-class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
-    def __init__(self: TArray) -> None:
+class Array[TArray: Array, TDevice, TDtype](Protocol):
+    def __init__(self) -> None:
         """Initialize the attributes for the array object class."""
         ...
 
     @property
-    def dtype(self: TArray) -> TDtype:
+    def dtype(self) -> TDtype:
         """
         Data type of the array elements.
 
@@ -77,7 +81,7 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         ...
 
     @property
-    def device(self: TArray) -> TDevice:
+    def device(self) -> TDevice:
         """
         Hardware device the array data resides on.
 
@@ -90,7 +94,7 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         ...
 
     @property
-    def mT(self: TArray) -> TArray:
+    def mT(self) -> TArray:
         """
         Transpose of a matrix (or a stack of matrices).
 
@@ -105,7 +109,7 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         ...
 
     @property
-    def ndim(self: TArray) -> int:
+    def ndim(self) -> int:
         """
         Number of array dimensions (axes).
 
@@ -118,7 +122,7 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         ...
 
     @property
-    def shape(self: TArray) -> tuple[int | None, ...]:
+    def shape(self) -> tuple[int | None, ...]:
         """
         Array dimensions.
 
@@ -138,7 +142,7 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         ...
 
     @property
-    def size(self: TArray) -> int | None:
+    def size(self) -> int | None:
         """
         Number of elements in an array.
 
@@ -158,7 +162,7 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         ...
 
     @property
-    def T(self: TArray) -> TArray:
+    def T(self) -> TArray:
         """
         Transpose of the array.
 
@@ -176,7 +180,7 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __abs__(self: TArray, /) -> TArray:
+    def __abs__(self, /) -> TArray:
         """
         Calculates the absolute value for each element of an array instance.
 
@@ -187,7 +191,7 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
 
         Parameters
         ----------
-        self: array
+        self
             array instance. Should have a numeric data type.
 
         Returns
@@ -207,13 +211,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __add__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
+    def __add__(self, other: int | float | complex | TArray, /) -> TArray:
         """
         Calculates the sum for each element of an array instance with the respective element of the array ``other``.
 
         Parameters
         ----------
-        self: array
+        self
             array instance (augend array). Should have a numeric data type.
         other: Union[int, float, array]
             addend array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
@@ -233,13 +237,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __and__(self: TArray, other: int | bool | TArray, /) -> TArray:
+    def __and__(self, other: int | bool | TArray, /) -> TArray:
         """
         Evaluates ``self_i & other_i`` for each element of an array instance with the respective element of the array ``other``.
 
         Parameters
         ----------
-        self: array
+        self
             array instance. Should have an integer or boolean data type.
         other: Union[int, bool, array]
             other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer or boolean data type.
@@ -256,13 +260,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __array_namespace__(self: TArray, /, *, api_version: str | None = None) -> Any:
+    def __array_namespace__(self, /, *, api_version: str | None = None) -> Any:
         """
         Returns an object that has all the array API functions on it.
 
         Parameters
         ----------
-        self: array
+        self
             array instance.
         api_version: Optional[str]
             string representing the version of the array API specification to be returned, in ``'YYYY.MM'`` form, for example, ``'2020.10'``. If it is ``None``, it should return the namespace corresponding to latest version of the array API specification.  If the given version is invalid or not implemented for the given module, an error should be raised. Default: ``None``.
@@ -275,13 +279,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __bool__(self: TArray, /) -> bool:
+    def __bool__(self, /) -> bool:
         """
         Converts a zero-dimensional array to a Python ``bool`` object.
 
         Parameters
         ----------
-        self: array
+        self
             zero-dimensional array instance.
 
         Returns
@@ -314,13 +318,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __complex__(self: TArray, /) -> complex:
+    def __complex__(self, /) -> complex:
         """
         Converts a zero-dimensional array to a Python ``complex`` object.
 
         Parameters
         ----------
-        self: array
+        self
             zero-dimensional array instance.
 
         Returns
@@ -356,13 +360,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __dlpack__(self: TArray, /, *, stream: int | Any | None = None, max_version: tuple[int, int] | None = None, dl_device: tuple[Enum, int] | None = None, copy: bool | None = None) -> TPycapsule:
+    def __dlpack__(self, /, *, stream: int | Any | None = None, max_version: tuple[int, int] | None = None, dl_device: tuple[Enum, int] | None = None, copy: bool | None = None) -> PyCapsule:
         """
         Exports the array for consumption by :func:`~array_api.from_dlpack` as a DLPack capsule.
 
         Parameters
         ----------
-        self: array
+        self
             array instance.
         stream: Optional[Union[int, Any]]
             for CUDA and ROCm, a Python integer representing a pointer to a stream, on devices that support streams. ``stream`` is provided by the consumer to the producer to instruct the producer to ensure that operations can safely be performed on the array (e.g., by inserting a dependency between streams via "wait for event"). The pointer must be an integer larger than or equal to ``-1`` (see below for allowed values on each platform). If ``stream`` is ``-1``, the value may be used by the consumer to signal "producer must not perform any synchronization". The ownership of the stream stays with the consumer. On CPU and other device types without streams, only ``None`` is accepted.
@@ -526,13 +530,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __dlpack_device__(self: TArray, /) -> tuple[Enum, int]:
+    def __dlpack_device__(self, /) -> tuple[Enum, int]:
         """
         Returns device type and device ID in DLPack format. Meant for use within :func:`~array_api.from_dlpack`.
 
         Parameters
         ----------
-        self: array
+        self
             array instance.
 
         Returns
@@ -556,13 +560,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __eq__(self: TArray, other: int | float | complex | bool | TArray, /) -> TArray:  # type: ignore[override]
+    def __eq__(self, other: int | float | complex | bool | TArray, /) -> TArray:  # type: ignore[override]
         """
         Computes the truth value of ``self_i == other_i`` for each element of an array instance with the respective element of the array ``other``.
 
         Parameters
         ----------
-        self: array
+        self
             array instance. May have any data type.
         other: Union[int, float, complex, bool, array]
             other array. Must be compatible with ``self`` (see :ref:`broadcasting`). May have any data type.
@@ -586,7 +590,7 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __float__(self: TArray, /) -> float:
+    def __float__(self, /) -> float:
         """
         Converts a zero-dimensional array to a Python ``float`` object.
 
@@ -595,7 +599,7 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
 
         Parameters
         ----------
-        self: array
+        self
             zero-dimensional array instance. Should have a real-valued or boolean data type. If ``self`` has a complex floating-point data type, the function must raise a ``TypeError``.
 
         Returns
@@ -625,7 +629,7 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __floordiv__(self: TArray, other: int | float | TArray, /) -> TArray:
+    def __floordiv__(self, other: int | float | TArray, /) -> TArray:
         """
         Evaluates ``self_i // other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -634,7 +638,7 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
 
         Parameters
         ----------
-        self: array
+        self
             array instance. Should have a real-valued data type.
         other: Union[int, float, array]
             other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a real-valued data type.
@@ -651,13 +655,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __ge__(self: TArray, other: int | float | TArray, /) -> TArray:
+    def __ge__(self, other: int | float | TArray, /) -> TArray:
         """
         Computes the truth value of ``self_i >= other_i`` for each element of an array instance with the respective element of the array ``other``.
 
         Parameters
         ----------
-        self: array
+        self
             array instance. Should have a real-valued data type.
         other: Union[int, float, array]
             other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a real-valued data type.
@@ -679,13 +683,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __getitem__(self: TArray, key: int | slice | TEllipsis | None | tuple[int | slice | TEllipsis | TArray | None, ...] | TArray, /) -> TArray:
+    def __getitem__(self, key: int | slice | ellipsis | None | tuple[int | slice | ellipsis | TArray | None, ...] | TArray, /) -> TArray:
         """
         Returns ``self[key]``.
 
         Parameters
         ----------
-        self: array
+        self
             array instance.
         key: Union[int, slice, ellipsis, None, Tuple[Union[int, slice, ellipsis, array,  None], ...], array]
             index key.
@@ -706,13 +710,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __gt__(self: TArray, other: int | float | TArray, /) -> TArray:
+    def __gt__(self, other: int | float | TArray, /) -> TArray:
         """
         Computes the truth value of ``self_i > other_i`` for each element of an array instance with the respective element of the array ``other``.
 
         Parameters
         ----------
-        self: array
+        self
             array instance. Should have a real-valued data type.
         other: Union[int, float, array]
             other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a real-valued data type.
@@ -734,7 +738,7 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __index__(self: TArray, /) -> int:
+    def __index__(self, /) -> int:
         """
         Converts a zero-dimensional integer array to a Python ``int`` object.
 
@@ -743,7 +747,7 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
 
         Parameters
         ----------
-        self: array
+        self
             zero-dimensional array instance. Should have an integer data type. If ``self`` has a floating-point data type, the function must raise a ``TypeError``.
 
         Returns
@@ -763,13 +767,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __int__(self: TArray, /) -> int:
+    def __int__(self, /) -> int:
         """
         Converts a zero-dimensional array to a Python ``int`` object.
 
         Parameters
         ----------
-        self: array
+        self
             zero-dimensional array instance. Should have a real-valued or boolean data type. If ``self`` has a complex floating-point data type, the function must raise a ``TypeError``.
 
         Returns
@@ -813,13 +817,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __invert__(self: TArray, /) -> TArray:
+    def __invert__(self, /) -> TArray:
         """
         Evaluates ``~self_i`` for each element of an array instance.
 
         Parameters
         ----------
-        self: array
+        self
             array instance. Should have an integer or boolean data type.
 
         Returns
@@ -834,13 +838,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __le__(self: TArray, other: int | float | TArray, /) -> TArray:
+    def __le__(self, other: int | float | TArray, /) -> TArray:
         """
         Computes the truth value of ``self_i <= other_i`` for each element of an array instance with the respective element of the array ``other``.
 
         Parameters
         ----------
-        self: array
+        self
             array instance. Should have a real-valued data type.
         other: Union[int, float, array]
             other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a real-valued data type.
@@ -862,13 +866,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __lshift__(self: TArray, other: int | TArray, /) -> TArray:
+    def __lshift__(self, other: int | TArray, /) -> TArray:
         """
         Evaluates ``self_i << other_i`` for each element of an array instance with the respective element  of the array ``other``.
 
         Parameters
         ----------
-        self: array
+        self
             array instance. Should have an integer data type.
         other: Union[int, array]
             other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer data type. Each element must be greater than or equal to ``0``.
@@ -885,13 +889,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __lt__(self: TArray, other: int | float | TArray, /) -> TArray:
+    def __lt__(self, other: int | float | TArray, /) -> TArray:
         """
         Computes the truth value of ``self_i < other_i`` for each element of an array instance with the respective element of the array ``other``.
 
         Parameters
         ----------
-        self: array
+        self
             array instance. Should have a real-valued data type.
         other: Union[int, float, array]
             other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a real-valued data type.
@@ -913,7 +917,7 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __matmul__(self: TArray, other: TArray, /) -> TArray:
+    def __matmul__(self, other: TArray, /) -> TArray:
         """
         Computes the matrix product.
 
@@ -922,7 +926,7 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
 
         Parameters
         ----------
-        self: array
+        self
             array instance. Should have a numeric data type. Must have at least one dimension. If ``self`` is one-dimensional having shape ``(M,)`` and ``other`` has more than one dimension, ``self`` must be promoted to a two-dimensional array by prepending ``1`` to its dimensions (i.e., must have shape ``(1, M)``). After matrix multiplication, the prepended dimensions in the returned array must be removed. If ``self`` has more than one dimension (including after vector-to-matrix promotion), ``shape(self)[:-2]`` must be compatible with ``shape(other)[:-2]`` (after vector-to-matrix promotion) (see :ref:`broadcasting`). If ``self`` has shape ``(..., M, K)``, the innermost two dimensions form matrices on which to perform matrix multiplication.
         other: array
             other array. Should have a numeric data type. Must have at least one dimension. If ``other`` is one-dimensional having shape ``(N,)`` and ``self`` has more than one dimension, ``other`` must be promoted to a two-dimensional array by appending ``1`` to its dimensions (i.e., must have shape ``(N, 1)``). After matrix multiplication, the appended dimensions in the returned array must be removed. If ``other`` has more than one dimension (including after vector-to-matrix promotion), ``shape(other)[:-2]`` must be compatible with ``shape(self)[:-2]`` (after vector-to-matrix promotion) (see :ref:`broadcasting`). If ``other`` has shape ``(..., K, N)``, the innermost two dimensions form matrices on which to perform matrix multiplication.
@@ -963,13 +967,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __mod__(self: TArray, other: int | float | TArray, /) -> TArray:
+    def __mod__(self, other: int | float | TArray, /) -> TArray:
         """
         Evaluates ``self_i % other_i`` for each element of an array instance with the respective element of the array ``other``.
 
         Parameters
         ----------
-        self: array
+        self
             array instance. Should have a real-valued data type.
         other: Union[int, float, array]
             other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a real-valued data type.
@@ -987,7 +991,7 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __mul__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
+    def __mul__(self, other: int | float | complex | TArray, /) -> TArray:
         """
         Calculates the product for each element of an array instance with the respective element of the array ``other``.
 
@@ -996,7 +1000,7 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
 
         Parameters
         ----------
-        self: array
+        self
             array instance. Should have a numeric data type.
         other: Union[int, float, complex, array]
             other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
@@ -1016,13 +1020,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __ne__(self: TArray, other: int | float | complex | bool | TArray, /) -> TArray:  # type: ignore[override]
+    def __ne__(self, other: int | float | complex | bool | TArray, /) -> TArray:  # type: ignore[override]
         """
         Computes the truth value of ``self_i != other_i`` for each element of an array instance with the respective element of the array ``other``.
 
         Parameters
         ----------
-        self: array
+        self
             array instance. May have any data type.
         other: Union[int, float, complex, bool, array]
             other array. Must be compatible with ``self`` (see :ref:`broadcasting`). May have any data type.
@@ -1046,7 +1050,7 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __neg__(self: TArray, /) -> TArray:
+    def __neg__(self, /) -> TArray:
         """
         Evaluates ``-self_i`` for each element of an array instance.
 
@@ -1058,7 +1062,7 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
 
         Parameters
         ----------
-        self: array
+        self
             array instance. Should have a numeric data type.
 
         Returns
@@ -1078,13 +1082,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __or__(self: TArray, other: int | bool | TArray, /) -> TArray:
+    def __or__(self, other: int | bool | TArray, /) -> TArray:
         """
         Evaluates ``self_i | other_i`` for each element of an array instance with the respective element of the array ``other``.
 
         Parameters
         ----------
-        self: array
+        self
             array instance. Should have an integer or boolean data type.
         other: Union[int, bool, array]
             other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer or boolean data type.
@@ -1101,13 +1105,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __pos__(self: TArray, /) -> TArray:
+    def __pos__(self, /) -> TArray:
         """
         Evaluates ``+self_i`` for each element of an array instance.
 
         Parameters
         ----------
-        self: array
+        self
             array instance. Should have a numeric data type.
 
         Returns
@@ -1127,13 +1131,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __pow__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
+    def __pow__(self, other: int | float | complex | TArray, /) -> TArray:
         """
         Calculates an implementation-dependent approximation of exponentiation by raising each element (the base) of an array instance to the power of ``other_i`` (the exponent), where ``other_i`` is the corresponding element of the array ``other``.
 
         Parameters
         ----------
-        self: array
+        self
             array instance whose elements correspond to the exponentiation base. Should have a numeric data type.
         other: Union[int, float, complex, array]
             other array whose elements correspond to the exponentiation exponent. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
@@ -1155,13 +1159,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __rshift__(self: TArray, other: int | TArray, /) -> TArray:
+    def __rshift__(self, other: int | TArray, /) -> TArray:
         """
         Evaluates ``self_i >> other_i`` for each element of an array instance with the respective element of the array ``other``.
 
         Parameters
         ----------
-        self: array
+        self
             array instance. Should have an integer data type.
         other: Union[int, array]
             other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer data type. Each element must be greater than or equal to ``0``.
@@ -1178,13 +1182,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __setitem__(self: TArray, key: int | slice | TEllipsis | tuple[int | slice | TEllipsis | TArray, ...] | TArray, value: int | float | complex | bool | TArray, /) -> None:
+    def __setitem__(self, key: int | slice | ellipsis | tuple[int | slice | ellipsis | TArray, ...] | TArray, value: int | float | complex | bool | TArray, /) -> None:
         """
         Sets ``self[key]`` to ``value``.
 
         Parameters
         ----------
-        self: array
+        self
             array instance.
         key: Union[int, slice, ellipsis, Tuple[Union[int, slice, ellipsis, array], ...], array]
             index key.
@@ -1205,13 +1209,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __sub__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
+    def __sub__(self, other: int | float | complex | TArray, /) -> TArray:
         """
         Calculates the difference for each element of an array instance with the respective element of the array ``other``.
 
         Parameters
         ----------
-        self: array
+        self
             array instance (minuend array). Should have a numeric data type.
         other: Union[int, float, complex, array]
             subtrahend array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
@@ -1232,13 +1236,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __truediv__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
+    def __truediv__(self, other: int | float | complex | TArray, /) -> TArray:
         """
         Evaluates ``self_i / other_i`` for each element of an array instance with the respective element of the array ``other``.
 
         Parameters
         ----------
-        self: array
+        self
             array instance. Should have a numeric data type.
         other: Union[int, float, complex, array]
             other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
@@ -1262,13 +1266,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def __xor__(self: TArray, other: int | bool | TArray, /) -> TArray:
+    def __xor__(self, other: int | bool | TArray, /) -> TArray:
         """
         Evaluates ``self_i ^ other_i`` for each element of an array instance with the respective element of the array ``other``.
 
         Parameters
         ----------
-        self: array
+        self
             array instance. Should have an integer or boolean data type.
         other: Union[int, bool, array]
             other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer or boolean data type.
@@ -1285,13 +1289,13 @@ class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
         """
         ...
 
-    def to_device(self: TArray, device: TDevice, /, *, stream: int | Any | None = None) -> TArray:
+    def to_device(self, device: TDevice, /, *, stream: int | Any | None = None) -> TArray:
         """
         Copy the array from the device on which it currently resides to the specified ``device``.
 
         Parameters
         ----------
-        self: array
+        self
             array instance.
         device: device
             a ``device`` object (see :ref:`device-support`).
@@ -2027,7 +2031,7 @@ class arange[TArray: Array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class asarray[TArray: Array, TDevice, TDtype, TSupportsbufferprotocol](Protocol):
+class asarray[TArray: Array, TDevice, TDtype](Protocol):
     r"""
     Convert the input to an array.
 
@@ -2078,7 +2082,7 @@ class asarray[TArray: Array, TDevice, TDtype, TSupportsbufferprotocol](Protocol)
     """
 
     @abstractmethod
-    def __call__(self, obj: TArray | bool | int | float | complex | NestedSequence | TSupportsbufferprotocol, /, *, dtype: TDtype | None = None, device: TDevice | None = None, copy: bool | None = None) -> TArray: ...
+    def __call__(self, obj: TArray | bool | int | float | complex | NestedSequence | SupportsBufferProtocol, /, *, dtype: TDtype | None = None, device: TDevice | None = None, copy: bool | None = None) -> TArray: ...
 
 
 @runtime_checkable
@@ -8677,7 +8681,7 @@ class unique_values[TArray: Array](Protocol):
 
 
 @runtime_checkable
-class ArrayNamespace[TCapabilities, TDatatypes, TDefaultdatatypes, TSupportsbufferprotocol, TArray: Array, TDevice, TDtype](Protocol):
+class ArrayNamespace[TArray: Array, TCapabilities, TDatatypes, TDefaultdatatypes, TDevice, TDtype](Protocol):
     astype: astype[TArray, TDevice, TDtype]
     "Copies an array to a specified data type irrespective of :ref:`type-promotion` rules.\n\n.. note::\n   Casting floating-point ``NaN`` and ``infinity`` values to integral data types is not specified and is implementation-dependent.\n\n.. note::\n   Casting a complex floating-point array to a real-valued data type should not be permitted.\n\n   Historically, when casting a complex floating-point array to a real-valued data type, libraries such as NumPy have discarded imaginary components such that, for a complex floating-point array ``x``, ``astype(x)`` equals ``astype(real(x))``). This behavior is considered problematic as the choice to discard the imaginary component is arbitrary and introduces more than one way to achieve the same outcome (i.e., for a complex floating-point array ``x``, ``astype(x)`` and ``astype(real(x))`` versus only ``astype(imag(x))``). Instead, in order to avoid ambiguity and to promote clarity, this specification requires that array API consumers explicitly express which component should be cast to a specified real-valued data type.\n\n.. note::\n   When casting a boolean input array to a real-valued data type, a value of ``True`` must cast to a real-valued number equal to ``1``, and a value of ``False`` must cast to a real-valued number equal to ``0``.\n\n   When casting a boolean input array to a complex floating-point data type, a value of ``True`` must cast to a complex number equal to ``1 + 0j``, and a value of ``False`` must cast to a complex number equal to ``0 + 0j``.\n\n.. note::\n   When casting a real-valued input array to ``bool``, a value of ``0`` must cast to ``False``, and a non-zero value must cast to ``True``.\n\n   When casting a complex floating-point array to ``bool``, a value of ``0 + 0j`` must cast to ``False``, and all other values must cast to ``True``.\n\nParameters\n----------\nx: array\n    array to cast.\ndtype: dtype\n    desired data type.\ncopy: bool\n    specifies whether to copy an array when the specified ``dtype`` matches the data type of the input array ``x``. If ``True``, a newly allocated array must always be returned (see :ref:`copy-keyword-argument`). If ``False`` and the specified ``dtype`` matches the data type of the input array, the input array must be returned; otherwise, a newly allocated array must be returned. Default: ``True``.\ndevice: Optional[device]\n    device on which to place the returned array. If ``device`` is ``None``, the output array device must be inferred from ``x``. Default: ``None``.\n\nReturns\n-------\nout: array\n    an array having the specified data type. The returned array must have the same shape as ``x``.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support.\n\n.. versionchanged:: 2023.12\n   Added device keyword argument support."
     can_cast: can_cast[TArray, TDtype]
@@ -8710,7 +8714,7 @@ class ArrayNamespace[TCapabilities, TDatatypes, TDefaultdatatypes, TSupportsbuff
     "Calculates the variance of the input array ``x``.\n\nParameters\n----------\nx: array\n    input array. Should have a real-valued floating-point data type.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis or axes along which variances must be computed. By default, the variance must be computed over the entire array. If a tuple of integers, variances must be computed over multiple axes. Default: ``None``.\ncorrection: Union[int, float]\n    degrees of freedom adjustment. Setting this parameter to a value other than ``0`` has the effect of adjusting the divisor during the calculation of the variance according to ``N-c`` where ``N`` corresponds to the total number of elements over which the variance is computed and ``c`` corresponds to the provided degrees of freedom adjustment. When computing the variance of a population, setting this parameter to ``0`` is the standard choice (i.e., the provided array contains data constituting an entire population). When computing the unbiased sample variance, setting this parameter to ``1`` is the standard choice (i.e., the provided array contains data sampled from a larger population; this is commonly referred to as Bessel's correction). Default: ``0``.\nkeepdims: bool\n    if ``True``, the reduced axes (dimensions) must be included in the result as singleton dimensions, and, accordingly, the result must be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) must not be included in the result. Default: ``False``.\n\nReturns\n-------\nout: array\n    if the variance was computed over the entire array, a zero-dimensional array containing the variance; otherwise, a non-zero-dimensional array containing the variances. The returned array must have the same data type as ``x``.\n\n\n.. note::\n   While this specification recommends that this function only accept input arrays having a real-valued floating-point data type, specification-compliant array libraries may choose to accept input arrays having an integer data type. While mixed data type promotion is implementation-defined, if the input array ``x`` has an integer data type, the returned array must have the default real-valued floating-point data type.\n\nNotes\n-----\n\n**Special Cases**\n\nLet ``N`` equal the number of elements over which to compute the variance.\n\n-   If ``N - correction`` is less than or equal to ``0``, the variance is ``NaN``.\n-   If ``x_i`` is ``NaN``, the variance is ``NaN`` (i.e., ``NaN`` values propagate)."
     arange: arange[TArray, TDevice, TDtype]
     "Returns evenly spaced values within the half-open interval ``[start, stop)`` as a one-dimensional array.\n\nParameters\n----------\nstart: Union[int, float]\n    if ``stop`` is specified, the start of interval (inclusive); otherwise, the end of the interval (exclusive). If ``stop`` is not specified, the default starting value is ``0``.\nstop: Optional[Union[int, float]]\n    the end of the interval. Default: ``None``.\nstep: Union[int, float]\n    the distance between two adjacent elements (``out[i+1] - out[i]``). Must not be ``0``; may be negative, this results in an empty array if ``stop >= start``. Default: ``1``.\ndtype: Optional[dtype]\n    output array data type. If ``dtype`` is ``None``, the output array data type must be inferred from ``start``, ``stop`` and ``step``. If those are all integers, the output array dtype must be the default integer dtype; if one or more have type ``float``, then the output array dtype must be the default real-valued floating-point data type. Default: ``None``.\ndevice: Optional[device]\n    device on which to place the created array. Default: ``None``.\n\n\n.. note::\n   This function cannot guarantee that the interval does not include the ``stop`` value in those cases where ``step`` is not an integer and floating-point rounding errors affect the length of the output array.\n\nReturns\n-------\nout: array\n    a one-dimensional array containing evenly spaced values. The length of the output array must be ``ceil((stop-start)/step)`` if ``stop - start`` and ``step`` have the same sign, and length ``0`` otherwise."
-    asarray: asarray[TArray, TDevice, TDtype, TSupportsbufferprotocol]
+    asarray: asarray[TArray, TDevice, TDtype]
     "Convert the input to an array.\n\nParameters\n----------\nobj: Union[array, bool, int, float, complex, NestedSequence[bool | int | float | complex], SupportsBufferProtocol]\n    object to be converted to an array. May be a Python scalar, a (possibly nested) sequence of Python scalars, or an object supporting the Python buffer protocol.\n\n    .. admonition:: Tip\n       :class: important\n\n       An object supporting the buffer protocol can be turned into a memoryview through ``memoryview(obj)``.\n\ndtype: Optional[dtype]\n    output array data type. If ``dtype`` is ``None``, the output array data type must be inferred from the data type(s) in ``obj``. If all input values are Python scalars, then, in order of precedence,\n\n    -   if all values are of type ``bool``, the output data type must be ``bool``.\n    -   if all values are of type ``int`` or are a mixture of ``bool`` and ``int``, the output data type must be the default integer data type.\n    -   if one or more values are ``complex`` numbers, the output data type must be the default complex floating-point data type.\n    -   if one or more values are ``float``\\s, the output data type must be the default real-valued floating-point data type.\n\n    Default: ``None``.\n\n    .. admonition:: Note\n       :class: note\n\n       If ``dtype`` is not ``None``, then array conversions should obey :ref:`type-promotion` rules. Conversions not specified according to :ref:`type-promotion` rules may or may not be permitted by a conforming array library. To perform an explicit cast, use :func:`array_api.astype`.\n\n    .. note::\n       If an input value exceeds the precision of the resolved output array data type, behavior is left unspecified and, thus, implementation-defined.\n\ndevice: Optional[device]\n    device on which to place the created array. If ``device`` is ``None`` and ``obj`` is an array, the output array device must be inferred from ``obj``. Default: ``None``.\ncopy: Optional[bool]\n    boolean indicating whether or not to copy the input. If ``True``, the function must always copy (see :ref:`copy-keyword-argument`). If ``False``, the function must never copy for input which supports the buffer protocol and must raise a ``ValueError`` in case a copy would be necessary. If ``None``, the function must reuse existing memory buffer if possible and copy otherwise. Default: ``None``.\n\nReturns\n-------\nout: array\n    an array containing the data from ``obj``.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support."
     empty: empty[TArray, TDevice, TDtype]
     "Returns an uninitialized array having a specified `shape`.\n\nParameters\n----------\nshape: Union[int, Tuple[int, ...]]\n    output array shape.\ndtype: Optional[dtype]\n    output array data type. If ``dtype`` is ``None``, the output array data type must be the default real-valued floating-point data type. Default: ``None``.\ndevice: Optional[device]\n    device on which to place the created array. Default: ``None``.\n\nReturns\n-------\nout: array\n    an array containing uninitialized data."
@@ -8956,19 +8960,19 @@ class ArrayNamespace[TCapabilities, TDatatypes, TDefaultdatatypes, TSupportsbuff
     "Returns the unique elements of an input array ``x`` and the indices from the set of unique elements that reconstruct ``x``.\n\n.. admonition:: Data-dependent output shape\n    :class: important\n\n    The shapes of two of the output arrays for this function depend on the data values in the input array; hence, array libraries which build computation graphs (e.g., JAX, Dask, etc.) may find this function difficult to implement without knowing array values. Accordingly, such libraries may choose to omit this function. See :ref:`data-dependent-output-shapes` section for more details.\n\n.. note::\n   Uniqueness should be determined based on value equality (see :func:`~array_api.equal`). For input arrays having floating-point data types, value-based equality implies the following behavior.\n\n   -   As ``nan`` values compare as ``False``, ``nan`` values should be considered distinct.\n   -   As complex floating-point values having at least one ``nan`` component compare as ``False``, complex floating-point values having ``nan`` components should be considered distinct.\n   -   As ``-0`` and ``+0`` compare as ``True``, signed zeros should not be considered distinct, and the corresponding unique element will be implementation-dependent (e.g., an implementation could choose to return ``-0`` if ``-0`` occurs before ``+0``).\n\n   As signed zeros are not distinct, using ``inverse_indices`` to reconstruct the input array is not guaranteed to return an array having the exact same values.\n\nParameters\n----------\nx: array\n    input array. If ``x`` has more than one dimension, the function must flatten ``x`` and return the unique elements of the flattened array.\n\nReturns\n-------\nout: Tuple[array, array]\n    a namedtuple ``(values, inverse_indices)`` whose\n\n    -   first element must have the field name ``values`` and must be a one-dimensional array containing the unique elements of ``x``. The array must have the same data type as ``x``.\n    -   second element must have the field name ``inverse_indices`` and must be an array containing the indices of ``values`` that reconstruct ``x``. The array must have the same shape as ``x`` and have the default array index data type.\n\n    .. note::\n       The order of unique elements is not specified and may vary between implementations.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support.\n\n.. versionchanged:: 2023.12\n   Clarified flattening behavior."
     unique_values: unique_values[TArray,]
     "Returns the unique elements of an input array ``x``.\n\n.. admonition:: Data-dependent output shape\n    :class: important\n\n    The shapes of two of the output arrays for this function depend on the data values in the input array; hence, array libraries which build computation graphs (e.g., JAX, Dask, etc.) may find this function difficult to implement without knowing array values. Accordingly, such libraries may choose to omit this function. See :ref:`data-dependent-output-shapes` section for more details.\n\n.. note::\n   Uniqueness should be determined based on value equality (see :func:`~array_api.equal`). For input arrays having floating-point data types, value-based equality implies the following behavior.\n\n   -   As ``nan`` values compare as ``False``, ``nan`` values should be considered distinct.\n   -   As complex floating-point values having at least one ``nan`` component compare as ``False``, complex floating-point values having ``nan`` components should be considered distinct.\n   -   As ``-0`` and ``+0`` compare as ``True``, signed zeros should not be considered distinct, and the corresponding unique element will be implementation-dependent (e.g., an implementation could choose to return ``-0`` if ``-0`` occurs before ``+0``).\n\nParameters\n----------\nx: array\n    input array. If ``x`` has more than one dimension, the function must flatten ``x`` and return the unique elements of the flattened array.\n\nReturns\n-------\nout: array\n    a one-dimensional array containing the set of unique elements in ``x``. The returned array must have the same data type as ``x``.\n\n    .. note::\n       The order of unique elements is not specified and may vary between implementations.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support.\n\n.. versionchanged:: 2023.12\n   Required that the output array must be one-dimensional."
-    bool: float
-    complex128: float
-    complex64: float
-    float32: float
-    float64: float
-    int16: float
-    int32: float
-    int64: float
-    int8: float
-    uint16: float
-    uint32: float
-    uint64: float
-    uint8: float
+    bool: TDtype
+    complex128: TDtype
+    complex64: TDtype
+    float32: TDtype
+    float64: TDtype
+    int16: TDtype
+    int32: TDtype
+    int64: TDtype
+    int8: TDtype
+    uint16: TDtype
+    uint32: TDtype
+    uint64: TDtype
+    uint8: TDtype
     Device: TDevice
 
 
@@ -9055,6 +9059,6 @@ class FftNamespace[TArray: Array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class ArrayNamespaceFull[TArray: Array, TCapabilities, TDatatypes, TDefaultdatatypes, TDevice, TDtype, TSupportsbufferprotocol](ArrayNamespace[TCapabilities, TDatatypes, TDefaultdatatypes, TSupportsbufferprotocol, TArray, TDevice, TDtype], Protocol):
+class ArrayNamespaceFull[TArray: Array, TCapabilities, TDatatypes, TDefaultdatatypes, TDevice, TDtype](ArrayNamespace[TArray, TCapabilities, TDatatypes, TDefaultdatatypes, TDevice, TDtype], Protocol):
     linalg: LinalgNamespace[TArray, TDtype]
     fft: FftNamespace[TArray, TDevice, TDtype]
