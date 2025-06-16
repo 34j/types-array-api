@@ -5,12 +5,7 @@ from collections.abc import Buffer as SupportsBufferProtocol
 from collections.abc import Sequence
 from enum import Enum
 from types import EllipsisType as ellipsis
-from typing import (
-    Any,
-    Literal,
-    Protocol,
-    runtime_checkable,
-)
+from typing import Any, Literal, Protocol, runtime_checkable
 
 from typing_extensions import CapsuleType as PyCapsule
 
@@ -47,7 +42,7 @@ class finfo_object[TDtype](Protocol):
 
 
 @runtime_checkable
-class Array[TArray: Array, TDevice, TDtype](Protocol):
+class Array[TArray: Array, TDtype, TDevice](Protocol):
     def __init__(self) -> None:
         """Initialize the attributes for the array object class."""
         ...
@@ -1690,7 +1685,7 @@ class var[TArray: Array](Protocol):
 
 
 @runtime_checkable
-class arange[TArray: Array, TDevice, TDtype](Protocol):
+class arange[TArray: Array, TDtype, TDevice](Protocol):
     """
     Returns evenly spaced values within the half-open interval ``[start, stop)`` as a one-dimensional array.
 
@@ -1723,7 +1718,7 @@ class arange[TArray: Array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class asarray[TArray: Array, TDevice, TDtype](Protocol):
+class asarray[TArray: Array, TDtype, TDevice](Protocol):
     r"""
     Convert the input to an array.
 
@@ -1778,7 +1773,7 @@ class asarray[TArray: Array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class empty[TArray: Array, TDevice, TDtype](Protocol):
+class empty[TArray: Array, TDtype, TDevice](Protocol):
     """
     Returns an uninitialized array having a specified `shape`.
 
@@ -1803,7 +1798,7 @@ class empty[TArray: Array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class empty_like[TArray: Array, TDevice, TDtype](Protocol):
+class empty_like[TArray: Array, TDtype, TDevice](Protocol):
     """
     Returns an uninitialized array with the same ``shape`` as an input array ``x``.
 
@@ -1828,7 +1823,7 @@ class empty_like[TArray: Array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class eye[TArray: Array, TDevice, TDtype](Protocol):
+class eye[TArray: Array, TDtype, TDevice](Protocol):
     r"""
     Returns a two-dimensional array with ones on the ``k``\\th diagonal and zeros elsewhere.
 
@@ -1892,7 +1887,7 @@ class from_dlpack[TArray: Array](Protocol):
 
 
 @runtime_checkable
-class full[TArray: Array, TDevice, TDtype](Protocol):
+class full[TArray: Array, TDtype, TDevice](Protocol):
     """
     Returns a new array having a specified ``shape`` and filled with ``fill_value``.
 
@@ -1934,7 +1929,7 @@ class full[TArray: Array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class full_like[TArray: Array, TDevice, TDtype](Protocol):
+class full_like[TArray: Array, TDtype, TDevice](Protocol):
     """
     Returns a new array filled with ``fill_value`` and having the same ``shape`` as an input array ``x``.
 
@@ -1974,7 +1969,7 @@ class full_like[TArray: Array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class linspace[TArray: Array, TDevice, TDtype](Protocol):
+class linspace[TArray: Array, TDtype, TDevice](Protocol):
     r"""
     Returns evenly spaced numbers over a specified interval.
 
@@ -2080,7 +2075,7 @@ class meshgrid[TArray: Array](Protocol):
 
 
 @runtime_checkable
-class ones[TArray: Array, TDevice, TDtype](Protocol):
+class ones[TArray: Array, TDtype, TDevice](Protocol):
     """
     Returns a new array having a specified ``shape`` and filled with ones.
 
@@ -2114,7 +2109,7 @@ class ones[TArray: Array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class ones_like[TArray: Array, TDevice, TDtype](Protocol):
+class ones_like[TArray: Array, TDtype, TDevice](Protocol):
     """
     Returns a new array filled with ones and having the same ``shape`` as an input array ``x``.
 
@@ -2206,7 +2201,7 @@ class triu[TArray: Array](Protocol):
 
 
 @runtime_checkable
-class zeros[TArray: Array, TDevice, TDtype](Protocol):
+class zeros[TArray: Array, TDtype, TDevice](Protocol):
     """
     Returns a new array having a specified ``shape`` and filled with zeros.
 
@@ -2231,7 +2226,7 @@ class zeros[TArray: Array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class zeros_like[TArray: Array, TDevice, TDtype](Protocol):
+class zeros_like[TArray: Array, TDtype, TDevice](Protocol):
     """
     Returns a new array filled with zeros and having the same ``shape`` as an input array ``x``.
 
@@ -7386,7 +7381,7 @@ class unique_values[TArray: Array](Protocol):
 
 
 @runtime_checkable
-class ArrayNamespace[TArray: Array, TDevice, TDtype](Protocol):
+class ArrayNamespace[TArray: Array, TDtype, TDevice](Protocol):
     astype: astype[TArray, TDtype]
     "Copies an array to a specified data type irrespective of :ref:`type-promotion` rules.\n\n.. note::\n   Casting floating-point ``NaN`` and ``infinity`` values to integral data types is not specified and is implementation-dependent.\n\n.. note::\n   Casting a complex floating-point array to a real-valued data type should not be permitted.\n\n   Historically, when casting a complex floating-point array to a real-valued data type, libraries such as NumPy have discarded imaginary components such that, for a complex floating-point array ``x``, ``astype(x)`` equals ``astype(real(x))``). This behavior is considered problematic as the choice to discard the imaginary component is arbitrary and introduces more than one way to achieve the same outcome (i.e., for a complex floating-point array ``x``, ``astype(x)`` and ``astype(real(x))`` versus only ``astype(imag(x))``). Instead, in order to avoid ambiguity and to promote clarity, this specification requires that array API consumers explicitly express which component should be cast to a specified real-valued data type.\n\n.. note::\n   When casting a boolean input array to a real-valued data type, a value of ``True`` must cast to a real-valued number equal to ``1``, and a value of ``False`` must cast to a real-valued number equal to ``0``.\n\n   When casting a boolean input array to a complex floating-point data type, a value of ``True`` must cast to a complex number equal to ``1 + 0j``, and a value of ``False`` must cast to a complex number equal to ``0 + 0j``.\n\n.. note::\n   When casting a real-valued input array to ``bool``, a value of ``0`` must cast to ``False``, and a non-zero value must cast to ``True``.\n\n   When casting a complex floating-point array to ``bool``, a value of ``0 + 0j`` must cast to ``False``, and all other values must cast to ``True``.\n\nParameters\n----------\nx: array\n    array to cast.\ndtype: dtype\n    desired data type.\ncopy: bool\n    specifies whether to copy an array when the specified ``dtype`` matches the data type of the input array ``x``. If ``True``, a newly allocated array must always be returned. If ``False`` and the specified ``dtype`` matches the data type of the input array, the input array must be returned; otherwise, a newly allocated array must be returned. Default: ``True``.\n\nReturns\n-------\nout: array\n    an array having the specified data type. The returned array must have the same shape as ``x``.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support."
     can_cast: can_cast[TArray, TDtype]
@@ -7413,37 +7408,37 @@ class ArrayNamespace[TArray: Array, TDevice, TDtype](Protocol):
     'Calculates the sum of the input array ``x``.\n\nParameters\n----------\nx: array\n    input array. Should have a numeric data type.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis or axes along which sums must be computed. By default, the sum must be computed over the entire array. If a tuple of integers, sums must be computed over multiple axes. Default: ``None``.\ndtype: Optional[dtype]\n    data type of the returned array. If ``None``,\n\n    -   if the default data type corresponding to the data type "kind" (integer, real-valued floating-point, or complex floating-point) of ``x`` has a smaller range of values than the data type of ``x`` (e.g., ``x`` has data type ``int64`` and the default data type is ``int32``, or ``x`` has data type ``uint64`` and the default data type is ``int64``), the returned array must have the same data type as ``x``.\n    -   if ``x`` has a real-valued floating-point data type, the returned array must have the default real-valued floating-point data type.\n    -   if ``x`` has a complex floating-point data type, the returned array must have the default complex floating-point data type.\n    -   if ``x`` has a signed integer data type (e.g., ``int16``), the returned array must have the default integer data type.\n    -   if ``x`` has an unsigned integer data type (e.g., ``uint16``), the returned array must have an unsigned integer data type having the same number of bits as the default integer data type (e.g., if the default integer data type is ``int32``, the returned array must have a ``uint32`` data type).\n\n    If the data type (either specified or resolved) differs from the data type of ``x``, the input array should be cast to the specified data type before computing the sum. Default: ``None``.\n\n    .. note::\n       keyword argument is intended to help prevent data type overflows.\n\nkeepdims: bool\n    if ``True``, the reduced axes (dimensions) must be included in the result as singleton dimensions, and, accordingly, the result must be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) must not be included in the result. Default: ``False``.\n\nReturns\n-------\nout: array\n    if the sum was computed over the entire array, a zero-dimensional array containing the sum; otherwise, an array containing the sums. The returned array must have a data type as described by the ``dtype`` parameter above.\n\nNotes\n-----\n\n**Special Cases**\n\nLet ``N`` equal the number of elements over which to compute the sum.\n\n-   If ``N`` is ``0``, the sum is ``0`` (i.e., the empty sum).\n\nFor both real-valued and complex floating-point operands, special cases must be handled as if the operation is implemented by successive application of :func:`~array_api.add`.\n\n.. versionchanged:: 2022.12\n   Added complex data type support.'
     var: var[TArray,]
     "Calculates the variance of the input array ``x``.\n\nParameters\n----------\nx: array\n    input array. Should have a real-valued floating-point data type.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis or axes along which variances must be computed. By default, the variance must be computed over the entire array. If a tuple of integers, variances must be computed over multiple axes. Default: ``None``.\ncorrection: Union[int, float]\n    degrees of freedom adjustment. Setting this parameter to a value other than ``0`` has the effect of adjusting the divisor during the calculation of the variance according to ``N-c`` where ``N`` corresponds to the total number of elements over which the variance is computed and ``c`` corresponds to the provided degrees of freedom adjustment. When computing the variance of a population, setting this parameter to ``0`` is the standard choice (i.e., the provided array contains data constituting an entire population). When computing the unbiased sample variance, setting this parameter to ``1`` is the standard choice (i.e., the provided array contains data sampled from a larger population; this is commonly referred to as Bessel's correction). Default: ``0``.\nkeepdims: bool\n    if ``True``, the reduced axes (dimensions) must be included in the result as singleton dimensions, and, accordingly, the result must be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) must not be included in the result. Default: ``False``.\n\nReturns\n-------\nout: array\n    if the variance was computed over the entire array, a zero-dimensional array containing the variance; otherwise, a non-zero-dimensional array containing the variances. The returned array must have the same data type as ``x``.\n\n\n.. note::\n   While this specification recommends that this function only accept input arrays having a real-valued floating-point data type, specification-compliant array libraries may choose to accept input arrays having an integer data type. While mixed data type promotion is implementation-defined, if the input array ``x`` has an integer data type, the returned array must have the default real-valued floating-point data type.\n\nNotes\n-----\n\n**Special Cases**\n\nLet ``N`` equal the number of elements over which to compute the variance.\n\n-   If ``N - correction`` is less than or equal to ``0``, the variance is ``NaN``.\n-   If ``x_i`` is ``NaN``, the variance is ``NaN`` (i.e., ``NaN`` values propagate)."
-    arange: arange[TArray, TDevice, TDtype]
+    arange: arange[TArray, TDtype, TDevice]
     "Returns evenly spaced values within the half-open interval ``[start, stop)`` as a one-dimensional array.\n\nParameters\n----------\nstart: Union[int, float]\n    if ``stop`` is specified, the start of interval (inclusive); otherwise, the end of the interval (exclusive). If ``stop`` is not specified, the default starting value is ``0``.\nstop: Optional[Union[int, float]]\n    the end of the interval. Default: ``None``.\nstep: Union[int, float]\n    the distance between two adjacent elements (``out[i+1] - out[i]``). Must not be ``0``; may be negative, this results in an empty array if ``stop >= start``. Default: ``1``.\ndtype: Optional[dtype]\n    output array data type. If ``dtype`` is ``None``, the output array data type must be inferred from ``start``, ``stop`` and ``step``. If those are all integers, the output array dtype must be the default integer dtype; if one or more have type ``float``, then the output array dtype must be the default real-valued floating-point data type. Default: ``None``.\ndevice: Optional[device]\n    device on which to place the created array. Default: ``None``.\n\n\n.. note::\n   This function cannot guarantee that the interval does not include the ``stop`` value in those cases where ``step`` is not an integer and floating-point rounding errors affect the length of the output array.\n\nReturns\n-------\nout: array\n    a one-dimensional array containing evenly spaced values. The length of the output array must be ``ceil((stop-start)/step)`` if ``stop - start`` and ``step`` have the same sign, and length ``0`` otherwise."
-    asarray: asarray[TArray, TDevice, TDtype]
+    asarray: asarray[TArray, TDtype, TDevice]
     "Convert the input to an array.\n\nParameters\n----------\nobj: Union[array, bool, int, float, complex, NestedSequence[bool | int | float | complex], SupportsBufferProtocol]\n    object to be converted to an array. May be a Python scalar, a (possibly nested) sequence of Python scalars, or an object supporting the Python buffer protocol.\n\n    .. admonition:: Tip\n       :class: important\n\n       An object supporting the buffer protocol can be turned into a memoryview through ``memoryview(obj)``.\n\ndtype: Optional[dtype]\n    output array data type. If ``dtype`` is ``None``, the output array data type must be inferred from the data type(s) in ``obj``. If all input values are Python scalars, then, in order of precedence,\n\n    -   if all values are of type ``bool``, the output data type must be ``bool``.\n    -   if all values are of type ``int`` or are a mixture of ``bool`` and ``int``, the output data type must be the default integer data type.\n    -   if one or more values are ``complex`` numbers, the output data type must be the default complex floating-point data type.\n    -   if one or more values are ``float``\\s, the output data type must be the default real-valued floating-point data type.\n\n    Default: ``None``.\n\n    .. admonition:: Note\n       :class: note\n\n       If ``dtype`` is not ``None``, then array conversions should obey :ref:`type-promotion` rules. Conversions not specified according to :ref:`type-promotion` rules may or may not be permitted by a conforming array library. To perform an explicit cast, use :func:`array_api.astype`.\n\n    .. note::\n       If an input value exceeds the precision of the resolved output array data type, behavior is left unspecified and, thus, implementation-defined.\n\ndevice: Optional[device]\n    device on which to place the created array. If ``device`` is ``None`` and ``obj`` is an array, the output array device must be inferred from ``obj``. Default: ``None``.\ncopy: Optional[bool]\n    boolean indicating whether or not to copy the input. If ``True``, the function must always copy. If ``False``, the function must never copy for input which supports the buffer protocol and must raise a ``ValueError`` in case a copy would be necessary. If ``None``, the function must reuse existing memory buffer if possible and copy otherwise. Default: ``None``.\n\nReturns\n-------\nout: array\n    an array containing the data from ``obj``.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support."
-    empty: empty[TArray, TDevice, TDtype]
+    empty: empty[TArray, TDtype, TDevice]
     "Returns an uninitialized array having a specified `shape`.\n\nParameters\n----------\nshape: Union[int, Tuple[int, ...]]\n    output array shape.\ndtype: Optional[dtype]\n    output array data type. If ``dtype`` is ``None``, the output array data type must be the default real-valued floating-point data type. Default: ``None``.\ndevice: Optional[device]\n    device on which to place the created array. Default: ``None``.\n\nReturns\n-------\nout: array\n    an array containing uninitialized data."
-    empty_like: empty_like[TArray, TDevice, TDtype]
+    empty_like: empty_like[TArray, TDtype, TDevice]
     "Returns an uninitialized array with the same ``shape`` as an input array ``x``.\n\nParameters\n----------\nx: array\n    input array from which to derive the output array shape.\ndtype: Optional[dtype]\n    output array data type. If ``dtype`` is ``None``, the output array data type must be inferred from ``x``. Default: ``None``.\ndevice: Optional[device]\n    device on which to place the created array. If ``device`` is ``None``, the output array device must be inferred from ``x``. Default: ``None``.\n\nReturns\n-------\nout: array\n    an array having the same shape as ``x`` and containing uninitialized data."
-    eye: eye[TArray, TDevice, TDtype]
+    eye: eye[TArray, TDtype, TDevice]
     "Returns a two-dimensional array with ones on the ``k``\\th diagonal and zeros elsewhere.\n\n.. note::\n   An output array having a complex floating-point data type must have the value ``1 + 0j`` along the ``k``\\th diagonal and ``0 + 0j`` elsewhere.\n\nParameters\n----------\nn_rows: int\n    number of rows in the output array.\nn_cols: Optional[int]\n    number of columns in the output array. If ``None``, the default number of columns in the output array is equal to ``n_rows``. Default: ``None``.\nk: int\n    index of the diagonal. A positive value refers to an upper diagonal, a negative value to a lower diagonal, and ``0`` to the main diagonal. Default: ``0``.\ndtype: Optional[dtype]\n    output array data type. If ``dtype`` is ``None``, the output array data type must be the default real-valued floating-point data type. Default: ``None``.\ndevice: Optional[device]\n    device on which to place the created array. Default: ``None``.\n\nReturns\n-------\nout: array\n    an array where all elements are equal to zero, except for the ``k``\\th diagonal, whose values are equal to one.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support."
     from_dlpack: from_dlpack[TArray,]
     "Returns a new array containing the data from another (array) object with a ``__dlpack__`` method.\n\nParameters\n----------\nx: object\n    input (array) object.\n\nReturns\n-------\nout: array\n    an array containing the data in `x`.\n\n    .. admonition:: Note\n       :class: note\n\n       The returned array may be either a copy or a view. See :ref:`data-interchange` for details."
-    full: full[TArray, TDevice, TDtype]
+    full: full[TArray, TDtype, TDevice]
     "Returns a new array having a specified ``shape`` and filled with ``fill_value``.\n\nParameters\n----------\nshape: Union[int, Tuple[int, ...]]\n    output array shape.\nfill_value: Union[bool, int, float, complex]\n    fill value.\ndtype: Optional[dtype]\n    output array data type. If ``dtype`` is ``None``, the output array data type must be inferred from ``fill_value`` according to the following rules:\n\n    - If the fill value is an ``int``, the output array data type must be the default integer data type.\n    - If the fill value is a ``float``, the output array data type must be the default real-valued floating-point data type.\n    - If the fill value is a ``complex`` number, the output array data type must be the default complex floating-point data type.\n    - If the fill value is a ``bool``, the output array must have a boolean data type. Default: ``None``.\n\n    .. note::\n       If the ``fill_value`` exceeds the precision of the resolved default output array data type, behavior is left unspecified and, thus, implementation-defined.\n\ndevice: Optional[device]\n    device on which to place the created array. Default: ``None``.\n\nReturns\n-------\nout: array\n    an array where every element is equal to ``fill_value``.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support."
-    full_like: full_like[TArray, TDevice, TDtype]
+    full_like: full_like[TArray, TDtype, TDevice]
     "Returns a new array filled with ``fill_value`` and having the same ``shape`` as an input array ``x``.\n\nParameters\n----------\nx: array\n    input array from which to derive the output array shape.\nfill_value: Union[bool, int, float, complex]\n    fill value.\ndtype: Optional[dtype]\n    output array data type. If ``dtype`` is ``None``, the output array data type must be inferred from ``x``. Default: ``None``.\n\n    .. note::\n       If the ``fill_value`` exceeds the precision of the resolved output array data type, behavior is unspecified and, thus, implementation-defined.\n\n    .. note::\n       If the ``fill_value`` has a data type which is not of the same data type kind (boolean, integer, or floating-point) as the resolved output array data type (see :ref:`type-promotion`), behavior is unspecified and, thus, implementation-defined.\n\ndevice: Optional[device]\n    device on which to place the created array. If ``device`` is ``None``, the output array device must be inferred from ``x``. Default: ``None``.\n\nReturns\n-------\nout: array\n    an array having the same shape as ``x`` and where every element is equal to ``fill_value``.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support."
-    linspace: linspace[TArray, TDevice, TDtype]
+    linspace: linspace[TArray, TDtype, TDevice]
     "Returns evenly spaced numbers over a specified interval.\n\nLet :math:`N` be the number of generated values (which is either ``num`` or ``num+1`` depending on whether ``endpoint`` is ``True`` or ``False``, respectively). For real-valued output arrays, the spacing between values is given by\n\n.. math::\n   \\Delta_{\\textrm{real}} = \\frac{\\textrm{stop} - \\textrm{start}}{N - 1}\n\nFor complex output arrays, let ``a = real(start)``, ``b = imag(start)``, ``c = real(stop)``, and ``d = imag(stop)``. The spacing between complex values is given by\n\n.. math::\n   \\Delta_{\\textrm{complex}} = \\frac{c-a}{N-1} + \\frac{d-b}{N-1} j\n\nParameters\n----------\nstart: Union[int, float, complex]\n    the start of the interval.\nstop: Union[int, float, complex]\n    the end of the interval. If ``endpoint`` is ``False``, the function must generate a sequence of ``num+1`` evenly spaced numbers starting with ``start`` and ending with ``stop`` and exclude the ``stop`` from the returned array such that the returned array consists of evenly spaced numbers over the half-open interval ``[start, stop)``. If ``endpoint`` is ``True``, the output array must consist of evenly spaced numbers over the closed interval ``[start, stop]``. Default: ``True``.\n\n    .. note::\n       The step size changes when `endpoint` is `False`.\n\nnum: int\n    number of samples. Must be a nonnegative integer value.\ndtype: Optional[dtype]\n    output array data type. Should be a floating-point data type. If ``dtype`` is ``None``,\n\n    -   if either ``start`` or ``stop`` is a ``complex`` number, the output data type must be the default complex floating-point data type.\n    -   if both ``start`` and ``stop`` are real-valued, the output data type must be the default real-valued floating-point data type.\n\n    Default: ``None``.\n\n    .. admonition:: Note\n       :class: note\n\n       If ``dtype`` is not ``None``, conversion of ``start`` and ``stop`` should obey :ref:`type-promotion` rules. Conversions not specified according to :ref:`type-promotion` rules may or may not be permitted by a conforming array library.\n\ndevice: Optional[device]\n    device on which to place the created array. Default: ``None``.\nendpoint: bool\n    boolean indicating whether to include ``stop`` in the interval. Default: ``True``.\n\nReturns\n-------\nout: array\n    a one-dimensional array containing evenly spaced values.\n\nNotes\n-----\n\n.. note::\n   While this specification recommends that this function only return arrays having a floating-point data type, specification-compliant array libraries may choose to support output arrays having an integer data type (e.g., due to backward compatibility concerns). However, function behavior when generating integer output arrays is unspecified and, thus, is implementation-defined. Accordingly, using this function to generate integer output arrays is not portable.\n\n.. note::\n   As mixed data type promotion is implementation-defined, behavior when ``start`` or ``stop`` exceeds the maximum safe integer of an output floating-point data type is implementation-defined. An implementation may choose to overflow or raise an exception.\n\n.. versionchanged:: 2022.12\n   Added complex data type support."
     meshgrid: meshgrid[TArray,]
     "Returns coordinate matrices from coordinate vectors.\n\nParameters\n----------\narrays: array\n    an arbitrary number of one-dimensional arrays representing grid coordinates. Each array should have the same numeric data type.\nindexing: Literal[\"xy\", \"ij\"]\n    Cartesian ``'xy'`` or matrix ``'ij'`` indexing of output. If provided zero or one one-dimensional vector(s) (i.e., the zero- and one-dimensional cases, respectively), the ``indexing`` keyword has no effect and should be ignored. Default: ``'xy'``.\n\nReturns\n-------\nout: List[array]\n    list of N arrays, where ``N`` is the number of provided one-dimensional input arrays. Each returned array must have rank ``N``. For ``N`` one-dimensional arrays having lengths ``Ni = len(xi)``,\n\n    - if matrix indexing ``ij``, then each returned array must have the shape ``(N1, N2, N3, ..., Nn)``.\n    - if Cartesian indexing ``xy``, then each returned array must have shape ``(N2, N1, N3, ..., Nn)``.\n\n    Accordingly, for the two-dimensional case with input one-dimensional arrays of length ``M`` and ``N``, if matrix indexing ``ij``, then each returned array must have shape ``(M, N)``, and, if Cartesian indexing ``xy``, then each returned array must have shape ``(N, M)``.\n\n    Similarly, for the three-dimensional case with input one-dimensional arrays of length ``M``, ``N``, and ``P``, if matrix indexing ``ij``, then each returned array must have shape ``(M, N, P)``, and, if Cartesian indexing ``xy``, then each returned array must have shape ``(N, M, P)``.\n\n    Each returned array should have the same data type as the input arrays.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support."
-    ones: ones[TArray, TDevice, TDtype]
+    ones: ones[TArray, TDtype, TDevice]
     "Returns a new array having a specified ``shape`` and filled with ones.\n\n.. note::\n   An output array having a complex floating-point data type must contain complex numbers having a real component equal to one and an imaginary component equal to zero (i.e., ``1 + 0j``).\n\nParameters\n----------\nshape: Union[int, Tuple[int, ...]]\n    output array shape.\ndtype: Optional[dtype]\n    output array data type. If ``dtype`` is ``None``, the output array data type must be the default real-valued floating-point data type. Default: ``None``.\ndevice: Optional[device]\n    device on which to place the created array. Default: ``None``.\n\nReturns\n-------\nout: array\n    an array containing ones.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support."
-    ones_like: ones_like[TArray, TDevice, TDtype]
+    ones_like: ones_like[TArray, TDtype, TDevice]
     "Returns a new array filled with ones and having the same ``shape`` as an input array ``x``.\n\n.. note::\n   An output array having a complex floating-point data type must contain complex numbers having a real component equal to one and an imaginary component equal to zero (i.e., ``1 + 0j``).\n\nParameters\n----------\nx: array\n    input array from which to derive the output array shape.\ndtype: Optional[dtype]\n    output array data type. If ``dtype`` is ``None``, the output array data type must be inferred from ``x``. Default: ``None``.\ndevice: Optional[device]\n    device on which to place the created array. If ``device`` is ``None``, the output array device must be inferred from ``x``. Default: ``None``.\n\nReturns\n-------\nout: array\n    an array having the same shape as ``x`` and filled with ones.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support."
     tril: tril[TArray,]
     "Returns the lower triangular part of a matrix (or a stack of matrices) ``x``.\n\n.. note::\n   The lower triangular part of the matrix is defined as the elements on and below the specified diagonal ``k``.\n\nParameters\n----------\nx: array\n    input array having shape ``(..., M, N)`` and whose innermost two dimensions form ``MxN`` matrices.\nk: int\n    diagonal above which to zero elements. If ``k = 0``, the diagonal is the main diagonal. If ``k < 0``, the diagonal is below the main diagonal. If ``k > 0``, the diagonal is above the main diagonal. Default: ``0``.\n\n    .. note::\n       The main diagonal is defined as the set of indices ``{(i, i)}`` for ``i`` on the interval ``[0, min(M, N) - 1]``.\n\nReturns\n-------\nout: array\n    an array containing the lower triangular part(s). The returned array must have the same shape and data type as ``x``. All elements above the specified diagonal ``k`` must be zeroed. The returned array should be allocated on the same device as ``x``."
     triu: triu[TArray,]
     "Returns the upper triangular part of a matrix (or a stack of matrices) ``x``.\n\n.. note::\n   The upper triangular part of the matrix is defined as the elements on and above the specified diagonal ``k``.\n\nParameters\n----------\nx: array\n    input array having shape ``(..., M, N)`` and whose innermost two dimensions form ``MxN`` matrices.\nk: int\n    diagonal below which to zero elements. If ``k = 0``, the diagonal is the main diagonal. If ``k < 0``, the diagonal is below the main diagonal. If ``k > 0``, the diagonal is above the main diagonal. Default: ``0``.\n\n    .. note::\n       The main diagonal is defined as the set of indices ``{(i, i)}`` for ``i`` on the interval ``[0, min(M, N) - 1]``.\n\nReturns\n-------\nout: array\n    an array containing the upper triangular part(s). The returned array must have the same shape and data type as ``x``. All elements below the specified diagonal ``k`` must be zeroed. The returned array should be allocated on the same device as ``x``."
-    zeros: zeros[TArray, TDevice, TDtype]
+    zeros: zeros[TArray, TDtype, TDevice]
     "Returns a new array having a specified ``shape`` and filled with zeros.\n\nParameters\n----------\nshape: Union[int, Tuple[int, ...]]\n    output array shape.\ndtype: Optional[dtype]\n    output array data type. If ``dtype`` is ``None``, the output array data type must be the default real-valued floating-point data type. Default: ``None``.\ndevice: Optional[device]\n    device on which to place the created array. Default: ``None``.\n\nReturns\n-------\nout: array\n    an array containing zeros."
-    zeros_like: zeros_like[TArray, TDevice, TDtype]
+    zeros_like: zeros_like[TArray, TDtype, TDevice]
     "Returns a new array filled with zeros and having the same ``shape`` as an input array ``x``.\n\nParameters\n----------\nx: array\n    input array from which to derive the output array shape.\ndtype: Optional[dtype]\n    output array data type. If ``dtype`` is ``None``, the output array data type must be inferred from ``x``. Default: ``None``.\ndevice: Optional[device]\n    device on which to place the created array. If ``device`` is ``None``, the output array device must be inferred from ``x``. Default: ``None``.\n\nReturns\n-------\nout: array\n    an array having the same shape as ``x`` and filled with zeros."
     argsort: argsort[TArray,]
     "Returns the indices that sort an array ``x`` along a specified axis.\n\n.. note::\n   For backward compatibility, conforming implementations may support complex numbers; however, inequality comparison of complex numbers is unspecified and thus implementation-dependent (see :ref:`complex-number-ordering`).\n\nParameters\n----------\nx : array\n    input array. Should have a real-valued data type.\naxis: int\n    axis along which to sort. If set to ``-1``, the function must sort along the last axis. Default: ``-1``.\ndescending: bool\n    sort order. If ``True``, the returned indices sort ``x`` in descending order (by value). If ``False``, the returned indices sort ``x`` in ascending order (by value). Default: ``False``.\nstable: bool\n    sort stability. If ``True``, the returned indices must maintain the relative order of ``x`` values which compare as equal. If ``False``, the returned indices may or may not maintain the relative order of ``x`` values which compare as equal (i.e., the relative order of ``x`` values which compare as equal is implementation-dependent). Default: ``True``.\n\nReturns\n-------\nout : array\n    an array of indices. The returned array must have the same shape as ``x``. The returned array must have the default array index data type."
@@ -7726,6 +7721,6 @@ class FftNamespace[TArray: Array, TDevice](Protocol):
 
 
 @runtime_checkable
-class ArrayNamespaceFull[TArray: Array, TDevice, TDtype](ArrayNamespace[TArray, TDevice, TDtype], Protocol):
+class ArrayNamespaceFull[TArray: Array, TDtype, TDevice](ArrayNamespace[TArray, TDtype, TDevice], Protocol):
     linalg: LinalgNamespace[TArray, TDtype]
     fft: FftNamespace[TArray, TDevice]
