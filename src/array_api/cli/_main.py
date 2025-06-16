@@ -79,7 +79,6 @@ def _function_to_protocol(stmt: ast.FunctionDef, typevars: Sequence[TypeVarInfo]
         )
     args = ast.unparse(stmt.args) + (ast.unparse(stmt.returns) if stmt.returns else "")
     typevars = [typevar for typevar in typevars if typevar.name in args]
-    typevars = sorted(typevars, key=lambda x: x.name)
 
     # Construct the protocol
     stmt_new = ast.ClassDef(
@@ -89,7 +88,7 @@ def _function_to_protocol(stmt: ast.FunctionDef, typevars: Sequence[TypeVarInfo]
         bases=[
             ast.Name(id="Protocol"),
         ],
-        body=([ast.Expr(value=ast.Constant(docstring, kind=None))] if docstring is not None else []) + [stmt],
+        body=([ast.Expr(value=ast.Constant(docstring))] if docstring is not None else []) + [stmt],
         type_params=[ast.TypeVar(name=t.name, bound=ast.Name(id=t.bound) if t.bound else None) for t in typevars],
     )
     return ProtocolData(
@@ -117,7 +116,6 @@ def _class_to_protocol(stmt: ast.ClassDef, typevars: Sequence[TypeVarInfo]) -> P
     """
     unp = ast.unparse(stmt)
     typevars = [typevar for typevar in typevars if typevar.name in unp]
-    typevars = sorted(typevars, key=lambda x: x.name)
     stmt.bases = [
         ast.Name(id="Protocol"),
     ]
@@ -221,8 +219,7 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
                                 )
                             )
     typevars += [TypeVarInfo(name=x) for x in ["Capabilities", "DefaultDataTypes", "DataTypes"]]
-    typevars = sorted(typevars, key=lambda x: x.name)
-    print(list(typevars))
+    typevars = sorted(typevars, key=lambda x: x.name.lower())
 
     # Dict of module attributes per submodule
     module_attributes: defaultdict[str, list[ModuleAttributes]] = defaultdict(list)

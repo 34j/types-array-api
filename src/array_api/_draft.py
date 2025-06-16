@@ -14,7 +14,7 @@ inf = float("inf")
 
 
 @runtime_checkable
-class Info[TCapabilities, TDatatypes, TDefaultdatatypes, TArray: Array, TDevice, TDtype](Protocol):
+class Info[TArray: Array, TCapabilities, TDatatypes, TDefaultdatatypes, TDevice, TDtype](Protocol):
     """Namespace returned by `__array_namespace_info__`."""
 
     def capabilities(self) -> TCapabilities: ...
@@ -58,7 +58,7 @@ class finfo_object[TDtype](Protocol):
 
 
 @runtime_checkable
-class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
+class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
     def __init__(self: TArray) -> None:
         """Initialize the attributes for the array object class."""
         ...
@@ -176,6 +176,86 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
+    def __abs__(self: TArray, /) -> TArray:
+        """
+        Calculates the absolute value for each element of an array instance.
+
+        For real-valued input arrays, the element-wise result has the same magnitude as the respective element in ``x`` but has positive sign.
+
+        .. note::
+           For signed integer data types, the absolute value of the minimum representable integer is implementation-dependent.
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have a numeric data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise absolute value. If ``self`` has a real-valued data type, the returned array must have the same data type as ``self``. If ``self`` has a complex floating-point data type, the returned arrayed must have a real-valued floating-point data type whose precision matches the precision of ``self`` (e.g., if ``self`` is ``complex128``, then the returned array must have a ``float64`` data type).
+
+        Notes
+        -----
+
+        .. note::
+           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.abs`.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __add__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
+        """
+        Calculates the sum for each element of an array instance with the respective element of the array ``other``.
+
+        Parameters
+        ----------
+        self: array
+            array instance (augend array). Should have a numeric data type.
+        other: Union[int, float, array]
+            addend array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise sums. The returned array must have a data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+        -   Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.add`.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __and__(self: TArray, other: int | bool | TArray, /) -> TArray:
+        """
+        Evaluates ``self_i & other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have an integer or boolean data type.
+        other: Union[int, bool, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer or boolean data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+        -   Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_and`.
+
+        """
+        ...
+
     def __array_namespace__(self: TArray, /, *, api_version: str | None = None) -> Any:
         """
         Returns an object that has all the array API functions on it.
@@ -191,6 +271,87 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         -------
         out: Any
             an object representing the array API namespace. It should have every top-level function defined in the specification as an attribute.
+
+        """
+        ...
+
+    def __bool__(self: TArray, /) -> bool:
+        """
+        Converts a zero-dimensional array to a Python ``bool`` object.
+
+        Parameters
+        ----------
+        self: array
+            zero-dimensional array instance.
+
+        Returns
+        -------
+        out: bool
+            a Python ``bool`` object representing the single element of the array.
+
+        Notes
+        -----
+        **Special cases**
+
+        For real-valued floating-point operands,
+
+        - If ``self`` is ``NaN``, the result is ``True``.
+        - If ``self`` is either ``+infinity`` or ``-infinity``, the result is ``True``.
+        - If ``self`` is either ``+0`` or ``-0``, the result is ``False``.
+
+        For complex floating-point operands, special cases must be handled as if the operation is implemented as the logical OR of ``bool(real(self))`` and ``bool(imag(self))``.
+
+        **Lazy implementations**
+
+        The Python language requires the return value to be of type ``bool``. Lazy implementations are therefore not able to return any kind of lazy/delayed object here and should raise a ``ValueError`` instead.
+
+        .. versionchanged:: 2022.12
+            Added boolean and complex data type support.
+
+        .. versionchanged:: 2023.12
+            Allowed lazy implementations to error.
+
+        """
+        ...
+
+    def __complex__(self: TArray, /) -> complex:
+        """
+        Converts a zero-dimensional array to a Python ``complex`` object.
+
+        Parameters
+        ----------
+        self: array
+            zero-dimensional array instance.
+
+        Returns
+        -------
+        out: complex
+            a Python ``complex`` object representing the single element of the array instance.
+
+        Notes
+        -----
+        **Special cases**
+
+        For boolean operands,
+
+        - If ``self`` is ``True``, the result is ``1+0j``.
+        - If ``self`` is ``False``, the result is ``0+0j``.
+
+        For real-valued floating-point operands,
+
+        - If ``self`` is ``NaN``, the result is ``NaN + NaN j``.
+        - If ``self`` is ``+infinity``, the result is ``+infinity + 0j``.
+        - If ``self`` is ``-infinity``, the result is ``-infinity + 0j``.
+        - If ``self`` is a finite number, the result is ``self + 0j``.
+
+        **Lazy implementations**
+
+        The Python language requires the return value to be of type ``complex``. Lazy implementations are therefore not able to return any kind of lazy/delayed object here and should raise a ``ValueError`` instead.
+
+        .. versionadded:: 2022.12
+
+        .. versionchanged:: 2023.12
+            Allowed lazy implementations to error.
 
         """
         ...
@@ -395,611 +556,6 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def to_device(self: TArray, device: TDevice, /, *, stream: int | Any | None = None) -> TArray:
-        """
-        Copy the array from the device on which it currently resides to the specified ``device``.
-
-        Parameters
-        ----------
-        self: array
-            array instance.
-        device: device
-            a ``device`` object (see :ref:`device-support`).
-        stream: Optional[Union[int, Any]]
-            stream object to use during copy. In addition to the types supported in :meth:`array.__dlpack__`, implementations may choose to support any library-specific stream object with the caveat that any code using such an object would not be portable.
-
-        Returns
-        -------
-        out: array
-            an array with the same data and data type as ``self`` and located on the specified ``device``.
-
-
-        Notes
-        -----
-        -   When a provided ``device`` object corresponds to the same device on which an array instance resides, implementations may choose to perform an explicit copy or return ``self``.
-        -   If ``stream`` is provided, the copy operation should be enqueued on the provided ``stream``; otherwise, the copy operation should be enqueued on the default stream/queue. Whether the copy is performed synchronously or asynchronously is implementation-dependent. Accordingly, if synchronization is required to guarantee data safety, this must be clearly explained in a conforming array library's documentation.
-
-        .. versionchanged:: 2023.12
-           Clarified behavior when a provided ``device`` object corresponds to the device on which an array instance resides.
-
-        """
-        ...
-
-    def __getitem__(self: TArray, key: int | slice | TEllipsis | None | tuple[int | slice | TEllipsis | TArray | None, ...] | TArray, /) -> TArray:
-        """
-        Returns ``self[key]``.
-
-        Parameters
-        ----------
-        self: array
-            array instance.
-        key: Union[int, slice, ellipsis, None, Tuple[Union[int, slice, ellipsis, array,  None], ...], array]
-            index key.
-
-        Returns
-        -------
-        out: array
-            an array containing the accessed value(s). The returned array must have the same data type as ``self``.
-
-        Notes
-        -----
-        -   See :ref:`indexing` for details on supported indexing semantics.
-        -   When ``__getitem__`` is defined on an object, Python will automatically define iteration (i.e., the behavior from ``iter(x)``) as  ``x[0]``, ``x[1]``, ..., ``x[N-1]``. This can also be implemented directly by defining ``__iter__``. Therefore, for a one-dimensional array ``x``, iteration should produce a sequence of zero-dimensional arrays ``x[0]``, ``x[1]``, ..., ``x[N-1]``, where ``N`` is the number of elements in the array. Iteration behavior for arrays having zero dimensions or more than one dimension is unspecified and thus implementation-defined.
-
-        .. versionchanged:: 2024.12
-            Clarified that iteration is defined for one-dimensional arrays.
-
-        """
-        ...
-
-    def __setitem__(self: TArray, key: int | slice | TEllipsis | tuple[int | slice | TEllipsis | TArray, ...] | TArray, value: int | float | complex | bool | TArray, /) -> None:
-        """
-        Sets ``self[key]`` to ``value``.
-
-        Parameters
-        ----------
-        self: array
-            array instance.
-        key: Union[int, slice, ellipsis, Tuple[Union[int, slice, ellipsis, array], ...], array]
-            index key.
-        value: Union[int, float, complex, bool, array]
-            value(s) to set. Must be compatible with ``self[key]`` (see :ref:`broadcasting`).
-
-        Notes
-        -----
-        -   See :ref:`indexing` for details on supported indexing semantics.
-
-            .. note::
-               Indexing semantics when ``key`` is an integer array or a tuple of integers and integer arrays is currently unspecified and thus implementation-defined. This will be revisited in a future revision of this standard.
-
-        -   Setting array values must not affect the data type of ``self``.
-        -   When ``value`` is a Python scalar (i.e., ``int``, ``float``, ``complex``, ``bool``), behavior must follow specification guidance on mixing arrays with Python scalars (see :ref:`type-promotion`).
-        -   When ``value`` is an ``array`` of a different data type than ``self``, how values are cast to the data type of ``self`` is implementation defined.
-
-        """
-        ...
-
-    def __add__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
-        """
-        Calculates the sum for each element of an array instance with the respective element of the array ``other``.
-
-        Parameters
-        ----------
-        self: array
-            array instance (augend array). Should have a numeric data type.
-        other: Union[int, float, array]
-            addend array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise sums. The returned array must have a data type determined by :ref:`type-promotion`.
-
-        Notes
-        -----
-        -   Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.add`.
-
-        .. versionchanged:: 2022.12
-            Added complex data type support.
-
-        """
-        ...
-
-    def __sub__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
-        """
-        Calculates the difference for each element of an array instance with the respective element of the array ``other``.
-
-        Parameters
-        ----------
-        self: array
-            array instance (minuend array). Should have a numeric data type.
-        other: Union[int, float, complex, array]
-            subtrahend array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise differences. The returned array must have a data type determined by :ref:`type-promotion`.
-
-        Notes
-        -----
-        -   Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.subtract`.
-        -   The result of ``self_i - other_i`` must be the same as ``self_i + (-other_i)`` and must be governed by the same floating-point rules as addition (see :meth:`array.__add__`).
-
-        .. versionchanged:: 2022.12
-            Added complex data type support.
-
-        """
-        ...
-
-    def __mul__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
-        """
-        Calculates the product for each element of an array instance with the respective element of the array ``other``.
-
-        .. note::
-           Floating-point multiplication is not always associative due to finite precision.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have a numeric data type.
-        other: Union[int, float, complex, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise products. The returned array must have a data type determined by :ref:`type-promotion`.
-
-        Notes
-        -----
-        -   Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.multiply`.
-
-        .. versionchanged:: 2022.12
-            Added complex data type support.
-
-        """
-        ...
-
-    def __matmul__(self: TArray, other: TArray, /) -> TArray:
-        """
-        Computes the matrix product.
-
-        .. note::
-           The ``matmul`` function must implement the same semantics as the built-in ``@`` operator (see `PEP 465 <https://www.python.org/dev/peps/pep-0465>`_).
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have a numeric data type. Must have at least one dimension. If ``self`` is one-dimensional having shape ``(M,)`` and ``other`` has more than one dimension, ``self`` must be promoted to a two-dimensional array by prepending ``1`` to its dimensions (i.e., must have shape ``(1, M)``). After matrix multiplication, the prepended dimensions in the returned array must be removed. If ``self`` has more than one dimension (including after vector-to-matrix promotion), ``shape(self)[:-2]`` must be compatible with ``shape(other)[:-2]`` (after vector-to-matrix promotion) (see :ref:`broadcasting`). If ``self`` has shape ``(..., M, K)``, the innermost two dimensions form matrices on which to perform matrix multiplication.
-        other: array
-            other array. Should have a numeric data type. Must have at least one dimension. If ``other`` is one-dimensional having shape ``(N,)`` and ``self`` has more than one dimension, ``other`` must be promoted to a two-dimensional array by appending ``1`` to its dimensions (i.e., must have shape ``(N, 1)``). After matrix multiplication, the appended dimensions in the returned array must be removed. If ``other`` has more than one dimension (including after vector-to-matrix promotion), ``shape(other)[:-2]`` must be compatible with ``shape(self)[:-2]`` (after vector-to-matrix promotion) (see :ref:`broadcasting`). If ``other`` has shape ``(..., K, N)``, the innermost two dimensions form matrices on which to perform matrix multiplication.
-
-
-        .. note::
-           If either ``x1`` or ``x2`` has a complex floating-point data type, neither argument must be complex-conjugated or transposed. If conjugation and/or transposition is desired, these operations should be explicitly performed prior to computing the matrix product.
-
-        Returns
-        -------
-        out: array
-            -   if both ``self`` and ``other`` are one-dimensional arrays having shape ``(N,)``, a zero-dimensional array containing the inner product as its only element.
-            -   if ``self`` is a two-dimensional array having shape ``(M, K)`` and ``other`` is a two-dimensional array having shape ``(K, N)``, a two-dimensional array containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ and having shape ``(M, N)``.
-            -   if ``self`` is a one-dimensional array having shape ``(K,)`` and ``other`` is an array having shape ``(..., K, N)``, an array having shape ``(..., N)`` (i.e., prepended dimensions during vector-to-matrix promotion must be removed) and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_.
-            -   if ``self`` is an array having shape ``(..., M, K)`` and ``other`` is a one-dimensional array having shape ``(K,)``, an array having shape ``(..., M)`` (i.e., appended dimensions during vector-to-matrix promotion must be removed) and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_.
-            -   if ``self`` is a two-dimensional array having shape ``(M, K)`` and ``other`` is an array having shape ``(..., K, N)``, an array having shape ``(..., M, N)`` and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.
-            -   if ``self`` is an array having shape ``(..., M, K)`` and ``other`` is a two-dimensional array having shape ``(K, N)``, an array having shape ``(..., M, N)`` and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.
-            -   if either ``self`` or ``other`` has more than two dimensions, an array having a shape determined by :ref:`broadcasting` ``shape(self)[:-2]`` against ``shape(other)[:-2]`` and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.
-            -   The returned array must have a data type determined by :ref:`type-promotion`.
-
-        Notes
-        -----
-
-        .. note::
-           Results must equal the results returned by the equivalent function :func:`~array_api.matmul`.
-
-        **Raises**
-
-        - if either ``self`` or ``other`` is a zero-dimensional array.
-        - if ``self`` is a one-dimensional array having shape ``(K,)``, ``other`` is a one-dimensional array having shape ``(L,)``, and ``K != L``.
-        - if ``self`` is a one-dimensional array having shape ``(K,)``, ``other`` is an array having shape ``(..., L, N)``, and ``K != L``.
-        - if ``self`` is an array having shape ``(..., M, K)``, ``other`` is a one-dimensional array having shape ``(L,)``, and ``K != L``.
-        - if ``self`` is an array having shape ``(..., M, K)``, ``other`` is an array having shape ``(..., L, N)``, and ``K != L``.
-
-        .. versionchanged:: 2022.12
-            Added complex data type support.
-
-        """
-        ...
-
-    def __truediv__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
-        """
-        Evaluates ``self_i / other_i`` for each element of an array instance with the respective element of the array ``other``.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have a numeric data type.
-        other: Union[int, float, complex, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. The returned array should have a floating-point data type determined by :ref:`type-promotion`.
-
-        Notes
-        -----
-        -   Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.divide`.
-
-        -   If one or both of ``self`` and ``other`` have integer data types, the result is implementation-dependent, as type promotion between data type "kinds" (e.g., integer versus floating-point) is unspecified.
-
-            Specification-compliant libraries may choose to raise an error or return an array containing the element-wise results. If an array is returned, the array must have a real-valued floating-point data type.
-
-        .. versionchanged:: 2022.12
-            Added complex data type support.
-
-        """
-        ...
-
-    def __floordiv__(self: TArray, other: int | float | TArray, /) -> TArray:
-        """
-        Evaluates ``self_i // other_i`` for each element of an array instance with the respective element of the array ``other``.
-
-        .. note::
-           For input arrays which promote to an integer data type, the result of division by zero is unspecified and thus implementation-defined.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have a real-valued data type.
-        other: Union[int, float, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a real-valued data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
-
-
-        .. note::
-           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.floor_divide`.
-
-        """
-        ...
-
-    def __mod__(self: TArray, other: int | float | TArray, /) -> TArray:
-        """
-        Evaluates ``self_i % other_i`` for each element of an array instance with the respective element of the array ``other``.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have a real-valued data type.
-        other: Union[int, float, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a real-valued data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. Each element-wise result must have the same sign as the respective element ``other_i``. The returned array must have a real-valued floating-point data type determined by :ref:`type-promotion`.
-
-        Notes
-        -----
-        -   Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.remainder`.
-        -   For input arrays which promote to an integer data type, the result of division by zero is unspecified and thus implementation-defined.
-
-        """
-        ...
-
-    def __pow__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
-        """
-        Calculates an implementation-dependent approximation of exponentiation by raising each element (the base) of an array instance to the power of ``other_i`` (the exponent), where ``other_i`` is the corresponding element of the array ``other``.
-
-        Parameters
-        ----------
-        self: array
-            array instance whose elements correspond to the exponentiation base. Should have a numeric data type.
-        other: Union[int, float, complex, array]
-            other array whose elements correspond to the exponentiation exponent. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
-
-        Notes
-        -----
-        -   Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.pow`.
-        -   If both ``self`` and ``other`` have integer data types, the result of ``__pow__`` when `other_i` is negative (i.e., less than zero) is unspecified and thus implementation-dependent.
-        -   If ``self`` has an integer data type and ``other`` has a floating-point data type, behavior is implementation-dependent, as type promotion between data type "kinds" (e.g., integer versus floating-point) is unspecified.
-
-        .. versionchanged:: 2022.12
-            Added complex data type support.
-
-        """
-        ...
-
-    def __lshift__(self: TArray, other: int | TArray, /) -> TArray:
-        """
-        Evaluates ``self_i << other_i`` for each element of an array instance with the respective element  of the array ``other``.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have an integer data type.
-        other: Union[int, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer data type. Each element must be greater than or equal to ``0``.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. The returned array must have the same data type as ``self``.
-
-        Notes
-        -----
-        -   Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_left_shift`.
-
-        """
-        ...
-
-    def __rshift__(self: TArray, other: int | TArray, /) -> TArray:
-        """
-        Evaluates ``self_i >> other_i`` for each element of an array instance with the respective element of the array ``other``.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have an integer data type.
-        other: Union[int, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer data type. Each element must be greater than or equal to ``0``.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. The returned array must have the same data type as ``self``.
-
-        Notes
-        -----
-        -   Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_right_shift`.
-
-        """
-        ...
-
-    def __and__(self: TArray, other: int | bool | TArray, /) -> TArray:
-        """
-        Evaluates ``self_i & other_i`` for each element of an array instance with the respective element of the array ``other``.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have an integer or boolean data type.
-        other: Union[int, bool, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer or boolean data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
-
-        Notes
-        -----
-        -   Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_and`.
-
-        """
-        ...
-
-    def __xor__(self: TArray, other: int | bool | TArray, /) -> TArray:
-        """
-        Evaluates ``self_i ^ other_i`` for each element of an array instance with the respective element of the array ``other``.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have an integer or boolean data type.
-        other: Union[int, bool, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer or boolean data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
-
-        Notes
-        -----
-        -   Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_xor`.
-
-        """
-        ...
-
-    def __or__(self: TArray, other: int | bool | TArray, /) -> TArray:
-        """
-        Evaluates ``self_i | other_i`` for each element of an array instance with the respective element of the array ``other``.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have an integer or boolean data type.
-        other: Union[int, bool, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer or boolean data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
-
-        Notes
-        -----
-        -   Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_or`.
-
-        """
-        ...
-
-    def __neg__(self: TArray, /) -> TArray:
-        """
-        Evaluates ``-self_i`` for each element of an array instance.
-
-        .. note::
-           For signed integer data types, the numerical negative of the minimum representable integer is implementation-dependent.
-
-        .. note::
-           If ``self`` has a complex floating-point data type, both the real and imaginary components for each ``self_i`` must be negated (a result which follows from the rules of complex number multiplication).
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have a numeric data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the evaluated result for each element in ``self``. The returned array must have a data type determined by :ref:`type-promotion`.
-
-        Notes
-        -----
-
-        .. note::
-           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.negative`.
-
-        .. versionchanged:: 2022.12
-            Added complex data type support.
-
-        """
-        ...
-
-    def __pos__(self: TArray, /) -> TArray:
-        """
-        Evaluates ``+self_i`` for each element of an array instance.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have a numeric data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the evaluated result for each element. The returned array must have the same data type as ``self``.
-
-        Notes
-        -----
-
-        .. note::
-           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.positive`.
-
-        .. versionchanged:: 2022.12
-            Added complex data type support.
-
-        """
-        ...
-
-    def __abs__(self: TArray, /) -> TArray:
-        """
-        Calculates the absolute value for each element of an array instance.
-
-        For real-valued input arrays, the element-wise result has the same magnitude as the respective element in ``x`` but has positive sign.
-
-        .. note::
-           For signed integer data types, the absolute value of the minimum representable integer is implementation-dependent.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have a numeric data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise absolute value. If ``self`` has a real-valued data type, the returned array must have the same data type as ``self``. If ``self`` has a complex floating-point data type, the returned arrayed must have a real-valued floating-point data type whose precision matches the precision of ``self`` (e.g., if ``self`` is ``complex128``, then the returned array must have a ``float64`` data type).
-
-        Notes
-        -----
-
-        .. note::
-           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.abs`.
-
-        .. versionchanged:: 2022.12
-            Added complex data type support.
-
-        """
-        ...
-
-    def __invert__(self: TArray, /) -> TArray:
-        """
-        Evaluates ``~self_i`` for each element of an array instance.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have an integer or boolean data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. The returned array must have the same data type as `self`.
-
-
-        .. note::
-           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_invert`.
-
-        """
-        ...
-
-    def __lt__(self: TArray, other: int | float | TArray, /) -> TArray:
-        """
-        Computes the truth value of ``self_i < other_i`` for each element of an array instance with the respective element of the array ``other``.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have a real-valued data type.
-        other: Union[int, float, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a real-valued data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. The returned array must have a data type of ``bool``.
-
-        Notes
-        -----
-        -   Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.less`.
-        -   Comparison of arrays without a corresponding promotable data type (see :ref:`type-promotion`) is undefined and thus implementation-dependent.
-        -   For backward compatibility, conforming implementations may support complex numbers; however, inequality comparison of complex numbers is unspecified and thus implementation-dependent (see :ref:`complex-number-ordering`).
-
-        .. versionchanged:: 2024.12
-            Cross-kind comparisons are explicitly left unspecified.
-
-        """
-        ...
-
-    def __le__(self: TArray, other: int | float | TArray, /) -> TArray:
-        """
-        Computes the truth value of ``self_i <= other_i`` for each element of an array instance with the respective element of the array ``other``.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have a real-valued data type.
-        other: Union[int, float, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a real-valued data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. The returned array must have a data type of ``bool``.
-
-        Notes
-        -----
-        -   Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.less_equal`.
-        -   Comparison of arrays without a corresponding promotable data type (see :ref:`type-promotion`) is undefined and thus implementation-dependent.
-        -   For backward compatibility, conforming implementations may support complex numbers; however, inequality comparison of complex numbers is unspecified and thus implementation-dependent (see :ref:`complex-number-ordering`).
-
-        .. versionchanged:: 2024.12
-            Cross-kind comparisons are explicitly left unspecified.
-
-        """
-        ...
-
     def __eq__(self: TArray, other: int | float | complex | bool | TArray, /) -> TArray:  # type: ignore[override]
         """
         Computes the truth value of ``self_i == other_i`` for each element of an array instance with the respective element of the array ``other``.
@@ -1030,39 +586,51 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __ne__(self: TArray, other: int | float | complex | bool | TArray, /) -> TArray:  # type: ignore[override]
+    def __float__(self: TArray, /) -> float:
         """
-        Computes the truth value of ``self_i != other_i`` for each element of an array instance with the respective element of the array ``other``.
+        Converts a zero-dimensional array to a Python ``float`` object.
+
+        .. note::
+           Casting integer values outside the representable bounds of Python's float type is not specified and is implementation-dependent.
 
         Parameters
         ----------
         self: array
-            array instance. May have any data type.
-        other: Union[int, float, complex, bool, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). May have any data type.
+            zero-dimensional array instance. Should have a real-valued or boolean data type. If ``self`` has a complex floating-point data type, the function must raise a ``TypeError``.
 
         Returns
         -------
-        out: array
-            an array containing the element-wise results. The returned array must have a data type of ``bool`` (i.e., must be a boolean array).
+        out: float
+            a Python ``float`` object representing the single element of the array instance.
 
         Notes
         -----
-        -   Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.not_equal`.
-        -   Comparison of arrays without a corresponding promotable data type (see :ref:`type-promotion`) is undefined and thus implementation-dependent.
+        **Special cases**
+
+        For boolean operands,
+
+        - If ``self`` is ``True``, the result is ``1``.
+        - If ``self`` is ``False``, the result is ``0``.
+
+        **Lazy implementations**
+
+        The Python language requires the return value to be of type ``float``. Lazy implementations are therefore not able to return any kind of lazy/delayed object here and should raise a ``ValueError`` instead.
 
         .. versionchanged:: 2022.12
-            Added complex data type support.
+            Added boolean and complex data type support.
 
-        .. versionchanged:: 2024.12
-            Cross-kind comparisons are explicitly left unspecified.
+        .. versionchanged:: 2023.12
+            Allowed lazy implementations to error.
 
         """
         ...
 
-    def __gt__(self: TArray, other: int | float | TArray, /) -> TArray:
+    def __floordiv__(self: TArray, other: int | float | TArray, /) -> TArray:
         """
-        Computes the truth value of ``self_i > other_i`` for each element of an array instance with the respective element of the array ``other``.
+        Evaluates ``self_i // other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        .. note::
+           For input arrays which promote to an integer data type, the result of division by zero is unspecified and thus implementation-defined.
 
         Parameters
         ----------
@@ -1074,16 +642,11 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         Returns
         -------
         out: array
-            an array containing the element-wise results. The returned array must have a data type of ``bool``.
+            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
 
-        Notes
-        -----
-        -   Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.greater`.
-        -   Comparison of arrays without a corresponding promotable data type (see :ref:`type-promotion`) is undefined and thus implementation-dependent.
-        -   For backward compatibility, conforming implementations may support complex numbers; however, inequality comparison of complex numbers is unspecified and thus implementation-dependent (see :ref:`complex-number-ordering`).
 
-        .. versionchanged:: 2024.12
-            Cross-kind comparisons are explicitly left unspecified.
+        .. note::
+           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.floor_divide`.
 
         """
         ...
@@ -1116,80 +679,83 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __bool__(self: TArray, /) -> bool:
+    def __getitem__(self: TArray, key: int | slice | TEllipsis | None | tuple[int | slice | TEllipsis | TArray | None, ...] | TArray, /) -> TArray:
         """
-        Converts a zero-dimensional array to a Python ``bool`` object.
+        Returns ``self[key]``.
 
         Parameters
         ----------
         self: array
-            zero-dimensional array instance.
+            array instance.
+        key: Union[int, slice, ellipsis, None, Tuple[Union[int, slice, ellipsis, array,  None], ...], array]
+            index key.
 
         Returns
         -------
-        out: bool
-            a Python ``bool`` object representing the single element of the array.
+        out: array
+            an array containing the accessed value(s). The returned array must have the same data type as ``self``.
 
         Notes
         -----
-        **Special cases**
+        -   See :ref:`indexing` for details on supported indexing semantics.
+        -   When ``__getitem__`` is defined on an object, Python will automatically define iteration (i.e., the behavior from ``iter(x)``) as  ``x[0]``, ``x[1]``, ..., ``x[N-1]``. This can also be implemented directly by defining ``__iter__``. Therefore, for a one-dimensional array ``x``, iteration should produce a sequence of zero-dimensional arrays ``x[0]``, ``x[1]``, ..., ``x[N-1]``, where ``N`` is the number of elements in the array. Iteration behavior for arrays having zero dimensions or more than one dimension is unspecified and thus implementation-defined.
 
-        For real-valued floating-point operands,
-
-        - If ``self`` is ``NaN``, the result is ``True``.
-        - If ``self`` is either ``+infinity`` or ``-infinity``, the result is ``True``.
-        - If ``self`` is either ``+0`` or ``-0``, the result is ``False``.
-
-        For complex floating-point operands, special cases must be handled as if the operation is implemented as the logical OR of ``bool(real(self))`` and ``bool(imag(self))``.
-
-        **Lazy implementations**
-
-        The Python language requires the return value to be of type ``bool``. Lazy implementations are therefore not able to return any kind of lazy/delayed object here and should raise a ``ValueError`` instead.
-
-        .. versionchanged:: 2022.12
-            Added boolean and complex data type support.
-
-        .. versionchanged:: 2023.12
-            Allowed lazy implementations to error.
+        .. versionchanged:: 2024.12
+            Clarified that iteration is defined for one-dimensional arrays.
 
         """
         ...
 
-    def __complex__(self: TArray, /) -> complex:
+    def __gt__(self: TArray, other: int | float | TArray, /) -> TArray:
         """
-        Converts a zero-dimensional array to a Python ``complex`` object.
+        Computes the truth value of ``self_i > other_i`` for each element of an array instance with the respective element of the array ``other``.
 
         Parameters
         ----------
         self: array
-            zero-dimensional array instance.
+            array instance. Should have a real-valued data type.
+        other: Union[int, float, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a real-valued data type.
 
         Returns
         -------
-        out: complex
-            a Python ``complex`` object representing the single element of the array instance.
+        out: array
+            an array containing the element-wise results. The returned array must have a data type of ``bool``.
 
         Notes
         -----
-        **Special cases**
+        -   Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.greater`.
+        -   Comparison of arrays without a corresponding promotable data type (see :ref:`type-promotion`) is undefined and thus implementation-dependent.
+        -   For backward compatibility, conforming implementations may support complex numbers; however, inequality comparison of complex numbers is unspecified and thus implementation-dependent (see :ref:`complex-number-ordering`).
 
-        For boolean operands,
+        .. versionchanged:: 2024.12
+            Cross-kind comparisons are explicitly left unspecified.
 
-        - If ``self`` is ``True``, the result is ``1+0j``.
-        - If ``self`` is ``False``, the result is ``0+0j``.
+        """
+        ...
 
-        For real-valued floating-point operands,
+    def __index__(self: TArray, /) -> int:
+        """
+        Converts a zero-dimensional integer array to a Python ``int`` object.
 
-        - If ``self`` is ``NaN``, the result is ``NaN + NaN j``.
-        - If ``self`` is ``+infinity``, the result is ``+infinity + 0j``.
-        - If ``self`` is ``-infinity``, the result is ``-infinity + 0j``.
-        - If ``self`` is a finite number, the result is ``self + 0j``.
+        .. note::
+           This method is called to implement `operator.index() <https://docs.python.org/3/reference/datamodel.html#object.__index__>`_. See also `PEP 357 <https://www.python.org/dev/peps/pep-0357/>`_.
 
+        Parameters
+        ----------
+        self: array
+            zero-dimensional array instance. Should have an integer data type. If ``self`` has a floating-point data type, the function must raise a ``TypeError``.
+
+        Returns
+        -------
+        out: int
+            a Python ``int`` object representing the single element of the array instance.
+
+        Notes
+        -----
         **Lazy implementations**
 
-        The Python language requires the return value to be of type ``complex``. Lazy implementations are therefore not able to return any kind of lazy/delayed object here and should raise a ``ValueError`` instead.
-
-        .. versionadded:: 2022.12
+        The Python language requires the return value to be of type ``int``. Lazy implementations are therefore not able to return any kind of lazy/delayed object here and should raise a ``ValueError`` instead.
 
         .. versionchanged:: 2023.12
             Allowed lazy implementations to error.
@@ -1247,70 +813,504 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __float__(self: TArray, /) -> float:
+    def __invert__(self: TArray, /) -> TArray:
         """
-        Converts a zero-dimensional array to a Python ``float`` object.
-
-        .. note::
-           Casting integer values outside the representable bounds of Python's float type is not specified and is implementation-dependent.
+        Evaluates ``~self_i`` for each element of an array instance.
 
         Parameters
         ----------
         self: array
-            zero-dimensional array instance. Should have a real-valued or boolean data type. If ``self`` has a complex floating-point data type, the function must raise a ``TypeError``.
+            array instance. Should have an integer or boolean data type.
 
         Returns
         -------
-        out: float
-            a Python ``float`` object representing the single element of the array instance.
+        out: array
+            an array containing the element-wise results. The returned array must have the same data type as `self`.
 
-        Notes
-        -----
-        **Special cases**
 
-        For boolean operands,
-
-        - If ``self`` is ``True``, the result is ``1``.
-        - If ``self`` is ``False``, the result is ``0``.
-
-        **Lazy implementations**
-
-        The Python language requires the return value to be of type ``float``. Lazy implementations are therefore not able to return any kind of lazy/delayed object here and should raise a ``ValueError`` instead.
-
-        .. versionchanged:: 2022.12
-            Added boolean and complex data type support.
-
-        .. versionchanged:: 2023.12
-            Allowed lazy implementations to error.
+        .. note::
+           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_invert`.
 
         """
         ...
 
-    def __index__(self: TArray, /) -> int:
+    def __le__(self: TArray, other: int | float | TArray, /) -> TArray:
         """
-        Converts a zero-dimensional integer array to a Python ``int`` object.
-
-        .. note::
-           This method is called to implement `operator.index() <https://docs.python.org/3/reference/datamodel.html#object.__index__>`_. See also `PEP 357 <https://www.python.org/dev/peps/pep-0357/>`_.
+        Computes the truth value of ``self_i <= other_i`` for each element of an array instance with the respective element of the array ``other``.
 
         Parameters
         ----------
         self: array
-            zero-dimensional array instance. Should have an integer data type. If ``self`` has a floating-point data type, the function must raise a ``TypeError``.
+            array instance. Should have a real-valued data type.
+        other: Union[int, float, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a real-valued data type.
 
         Returns
         -------
-        out: int
-            a Python ``int`` object representing the single element of the array instance.
+        out: array
+            an array containing the element-wise results. The returned array must have a data type of ``bool``.
 
         Notes
         -----
-        **Lazy implementations**
+        -   Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.less_equal`.
+        -   Comparison of arrays without a corresponding promotable data type (see :ref:`type-promotion`) is undefined and thus implementation-dependent.
+        -   For backward compatibility, conforming implementations may support complex numbers; however, inequality comparison of complex numbers is unspecified and thus implementation-dependent (see :ref:`complex-number-ordering`).
 
-        The Python language requires the return value to be of type ``int``. Lazy implementations are therefore not able to return any kind of lazy/delayed object here and should raise a ``ValueError`` instead.
+        .. versionchanged:: 2024.12
+            Cross-kind comparisons are explicitly left unspecified.
+
+        """
+        ...
+
+    def __lshift__(self: TArray, other: int | TArray, /) -> TArray:
+        """
+        Evaluates ``self_i << other_i`` for each element of an array instance with the respective element  of the array ``other``.
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have an integer data type.
+        other: Union[int, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer data type. Each element must be greater than or equal to ``0``.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have the same data type as ``self``.
+
+        Notes
+        -----
+        -   Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_left_shift`.
+
+        """
+        ...
+
+    def __lt__(self: TArray, other: int | float | TArray, /) -> TArray:
+        """
+        Computes the truth value of ``self_i < other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have a real-valued data type.
+        other: Union[int, float, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a real-valued data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have a data type of ``bool``.
+
+        Notes
+        -----
+        -   Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.less`.
+        -   Comparison of arrays without a corresponding promotable data type (see :ref:`type-promotion`) is undefined and thus implementation-dependent.
+        -   For backward compatibility, conforming implementations may support complex numbers; however, inequality comparison of complex numbers is unspecified and thus implementation-dependent (see :ref:`complex-number-ordering`).
+
+        .. versionchanged:: 2024.12
+            Cross-kind comparisons are explicitly left unspecified.
+
+        """
+        ...
+
+    def __matmul__(self: TArray, other: TArray, /) -> TArray:
+        """
+        Computes the matrix product.
+
+        .. note::
+           The ``matmul`` function must implement the same semantics as the built-in ``@`` operator (see `PEP 465 <https://www.python.org/dev/peps/pep-0465>`_).
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have a numeric data type. Must have at least one dimension. If ``self`` is one-dimensional having shape ``(M,)`` and ``other`` has more than one dimension, ``self`` must be promoted to a two-dimensional array by prepending ``1`` to its dimensions (i.e., must have shape ``(1, M)``). After matrix multiplication, the prepended dimensions in the returned array must be removed. If ``self`` has more than one dimension (including after vector-to-matrix promotion), ``shape(self)[:-2]`` must be compatible with ``shape(other)[:-2]`` (after vector-to-matrix promotion) (see :ref:`broadcasting`). If ``self`` has shape ``(..., M, K)``, the innermost two dimensions form matrices on which to perform matrix multiplication.
+        other: array
+            other array. Should have a numeric data type. Must have at least one dimension. If ``other`` is one-dimensional having shape ``(N,)`` and ``self`` has more than one dimension, ``other`` must be promoted to a two-dimensional array by appending ``1`` to its dimensions (i.e., must have shape ``(N, 1)``). After matrix multiplication, the appended dimensions in the returned array must be removed. If ``other`` has more than one dimension (including after vector-to-matrix promotion), ``shape(other)[:-2]`` must be compatible with ``shape(self)[:-2]`` (after vector-to-matrix promotion) (see :ref:`broadcasting`). If ``other`` has shape ``(..., K, N)``, the innermost two dimensions form matrices on which to perform matrix multiplication.
+
+
+        .. note::
+           If either ``x1`` or ``x2`` has a complex floating-point data type, neither argument must be complex-conjugated or transposed. If conjugation and/or transposition is desired, these operations should be explicitly performed prior to computing the matrix product.
+
+        Returns
+        -------
+        out: array
+            -   if both ``self`` and ``other`` are one-dimensional arrays having shape ``(N,)``, a zero-dimensional array containing the inner product as its only element.
+            -   if ``self`` is a two-dimensional array having shape ``(M, K)`` and ``other`` is a two-dimensional array having shape ``(K, N)``, a two-dimensional array containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ and having shape ``(M, N)``.
+            -   if ``self`` is a one-dimensional array having shape ``(K,)`` and ``other`` is an array having shape ``(..., K, N)``, an array having shape ``(..., N)`` (i.e., prepended dimensions during vector-to-matrix promotion must be removed) and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_.
+            -   if ``self`` is an array having shape ``(..., M, K)`` and ``other`` is a one-dimensional array having shape ``(K,)``, an array having shape ``(..., M)`` (i.e., appended dimensions during vector-to-matrix promotion must be removed) and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_.
+            -   if ``self`` is a two-dimensional array having shape ``(M, K)`` and ``other`` is an array having shape ``(..., K, N)``, an array having shape ``(..., M, N)`` and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.
+            -   if ``self`` is an array having shape ``(..., M, K)`` and ``other`` is a two-dimensional array having shape ``(K, N)``, an array having shape ``(..., M, N)`` and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.
+            -   if either ``self`` or ``other`` has more than two dimensions, an array having a shape determined by :ref:`broadcasting` ``shape(self)[:-2]`` against ``shape(other)[:-2]`` and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.
+            -   The returned array must have a data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+
+        .. note::
+           Results must equal the results returned by the equivalent function :func:`~array_api.matmul`.
+
+        **Raises**
+
+        - if either ``self`` or ``other`` is a zero-dimensional array.
+        - if ``self`` is a one-dimensional array having shape ``(K,)``, ``other`` is a one-dimensional array having shape ``(L,)``, and ``K != L``.
+        - if ``self`` is a one-dimensional array having shape ``(K,)``, ``other`` is an array having shape ``(..., L, N)``, and ``K != L``.
+        - if ``self`` is an array having shape ``(..., M, K)``, ``other`` is a one-dimensional array having shape ``(L,)``, and ``K != L``.
+        - if ``self`` is an array having shape ``(..., M, K)``, ``other`` is an array having shape ``(..., L, N)``, and ``K != L``.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __mod__(self: TArray, other: int | float | TArray, /) -> TArray:
+        """
+        Evaluates ``self_i % other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have a real-valued data type.
+        other: Union[int, float, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a real-valued data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. Each element-wise result must have the same sign as the respective element ``other_i``. The returned array must have a real-valued floating-point data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+        -   Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.remainder`.
+        -   For input arrays which promote to an integer data type, the result of division by zero is unspecified and thus implementation-defined.
+
+        """
+        ...
+
+    def __mul__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
+        """
+        Calculates the product for each element of an array instance with the respective element of the array ``other``.
+
+        .. note::
+           Floating-point multiplication is not always associative due to finite precision.
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have a numeric data type.
+        other: Union[int, float, complex, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise products. The returned array must have a data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+        -   Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.multiply`.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __ne__(self: TArray, other: int | float | complex | bool | TArray, /) -> TArray:  # type: ignore[override]
+        """
+        Computes the truth value of ``self_i != other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        Parameters
+        ----------
+        self: array
+            array instance. May have any data type.
+        other: Union[int, float, complex, bool, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). May have any data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have a data type of ``bool`` (i.e., must be a boolean array).
+
+        Notes
+        -----
+        -   Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.not_equal`.
+        -   Comparison of arrays without a corresponding promotable data type (see :ref:`type-promotion`) is undefined and thus implementation-dependent.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        .. versionchanged:: 2024.12
+            Cross-kind comparisons are explicitly left unspecified.
+
+        """
+        ...
+
+    def __neg__(self: TArray, /) -> TArray:
+        """
+        Evaluates ``-self_i`` for each element of an array instance.
+
+        .. note::
+           For signed integer data types, the numerical negative of the minimum representable integer is implementation-dependent.
+
+        .. note::
+           If ``self`` has a complex floating-point data type, both the real and imaginary components for each ``self_i`` must be negated (a result which follows from the rules of complex number multiplication).
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have a numeric data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the evaluated result for each element in ``self``. The returned array must have a data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+
+        .. note::
+           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.negative`.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __or__(self: TArray, other: int | bool | TArray, /) -> TArray:
+        """
+        Evaluates ``self_i | other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have an integer or boolean data type.
+        other: Union[int, bool, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer or boolean data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+        -   Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_or`.
+
+        """
+        ...
+
+    def __pos__(self: TArray, /) -> TArray:
+        """
+        Evaluates ``+self_i`` for each element of an array instance.
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have a numeric data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the evaluated result for each element. The returned array must have the same data type as ``self``.
+
+        Notes
+        -----
+
+        .. note::
+           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.positive`.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __pow__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
+        """
+        Calculates an implementation-dependent approximation of exponentiation by raising each element (the base) of an array instance to the power of ``other_i`` (the exponent), where ``other_i`` is the corresponding element of the array ``other``.
+
+        Parameters
+        ----------
+        self: array
+            array instance whose elements correspond to the exponentiation base. Should have a numeric data type.
+        other: Union[int, float, complex, array]
+            other array whose elements correspond to the exponentiation exponent. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+        -   Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.pow`.
+        -   If both ``self`` and ``other`` have integer data types, the result of ``__pow__`` when `other_i` is negative (i.e., less than zero) is unspecified and thus implementation-dependent.
+        -   If ``self`` has an integer data type and ``other`` has a floating-point data type, behavior is implementation-dependent, as type promotion between data type "kinds" (e.g., integer versus floating-point) is unspecified.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __rshift__(self: TArray, other: int | TArray, /) -> TArray:
+        """
+        Evaluates ``self_i >> other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have an integer data type.
+        other: Union[int, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer data type. Each element must be greater than or equal to ``0``.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have the same data type as ``self``.
+
+        Notes
+        -----
+        -   Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_right_shift`.
+
+        """
+        ...
+
+    def __setitem__(self: TArray, key: int | slice | TEllipsis | tuple[int | slice | TEllipsis | TArray, ...] | TArray, value: int | float | complex | bool | TArray, /) -> None:
+        """
+        Sets ``self[key]`` to ``value``.
+
+        Parameters
+        ----------
+        self: array
+            array instance.
+        key: Union[int, slice, ellipsis, Tuple[Union[int, slice, ellipsis, array], ...], array]
+            index key.
+        value: Union[int, float, complex, bool, array]
+            value(s) to set. Must be compatible with ``self[key]`` (see :ref:`broadcasting`).
+
+        Notes
+        -----
+        -   See :ref:`indexing` for details on supported indexing semantics.
+
+            .. note::
+               Indexing semantics when ``key`` is an integer array or a tuple of integers and integer arrays is currently unspecified and thus implementation-defined. This will be revisited in a future revision of this standard.
+
+        -   Setting array values must not affect the data type of ``self``.
+        -   When ``value`` is a Python scalar (i.e., ``int``, ``float``, ``complex``, ``bool``), behavior must follow specification guidance on mixing arrays with Python scalars (see :ref:`type-promotion`).
+        -   When ``value`` is an ``array`` of a different data type than ``self``, how values are cast to the data type of ``self`` is implementation defined.
+
+        """
+        ...
+
+    def __sub__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
+        """
+        Calculates the difference for each element of an array instance with the respective element of the array ``other``.
+
+        Parameters
+        ----------
+        self: array
+            array instance (minuend array). Should have a numeric data type.
+        other: Union[int, float, complex, array]
+            subtrahend array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise differences. The returned array must have a data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+        -   Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.subtract`.
+        -   The result of ``self_i - other_i`` must be the same as ``self_i + (-other_i)`` and must be governed by the same floating-point rules as addition (see :meth:`array.__add__`).
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __truediv__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
+        """
+        Evaluates ``self_i / other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have a numeric data type.
+        other: Union[int, float, complex, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array should have a floating-point data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+        -   Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.divide`.
+
+        -   If one or both of ``self`` and ``other`` have integer data types, the result is implementation-dependent, as type promotion between data type "kinds" (e.g., integer versus floating-point) is unspecified.
+
+            Specification-compliant libraries may choose to raise an error or return an array containing the element-wise results. If an array is returned, the array must have a real-valued floating-point data type.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __xor__(self: TArray, other: int | bool | TArray, /) -> TArray:
+        """
+        Evaluates ``self_i ^ other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have an integer or boolean data type.
+        other: Union[int, bool, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer or boolean data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+        -   Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_xor`.
+
+        """
+        ...
+
+    def to_device(self: TArray, device: TDevice, /, *, stream: int | Any | None = None) -> TArray:
+        """
+        Copy the array from the device on which it currently resides to the specified ``device``.
+
+        Parameters
+        ----------
+        self: array
+            array instance.
+        device: device
+            a ``device`` object (see :ref:`device-support`).
+        stream: Optional[Union[int, Any]]
+            stream object to use during copy. In addition to the types supported in :meth:`array.__dlpack__`, implementations may choose to support any library-specific stream object with the caveat that any code using such an object would not be portable.
+
+        Returns
+        -------
+        out: array
+            an array with the same data and data type as ``self`` and located on the specified ``device``.
+
+
+        Notes
+        -----
+        -   When a provided ``device`` object corresponds to the same device on which an array instance resides, implementations may choose to perform an explicit copy or return ``self``.
+        -   If ``stream`` is provided, the copy operation should be enqueued on the provided ``stream``; otherwise, the copy operation should be enqueued on the default stream/queue. Whether the copy is performed synchronously or asynchronously is implementation-dependent. Accordingly, if synchronization is required to guarantee data safety, this must be clearly explained in a conforming array library's documentation.
 
         .. versionchanged:: 2023.12
-            Allowed lazy implementations to error.
+           Clarified behavior when a provided ``device`` object corresponds to the device on which an array instance resides.
 
         """
         ...
@@ -1584,32 +1584,32 @@ class cumulative_prod[TArray: Array, TDtype](Protocol):
     Parameters
     ----------
     x: array
-    input array. Should have one or more dimensions (axes). Should have a numeric data type.
+    input array. **Should** have one or more dimensions (axes). **Should** have a numeric data type.
     axis: Optional[int]
-    axis along which a cumulative product must be computed. If ``axis`` is negative, the function must determine the axis along which to compute a cumulative product by counting from the last dimension.
+    axis along which to compute the cumulative product. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception.
 
-    If ``x`` is a one-dimensional array, providing an ``axis`` is optional; however, if ``x`` has more than one dimension, providing an ``axis`` is required.
+    If ``x`` is a one-dimensional array, providing an ``axis`` **must** be optional; however, if ``x`` has more than one dimension, providing an ``axis`` **must** be required.
 
     dtype: Optional[dtype]
-    data type of the returned array. If ``None``, the returned array must have the same data type as ``x``, unless ``x`` has an integer data type supporting a smaller range of values than the default integer data type (e.g., ``x`` has an ``int16`` or ``uint32`` data type and the default integer data type is ``int64``). In those latter cases:
+    data type of the returned array. If ``None``, the returned array **must** have the same data type as ``x``, unless ``x`` has an integer data type supporting a smaller range of values than the default integer data type (e.g., ``x`` has an ``int16`` or ``uint32`` data type and the default integer data type is ``int64``). In those latter cases:
 
-    -   if ``x`` has a signed integer data type (e.g., ``int16``), the returned array must have the default integer data type.
-    -   if ``x`` has an unsigned integer data type (e.g., ``uint16``), the returned array must have an unsigned integer data type having the same number of bits as the default integer data type (e.g., if the default integer data type is ``int32``, the returned array must have a ``uint32`` data type).
+    -   if ``x`` has a signed integer data type (e.g., ``int16``), the returned array **must** have the default integer data type.
+    -   if ``x`` has an unsigned integer data type (e.g., ``uint16``), the returned array **must** have an unsigned integer data type having the same number of bits as the default integer data type (e.g., if the default integer data type is ``int32``, the returned array **must** have a ``uint32`` data type).
 
-    If the data type (either specified or resolved) differs from the data type of ``x``, the input array should be cast to the specified data type before computing the product (rationale: the ``dtype`` keyword argument is intended to help prevent overflows). Default: ``None``.
+    If the data type (either specified or resolved) differs from the data type of ``x``, the input array **should** be cast to the specified data type before computing the product (rationale: the ``dtype`` keyword argument is intended to help prevent overflows). Default: ``None``.
 
     include_initial: bool
-    boolean indicating whether to include the initial value as the first value in the output. By convention, the initial value must be the multiplicative identity (i.e., one). Default: ``False``.
+    boolean indicating whether to include the initial value as the first value in the output. By convention, the initial value **must** be the multiplicative identity (i.e., one). Default: ``False``.
 
     Returns
     -------
     out: array
-    an array containing the cumulative products. The returned array must have a data type as described by the ``dtype`` parameter above.
+    an array containing the cumulative products. The returned array **must** have a data type as described by the ``dtype`` parameter above.
 
-    Let ``N`` be the size of the axis along which to compute the cumulative product. The returned array must have a shape determined according to the following rules:
+    Let ``M`` be the size of the axis along which to compute the cumulative product. The returned array **must** have a shape determined according to the following rules:
 
-    -   if ``include_initial`` is ``True``, the returned array must have the same shape as ``x``, except the size of the axis along which to compute the cumulative product must be ``N+1``.
-    -   if ``include_initial`` is ``False``, the returned array must have the same shape as ``x``.
+    -   if ``include_initial`` is ``True``, the returned array **must** have the same shape as ``x``, except the size of the axis along which to compute the cumulative product **must** be ``M+1``.
+    -   if ``include_initial`` is ``False``, the returned array **must** have the same shape as ``x``.
 
     Notes
     -----
@@ -1617,7 +1617,7 @@ class cumulative_prod[TArray: Array, TDtype](Protocol):
 
     **Special Cases**
 
-    For both real-valued and complex floating-point operands, special cases must be handled as if the operation is implemented by successive application of :func:`~array_api.multiply`.
+    For both real-valued and complex floating-point operands, special cases **must** be handled as if the operation is implemented by successive application of :func:`~array_api.multiply`.
 
     .. versionadded:: 2024.12
 
@@ -1635,32 +1635,32 @@ class cumulative_sum[TArray: Array, TDtype](Protocol):
     Parameters
     ----------
     x: array
-    input array. Should have one or more dimensions (axes). Should have a numeric data type.
+    input array. **Should** have one or more dimensions (axes). **Should** have a numeric data type.
     axis: Optional[int]
-    axis along which a cumulative sum must be computed. If ``axis`` is negative, the function must determine the axis along which to compute a cumulative sum by counting from the last dimension.
+    axis along which to compute the cumulative sum. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception.
 
-    If ``x`` is a one-dimensional array, providing an ``axis`` is optional; however, if ``x`` has more than one dimension, providing an ``axis`` is required.
+    If ``x`` is a one-dimensional array, providing an ``axis`` **must** be optional; however, if ``x`` has more than one dimension, providing an ``axis`` **must** be required.
 
     dtype: Optional[dtype]
-    data type of the returned array. If ``None``, the returned array must have the same data type as ``x``, unless ``x`` has an integer data type supporting a smaller range of values than the default integer data type (e.g., ``x`` has an ``int16`` or ``uint32`` data type and the default integer data type is ``int64``). In those latter cases:
+    data type of the returned array. If ``None``, the returned array **must** have the same data type as ``x``, unless ``x`` has an integer data type supporting a smaller range of values than the default integer data type (e.g., ``x`` has an ``int16`` or ``uint32`` data type and the default integer data type is ``int64``). In those latter cases:
 
-    -   if ``x`` has a signed integer data type (e.g., ``int16``), the returned array must have the default integer data type.
-    -   if ``x`` has an unsigned integer data type (e.g., ``uint16``), the returned array must have an unsigned integer data type having the same number of bits as the default integer data type (e.g., if the default integer data type is ``int32``, the returned array must have a ``uint32`` data type).
+    -   if ``x`` has a signed integer data type (e.g., ``int16``), the returned array **must** have the default integer data type.
+    -   if ``x`` has an unsigned integer data type (e.g., ``uint16``), the returned array **must** have an unsigned integer data type having the same number of bits as the default integer data type (e.g., if the default integer data type is ``int32``, the returned array **must** have a ``uint32`` data type).
 
-    If the data type (either specified or resolved) differs from the data type of ``x``, the input array should be cast to the specified data type before computing the sum (rationale: the ``dtype`` keyword argument is intended to help prevent overflows). Default: ``None``.
+    If the data type (either specified or resolved) differs from the data type of ``x``, the input array **should** be cast to the specified data type before computing the sum (rationale: the ``dtype`` keyword argument is intended to help prevent overflows). Default: ``None``.
 
     include_initial: bool
-    boolean indicating whether to include the initial value as the first value in the output. By convention, the initial value must be the additive identity (i.e., zero). Default: ``False``.
+    boolean indicating whether to include the initial value as the first value in the output. By convention, the initial value **must** be the additive identity (i.e., zero). Default: ``False``.
 
     Returns
     -------
     out: array
-    an array containing the cumulative sums. The returned array must have a data type as described by the ``dtype`` parameter above.
+    an array containing the cumulative sums. The returned array **must** have a data type as described by the ``dtype`` parameter above.
 
-    Let ``N`` be the size of the axis along which to compute the cumulative sum. The returned array must have a shape determined according to the following rules:
+    Let ``M`` be the size of the axis along which to compute the cumulative sum. The returned array **must** have a shape determined according to the following rules:
 
-    -   if ``include_initial`` is ``True``, the returned array must have the same shape as ``x``, except the size of the axis along which to compute the cumulative sum must be ``N+1``.
-    -   if ``include_initial`` is ``False``, the returned array must have the same shape as ``x``.
+    -   if ``include_initial`` is ``True``, the returned array **must** have the same shape as ``x``, except the size of the axis along which to compute the cumulative sum **must** be ``M+1``.
+    -   if ``include_initial`` is ``False``, the returned array **must** have the same shape as ``x``.
 
     Notes
     -----
@@ -1668,7 +1668,7 @@ class cumulative_sum[TArray: Array, TDtype](Protocol):
 
     **Special Cases**
 
-    For both real-valued and complex floating-point operands, special cases must be handled as if the operation is implemented by successive application of :func:`~array_api.add`.
+    For both real-valued and complex floating-point operands, special cases **must** be handled as if the operation is implemented by successive application of :func:`~array_api.add`.
 
     .. versionadded:: 2023.12
 
@@ -1689,30 +1689,30 @@ class max[TArray: Array](Protocol):
     Parameters
     ----------
     x: array
-    input array. Should have a real-valued data type.
+    input array. **Should** have a real-valued data type.
     axis: Optional[Union[int, Tuple[int, ...]]]
-    axis or axes along which maximum values must be computed. By default, the maximum value must be computed over the entire array. If a tuple of integers, maximum values must be computed over multiple axes. Default: ``None``.
+    axis or axes along which to compute maximum values. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. By default, the maximum value **must** be computed over the entire array. If a tuple of integers, maximum values **must** be computed over multiple axes. Default: ``None``.
     keepdims: bool
-    if ``True``, the reduced axes (dimensions) must be included in the result as singleton dimensions, and, accordingly, the result must be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) must not be included in the result. Default: ``False``.
+    if ``True``, the reduced axes (dimensions) **must** be included in the result as singleton dimensions, and, accordingly, the result **must** be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) **must** not be included in the result. Default: ``False``.
 
     Returns
     -------
     out: array
-    if the maximum value was computed over the entire array, a zero-dimensional array containing the maximum value; otherwise, a non-zero-dimensional array containing the maximum values. The returned array must have the same data type as ``x``.
+    if the maximum value is computed over the entire array, a zero-dimensional array containing the maximum value; otherwise, a non-zero-dimensional array containing the maximum values. The returned array **must** have the same data type as ``x``.
 
     Notes
     -----
-    When the number of elements over which to compute the maximum value is zero, the maximum value is implementation-defined. Specification-compliant libraries may choose to raise an error, return a sentinel value (e.g., if ``x`` is a floating-point input array, return ``NaN``), or return the minimum possible value for the input array ``x`` data type (e.g., if ``x`` is a floating-point array, return ``-infinity``).
+    -   When the number of elements over which to compute the maximum value is zero, the maximum value is implementation-defined. Specification-compliant libraries **may** choose to raise an error, return a sentinel value (e.g., if ``x`` is a floating-point input array, return ``NaN``), or return the minimum possible value for the input array ``x`` data type (e.g., if ``x`` is a floating-point array, return ``-infinity``).
 
-    The order of signed zeros is unspecified and thus implementation-defined. When choosing between ``-0`` or ``+0`` as a maximum value, specification-compliant libraries may choose to return either value.
+    -   The order of signed zeros is unspecified and thus implementation-defined. When choosing between ``-0`` or ``+0`` as a maximum value, specification-compliant libraries **may** choose to return either value.
 
-    For backward compatibility, conforming implementations may support complex numbers; however, inequality comparison of complex numbers is unspecified and thus implementation-defined (see :ref:`complex-number-ordering`).
+    -   For backward compatibility, conforming implementations **may** support complex numbers; however, inequality comparison of complex numbers is unspecified and thus implementation-defined (see :ref:`complex-number-ordering`).
 
     **Special Cases**
 
     For floating-point operands,
 
-    -   If ``x_i`` is ``NaN``, the maximum value is ``NaN`` (i.e., ``NaN`` values propagate).
+    -   If ``x_i`` is ``NaN``, the maximum value **must** be ``NaN`` (i.e., ``NaN`` values propagate).
 
     .. versionchanged:: 2023.12
     Clarified that the order of signed zeros is implementation-defined.
@@ -1731,37 +1731,36 @@ class mean[TArray: Array](Protocol):
     Parameters
     ----------
     x: array
-    input array. Should have a floating-point data type.
+    input array. **Should** have a floating-point data type.
     axis: Optional[Union[int, Tuple[int, ...]]]
-    axis or axes along which arithmetic means must be computed. By default, the mean must be computed over the entire array. If a tuple of integers, arithmetic means must be computed over multiple axes. Default: ``None``.
+    axis or axes along which to compute arithmetic means. By default, the mean **must** be computed over the entire array. If a tuple of integers, arithmetic means **must** be computed over multiple axes. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. Default: ``None``.
     keepdims: bool
-    if ``True``, the reduced axes (dimensions) must be included in the result as singleton dimensions, and, accordingly, the result must be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) must not be included in the result. Default: ``False``.
+    if ``True``, the reduced axes (dimensions) **must** be included in the result as singleton dimensions, and, accordingly, the result **must** be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) **must** not be included in the result. Default: ``False``.
 
     Returns
     -------
     out: array
-    if the arithmetic mean was computed over the entire array, a zero-dimensional array containing the arithmetic mean; otherwise, a non-zero-dimensional array containing the arithmetic means. The returned array must have the same data type as ``x``.
-
-    .. note::
-       While this specification recommends that this function only accept input arrays having a floating-point data type, specification-compliant array libraries may choose to accept input arrays having an integer data type. While mixed data type promotion is implementation-defined, if the input array ``x`` has an integer data type, the returned array must have the default real-valued floating-point data type.
+    if the arithmetic mean is computed over the entire array, a zero-dimensional array containing the arithmetic mean; otherwise, a non-zero-dimensional array containing the arithmetic means. The returned array **must** have the same data type as ``x``.
 
     Notes
     -----
+    -   While this specification recommends that this function only accept input arrays having a floating-point data type, specification-compliant array libraries **may** choose to accept input arrays having an integer data type. While mixed data type promotion is implementation-defined, if the input array ``x`` has an integer data type, the returned array **must** have the default real-valued floating-point data type.
+
     **Special Cases**
 
-    Let ``N`` equal the number of elements over which to compute the arithmetic mean. For real-valued operands,
+    Let ``M`` equal the number of elements over which to compute the arithmetic mean. For real-valued operands,
 
-    -   If ``N`` is ``0``, the arithmetic mean is ``NaN``.
-    -   If ``x_i`` is ``NaN``, the arithmetic mean is ``NaN`` (i.e., ``NaN`` values propagate).
+    -   If ``M`` is ``0``, the arithmetic mean **must** be ``NaN``.
+    -   If ``x_i`` is ``NaN``, the arithmetic mean **must** be ``NaN`` (i.e., ``NaN`` values propagate).
 
-    For complex floating-point operands, real-valued floating-point special cases should independently apply to the real and imaginary component operations involving real numbers. For example, let ``a = real(x_i)`` and ``b = imag(x_i)``, and
+    For complex floating-point operands, real-valued floating-point special cases **should** independently apply to the real and imaginary component operations involving real numbers. For example, let ``a = real(x_i)`` and ``b = imag(x_i)``, and
 
-    -   If ``N`` is ``0``, the arithmetic mean is ``NaN + NaN j``.
-    -   If ``a`` is ``NaN``, the real component of the result is ``NaN``.
-    -   Similarly, if ``b`` is ``NaN``, the imaginary component of the result is ``NaN``.
+    -   If ``M`` is ``0``, the arithmetic mean **must** be ``NaN + NaN j``.
+    -   If ``a`` is ``NaN``, the real component of the result **must** be ``NaN``.
+    -   Similarly, if ``b`` is ``NaN``, the imaginary component of the result **must** be ``NaN``.
 
     .. note::
-    Array libraries, such as NumPy, PyTorch, and JAX, currently deviate from this specification in their handling of components which are ``NaN`` when computing the arithmetic mean. In general, consumers of array libraries implementing this specification should use :func:`~array_api.isnan` to test whether the result of computing the arithmetic mean over an array have a complex floating-point data type is ``NaN``, rather than relying on ``NaN`` propagation of individual components.
+    Array libraries, such as NumPy, PyTorch, and JAX, currently deviate from this specification in their handling of components which are ``NaN`` when computing the arithmetic mean. In general, consumers of array libraries implementing this specification are recommended to use :func:`~array_api.isnan` to test whether the result of computing the arithmetic mean over an array have a complex floating-point data type is ``NaN``, rather than relying on ``NaN`` propagation of individual components.
 
     .. versionchanged:: 2024.12
     Added complex data type support.
@@ -1780,30 +1779,30 @@ class min[TArray: Array](Protocol):
     Parameters
     ----------
     x: array
-    input array. Should have a real-valued data type.
+    input array. **Should** have a real-valued data type.
     axis: Optional[Union[int, Tuple[int, ...]]]
-    axis or axes along which minimum values must be computed. By default, the minimum value must be computed over the entire array. If a tuple of integers, minimum values must be computed over multiple axes. Default: ``None``.
+    axis or axes along which to compute minimum values. By default, the minimum value **must** be computed over the entire array. If a tuple of integers, minimum values **must** be computed over multiple axes. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. Default: ``None``.
     keepdims: bool
-    if ``True``, the reduced axes (dimensions) must be included in the result as singleton dimensions, and, accordingly, the result must be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) must not be included in the result. Default: ``False``.
+    if ``True``, the reduced axes (dimensions) **must** be included in the result as singleton dimensions, and, accordingly, the result **must** be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) **must** not be included in the result. Default: ``False``.
 
     Returns
     -------
     out: array
-    if the minimum value was computed over the entire array, a zero-dimensional array containing the minimum value; otherwise, a non-zero-dimensional array containing the minimum values. The returned array must have the same data type as ``x``.
+    if the minimum value is computed over the entire array, a zero-dimensional array containing the minimum value; otherwise, a non-zero-dimensional array containing the minimum values. The returned array **must** have the same data type as ``x``.
 
     Notes
     -----
-    When the number of elements over which to compute the minimum value is zero, the minimum value is implementation-defined. Specification-compliant libraries may choose to raise an error, return a sentinel value (e.g., if ``x`` is a floating-point input array, return ``NaN``), or return the maximum possible value for the input array ``x`` data type (e.g., if ``x`` is a floating-point array, return ``+infinity``).
+    -   When the number of elements over which to compute the minimum value is zero, the minimum value is implementation-defined. Specification-compliant libraries **may** choose to raise an error, return a sentinel value (e.g., if ``x`` is a floating-point input array, return ``NaN``), or return the maximum possible value for the input array ``x`` data type (e.g., if ``x`` is a floating-point array, return ``+infinity``).
 
-    The order of signed zeros is unspecified and thus implementation-defined. When choosing between ``-0`` or ``+0`` as a minimum value, specification-compliant libraries may choose to return either value.
+    -   The order of signed zeros is unspecified and thus implementation-defined. When choosing between ``-0`` or ``+0`` as a minimum value, specification-compliant libraries **may** choose to return either value.
 
-    For backward compatibility, conforming implementations may support complex numbers; however, inequality comparison of complex numbers is unspecified and thus implementation-defined (see :ref:`complex-number-ordering`).
+    -   For backward compatibility, conforming implementations **may** support complex numbers; however, inequality comparison of complex numbers is unspecified and thus implementation-defined (see :ref:`complex-number-ordering`).
 
     **Special Cases**
 
     For floating-point operands,
 
-    -   If ``x_i`` is ``NaN``, the minimum value is ``NaN`` (i.e., ``NaN`` values propagate).
+    -   If ``x_i`` is ``NaN``, the minimum value **must** be ``NaN`` (i.e., ``NaN`` values propagate).
 
     .. versionchanged:: 2023.12
     Clarified that the order of signed zeros is implementation-defined.
@@ -1822,35 +1821,35 @@ class prod[TArray: Array, TDtype](Protocol):
     Parameters
     ----------
     x: array
-    input array. Should have a numeric data type.
+    input array. **Should** have a numeric data type.
     axis: Optional[Union[int, Tuple[int, ...]]]
-    axis or axes along which products must be computed. By default, the product must be computed over the entire array. If a tuple of integers, products must be computed over multiple axes. Default: ``None``.
+    axis or axes along which to compute products. By default, the product **must** be computed over the entire array. If a tuple of integers, products **must** be computed over multiple axes. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. Default: ``None``.
 
     dtype: Optional[dtype]
-    data type of the returned array. If ``None``, the returned array must have the same data type as ``x``, unless ``x`` has an integer data type supporting a smaller range of values than the default integer data type (e.g., ``x`` has an ``int16`` or ``uint32`` data type and the default integer data type is ``int64``). In those latter cases:
+    data type of the returned array. If ``None``, the returned array **must** have the same data type as ``x``, unless ``x`` has an integer data type supporting a smaller range of values than the default integer data type (e.g., ``x`` has an ``int16`` or ``uint32`` data type and the default integer data type is ``int64``). In those latter cases:
 
-    -   if ``x`` has a signed integer data type (e.g., ``int16``), the returned array must have the default integer data type.
-    -   if ``x`` has an unsigned integer data type (e.g., ``uint16``), the returned array must have an unsigned integer data type having the same number of bits as the default integer data type (e.g., if the default integer data type is ``int32``, the returned array must have a ``uint32`` data type).
+    -   if ``x`` has a signed integer data type (e.g., ``int16``), the returned array **must** have the default integer data type.
+    -   if ``x`` has an unsigned integer data type (e.g., ``uint16``), the returned array **must** have an unsigned integer data type having the same number of bits as the default integer data type (e.g., if the default integer data type is ``int32``, the returned array **must** have a ``uint32`` data type).
 
-    If the data type (either specified or resolved) differs from the data type of ``x``, the input array should be cast to the specified data type before computing the sum (rationale: the ``dtype`` keyword argument is intended to help prevent overflows). Default: ``None``.
+    If the data type (either specified or resolved) differs from the data type of ``x``, the input array **should** be cast to the specified data type before computing the sum (rationale: the ``dtype`` keyword argument is intended to help prevent overflows). Default: ``None``.
 
     keepdims: bool
-    if ``True``, the reduced axes (dimensions) must be included in the result as singleton dimensions, and, accordingly, the result must be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) must not be included in the result. Default: ``False``.
+    if ``True``, the reduced axes (dimensions) **must** be included in the result as singleton dimensions, and, accordingly, the result **must** be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) **must** not be included in the result. Default: ``False``.
 
     Returns
     -------
     out: array
-    if the product was computed over the entire array, a zero-dimensional array containing the product; otherwise, a non-zero-dimensional array containing the products. The returned array must have a data type as described by the ``dtype`` parameter above.
+    if the product is computed over the entire array, a zero-dimensional array containing the product; otherwise, a non-zero-dimensional array containing the products. The returned array **must** have a data type as described by the ``dtype`` parameter above.
 
     Notes
     -----
     **Special Cases**
 
-    Let ``N`` equal the number of elements over which to compute the product.
+    Let ``M`` equal the number of elements over which to compute the product.
 
-    -   If ``N`` is ``0``, the product is `1` (i.e., the empty product).
+    -   If ``M`` is ``0``, the product **must** be `1` (i.e., the empty product).
 
-    For both real-valued and complex floating-point operands, special cases must be handled as if the operation is implemented by successive application of :func:`~array_api.multiply`.
+    For both real-valued and complex floating-point operands, special cases **must** be handled as if the operation is implemented by successive application of :func:`~array_api.multiply`.
 
     .. versionchanged:: 2022.12
     Added complex data type support.
@@ -1872,30 +1871,29 @@ class std[TArray: Array](Protocol):
     Parameters
     ----------
     x: array
-    input array. Should have a real-valued floating-point data type.
+    input array. **Should** have a real-valued floating-point data type.
     axis: Optional[Union[int, Tuple[int, ...]]]
-    axis or axes along which standard deviations must be computed. By default, the standard deviation must be computed over the entire array. If a tuple of integers, standard deviations must be computed over multiple axes. Default: ``None``.
+    axis or axes along which to compute standard deviations. By default, the standard deviation **must** be computed over the entire array. If a tuple of integers, standard deviations **must** be computed over multiple axes. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. Default: ``None``.
     correction: Union[int, float]
-    degrees of freedom adjustment. Setting this parameter to a value other than ``0`` has the effect of adjusting the divisor during the calculation of the standard deviation according to ``N-c`` where ``N`` corresponds to the total number of elements over which the standard deviation is computed and ``c`` corresponds to the provided degrees of freedom adjustment. When computing the standard deviation of a population, setting this parameter to ``0`` is the standard choice (i.e., the provided array contains data constituting an entire population). When computing the corrected sample standard deviation, setting this parameter to ``1`` is the standard choice (i.e., the provided array contains data sampled from a larger population; this is commonly referred to as Bessel's correction). Default: ``0``.
+    degrees of freedom adjustment. Setting this parameter to a value other than ``0`` has the effect of adjusting the divisor during the calculation of the standard deviation according to ``M-c`` where ``M`` corresponds to the total number of elements over which the standard deviation is computed and ``c`` corresponds to the provided degrees of freedom adjustment. When computing the standard deviation of a population, setting this parameter to ``0`` is the standard choice (i.e., the provided array contains data constituting an entire population). When computing the corrected sample standard deviation, setting this parameter to ``1`` is the standard choice (i.e., the provided array contains data sampled from a larger population; this is commonly referred to as Bessel's correction). Default: ``0``.
     keepdims: bool
-    if ``True``, the reduced axes (dimensions) must be included in the result as singleton dimensions, and, accordingly, the result must be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) must not be included in the result. Default: ``False``.
+    if ``True``, the reduced axes (dimensions) **must** be included in the result as singleton dimensions, and, accordingly, the result **must** be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) **must** not be included in the result. Default: ``False``.
 
     Returns
     -------
     out: array
-    if the standard deviation was computed over the entire array, a zero-dimensional array containing the standard deviation; otherwise, a non-zero-dimensional array containing the standard deviations. The returned array must have the same data type as ``x``.
-
-    .. note::
-       While this specification recommends that this function only accept input arrays having a real-valued floating-point data type, specification-compliant array libraries may choose to accept input arrays having an integer data type. While mixed data type promotion is implementation-defined, if the input array ``x`` has an integer data type, the returned array must have the default real-valued floating-point data type.
+    if the standard deviation is computed over the entire array, a zero-dimensional array containing the standard deviation; otherwise, a non-zero-dimensional array containing the standard deviations. The returned array **must** have the same data type as ``x``.
 
     Notes
     -----
+    -   While this specification recommends that this function only accept input arrays having a real-valued floating-point data type, specification-compliant array libraries **may** choose to accept input arrays having an integer data type. While mixed data type promotion is implementation-defined, if the input array ``x`` has an integer data type, the returned array **must** have the default real-valued floating-point data type.
+
     **Special Cases**
 
-    Let ``N`` equal the number of elements over which to compute the standard deviation.
+    Let ``M`` equal the number of elements over which to compute the standard deviation.
 
-    -   If ``N - correction`` is less than or equal to ``0``, the standard deviation is ``NaN``.
-    -   If ``x_i`` is ``NaN``, the standard deviation is ``NaN`` (i.e., ``NaN`` values propagate).
+    -   If ``M - correction`` is less than or equal to ``0``, the standard deviation **must** be ``NaN``.
+    -   If ``x_i`` is ``NaN``, the standard deviation **must** be ``NaN`` (i.e., ``NaN`` values propagate).
 
     """
 
@@ -1911,35 +1909,35 @@ class sum[TArray: Array, TDtype](Protocol):
     Parameters
     ----------
     x: array
-    input array. Should have a numeric data type.
+    input array. **Should** have a numeric data type.
     axis: Optional[Union[int, Tuple[int, ...]]]
-    axis or axes along which sums must be computed. By default, the sum must be computed over the entire array. If a tuple of integers, sums must be computed over multiple axes. Default: ``None``.
+    axis or axes along which sums **must** be computed. By default, the sum **must** be computed over the entire array. If a tuple of integers, sums **must** be computed over multiple axes. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. Default: ``None``.
 
     dtype: Optional[dtype]
-    data type of the returned array. If ``None``, the returned array must have the same data type as ``x``, unless ``x`` has an integer data type supporting a smaller range of values than the default integer data type (e.g., ``x`` has an ``int16`` or ``uint32`` data type and the default integer data type is ``int64``). In those latter cases:
+    data type of the returned array. If ``None``, the returned array **must** have the same data type as ``x``, unless ``x`` has an integer data type supporting a smaller range of values than the default integer data type (e.g., ``x`` has an ``int16`` or ``uint32`` data type and the default integer data type is ``int64``). In those latter cases:
 
-    -   if ``x`` has a signed integer data type (e.g., ``int16``), the returned array must have the default integer data type.
-    -   if ``x`` has an unsigned integer data type (e.g., ``uint16``), the returned array must have an unsigned integer data type having the same number of bits as the default integer data type (e.g., if the default integer data type is ``int32``, the returned array must have a ``uint32`` data type).
+    -   if ``x`` has a signed integer data type (e.g., ``int16``), the returned array **must** have the default integer data type.
+    -   if ``x`` has an unsigned integer data type (e.g., ``uint16``), the returned array **must** have an unsigned integer data type having the same number of bits as the default integer data type (e.g., if the default integer data type is ``int32``, the returned array **must** have a ``uint32`` data type).
 
-    If the data type (either specified or resolved) differs from the data type of ``x``, the input array should be cast to the specified data type before computing the sum (rationale: the ``dtype`` keyword argument is intended to help prevent overflows). Default: ``None``.
+    If the data type (either specified or resolved) differs from the data type of ``x``, the input array **should** be cast to the specified data type before computing the sum (rationale: the ``dtype`` keyword argument is intended to help prevent overflows). Default: ``None``.
 
     keepdims: bool
-    if ``True``, the reduced axes (dimensions) must be included in the result as singleton dimensions, and, accordingly, the result must be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) must not be included in the result. Default: ``False``.
+    if ``True``, the reduced axes (dimensions) **must** be included in the result as singleton dimensions, and, accordingly, the result **must** be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) **must** not be included in the result. Default: ``False``.
 
     Returns
     -------
     out: array
-    if the sum was computed over the entire array, a zero-dimensional array containing the sum; otherwise, an array containing the sums. The returned array must have a data type as described by the ``dtype`` parameter above.
+    if the sum is computed over the entire array, a zero-dimensional array containing the sum; otherwise, an array containing the sums. The returned array **must** have a data type as described by the ``dtype`` parameter above.
 
     Notes
     -----
     **Special Cases**
 
-    Let ``N`` equal the number of elements over which to compute the sum.
+    Let ``M`` equal the number of elements over which to compute the sum.
 
-    -   If ``N`` is ``0``, the sum is ``0`` (i.e., the empty sum).
+    -   If ``M`` is ``0``, the sum **must** be ``0`` (i.e., the empty sum).
 
-    For both real-valued and complex floating-point operands, special cases must be handled as if the operation is implemented by successive application of :func:`~array_api.add`.
+    For both real-valued and complex floating-point operands, special cases **must** be handled as if the operation is implemented by successive application of :func:`~array_api.add`.
 
     .. versionchanged:: 2022.12
     Added complex data type support.
@@ -1961,31 +1959,29 @@ class var[TArray: Array](Protocol):
     Parameters
     ----------
     x: array
-    input array. Should have a real-valued floating-point data type.
+    input array. **Should** have a real-valued floating-point data type.
     axis: Optional[Union[int, Tuple[int, ...]]]
-    axis or axes along which variances must be computed. By default, the variance must be computed over the entire array. If a tuple of integers, variances must be computed over multiple axes. Default: ``None``.
+    axis or axes along which variances **must** be computed. By default, the variance **must** be computed over the entire array. If a tuple of integers, variances **must** be computed over multiple axes. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. Default: ``None``.
     correction: Union[int, float]
-    degrees of freedom adjustment. Setting this parameter to a value other than ``0`` has the effect of adjusting the divisor during the calculation of the variance according to ``N-c`` where ``N`` corresponds to the total number of elements over which the variance is computed and ``c`` corresponds to the provided degrees of freedom adjustment. When computing the variance of a population, setting this parameter to ``0`` is the standard choice (i.e., the provided array contains data constituting an entire population). When computing the unbiased sample variance, setting this parameter to ``1`` is the standard choice (i.e., the provided array contains data sampled from a larger population; this is commonly referred to as Bessel's correction). Default: ``0``.
+    degrees of freedom adjustment. Setting this parameter to a value other than ``0`` has the effect of adjusting the divisor during the calculation of the variance according to ``M-c`` where ``M`` corresponds to the total number of elements over which the variance is computed and ``c`` corresponds to the provided degrees of freedom adjustment. When computing the variance of a population, setting this parameter to ``0`` is the standard choice (i.e., the provided array contains data constituting an entire population). When computing the unbiased sample variance, setting this parameter to ``1`` is the standard choice (i.e., the provided array contains data sampled from a larger population; this is commonly referred to as Bessel's correction). Default: ``0``.
     keepdims: bool
-    if ``True``, the reduced axes (dimensions) must be included in the result as singleton dimensions, and, accordingly, the result must be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) must not be included in the result. Default: ``False``.
+    if ``True``, the reduced axes (dimensions) **must** be included in the result as singleton dimensions, and, accordingly, the result **must** be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) **must** not be included in the result. Default: ``False``.
 
     Returns
     -------
     out: array
-    if the variance was computed over the entire array, a zero-dimensional array containing the variance; otherwise, a non-zero-dimensional array containing the variances. The returned array must have the same data type as ``x``.
-
-
-    .. note::
-    While this specification recommends that this function only accept input arrays having a real-valued floating-point data type, specification-compliant array libraries may choose to accept input arrays having an integer data type. While mixed data type promotion is implementation-defined, if the input array ``x`` has an integer data type, the returned array must have the default real-valued floating-point data type.
+    if the variance is computed over the entire array, a zero-dimensional array containing the variance; otherwise, a non-zero-dimensional array containing the variances. The returned array **must** have the same data type as ``x``.
 
     Notes
     -----
+    -   While this specification recommends that this function only accept input arrays having a real-valued floating-point data type, specification-compliant array libraries **may** choose to accept input arrays having an integer data type. While mixed data type promotion is implementation-defined, if the input array ``x`` has an integer data type, the returned array **must** have the default real-valued floating-point data type.
+
     **Special Cases**
 
-    Let ``N`` equal the number of elements over which to compute the variance.
+    Let ``M`` equal the number of elements over which to compute the variance.
 
-    -   If ``N - correction`` is less than or equal to ``0``, the variance is ``NaN``.
-    -   If ``x_i`` is ``NaN``, the variance is ``NaN`` (i.e., ``NaN`` values propagate).
+    -   If ``M - correction`` is less than or equal to ``0``, the variance **must** be ``NaN``.
+    -   If ``x_i`` is ``NaN``, the variance **must** be ``NaN`` (i.e., ``NaN`` values propagate).
 
     """
 
@@ -2027,7 +2023,7 @@ class arange[TArray: Array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class asarray[TSupportsbufferprotocol, TArray: Array, TDevice, TDtype](Protocol):
+class asarray[TArray: Array, TDevice, TDtype, TSupportsbufferprotocol](Protocol):
     r"""
     Convert the input to an array.
 
@@ -7110,20 +7106,20 @@ class diff[TArray: Array](Protocol):
 
 
 @runtime_checkable
-class __array_namespace_info__[TCapabilities, TDatatypes, TDefaultdatatypes, TArray: Array, TDevice, TDtype](Protocol):
+class __array_namespace_info__[TArray: Array, TCapabilities, TDatatypes, TDefaultdatatypes, TDevice, TDtype](Protocol):
     """
     Returns a namespace with Array API namespace inspection utilities.
-
-    See :ref:`inspection` for a list of inspection APIs.
 
     Returns
     -------
     out: Info
-    An object containing Array API namespace inspection utilities.
+    an object containing Array API namespace inspection utilities.
 
     Notes
     -----
-    The returned object may be either a namespace or a class, so long as an Array API user can access inspection utilities as follows:
+    -   See :ref:`inspection` for a list of inspection APIs.
+
+    -   The returned object **may** be either a namespace or a class, as long as an Array API user can access inspection utilities as follows:
 
     ::
 
@@ -7139,7 +7135,7 @@ class __array_namespace_info__[TCapabilities, TDatatypes, TDefaultdatatypes, TAr
     """
 
     @abstractmethod
-    def __call__(self, /) -> Info[TCapabilities, TDatatypes, TDefaultdatatypes, TArray, TDevice, TDtype]: ...
+    def __call__(self, /) -> Info[TArray, TCapabilities, TDatatypes, TDefaultdatatypes, TDevice, TDtype]: ...
 
 
 @runtime_checkable
@@ -7150,23 +7146,23 @@ class take[TArray: Array](Protocol):
     Parameters
     ----------
     x: array
-    input array. Should have one or more dimensions (axes).
+    input array. **Should** have one or more axes.
     indices: array
-    array indices. The array must be one-dimensional and have an integer data type. If an index is negative, the function must determine the element to select along a specified axis (dimension) by counting from the last element (where ``-1`` refers to the last element).
+    array indices. The array **must** be one-dimensional and have an integer data type. If an index is negative, the function **must** determine the element to select along a specified axis by counting from the last element (where ``-1`` refers to the last element).
     axis: Optional[int]
-    axis over which to select values. If ``axis`` is negative, the function must determine the axis along which to select values by counting from the last dimension (where ``-1`` refers to the last dimension).
+    axis over which to select values. If ``axis`` is negative, the function **must** determine the axis along which to select values by counting from the last axis (where ``-1`` refers to the last axis).
 
-    If ``x`` is a one-dimensional array, providing an ``axis`` is optional; however, if ``x`` has more than one dimension, providing an ``axis`` is required.
+    If ``x`` is a one-dimensional array, providing an ``axis`` **must** be optional; however, if ``x`` has more than one axis, providing an ``axis`` **must** be required.
 
     Returns
     -------
     out: array
-    an array having the same data type as ``x``. The output array must have the same rank (i.e., number of dimensions) as ``x`` and must have the same shape as ``x``, except for the axis specified by ``axis`` whose size must equal the number of elements in ``indices``.
+    an array having the same data type as ``x``. The output array **must** have the same number of axes as ``x`` and **must** have the same shape as ``x``, except for the axis specified by ``axis`` whose size **must** equal the number of elements in ``indices``.
 
     Notes
     -----
-    -   Conceptually, ``take(x, indices, axis=3)`` is equivalent to ``x[:,:,:,indices,...]``; however, explicit indexing via arrays of indices is not currently supported in this specification due to concerns regarding ``__setitem__`` and array mutation semantics.
-    -   This specification does not require bounds checking. The behavior for out-of-bounds indices is left unspecified.
+    -   This specification does not require bounds checking. The behavior for out-of-bounds indices is unspecified and thus implementation-defined.
+
     -   When ``x`` is a zero-dimensional array, behavior is unspecified and thus implementation-defined.
 
     .. versionadded:: 2022.12
@@ -7194,20 +7190,20 @@ class take_along_axis[TArray: Array](Protocol):
     Parameters
     ----------
     x: array
-    input array. Must be compatible with ``indices``, except for the axis (dimension) specified by ``axis`` (see :ref:`broadcasting`).
+    input array. **Must** be compatible with ``indices``, except for the axis specified by ``axis`` (see :ref:`broadcasting`).
     indices: array
-    array indices. Must have the same rank (i.e., number of dimensions) as ``x``. If an index is negative, the function must determine the element to select along a specified axis (dimension) by counting from the last element (where ``-1`` refers to the last element).
+    array indices. **Must** have the same number of axes as ``x`` and **must** be compatible with ``x``, except for the axis specified by ``axis`` (see :ref:`broadcasting`). If an index is negative, the function **must** determine the element to select along a specified axis by counting from the last element (where ``-1`` refers to the last element).
     axis: int
-    axis along which to select values. If ``axis`` is negative, the function must determine the axis along which to select values by counting from the last dimension (where ``-1`` refers to the last dimension). Default: ``-1``.
+    axis along which to select values. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. Default: ``-1``.
 
     Returns
     -------
     out: array
-    an array having the same data type as ``x``. Must have the same rank (i.e., number of dimensions) as ``x`` and must have a shape determined according to :ref:`broadcasting`, except for the axis (dimension) specified by ``axis`` whose size must equal the size of the corresponding axis (dimension) in ``indices``.
+    an array containing elements from ``x``. The returned array **must** have the same data type as ``x``. The returned array **must** have the same number of axes as ``x`` and **must** have a shape determined according to :ref:`broadcasting`, except for the axis specified by ``axis`` whose size **must** equal the size of the corresponding axis in ``indices``.
 
     Notes
     -----
-    -   This specification does not require bounds checking. The behavior for out-of-bounds indices is left unspecified.
+    -   This specification does not require bounds checking. The behavior for out-of-bounds indices is unspecified and thus implementation-defined.
 
     .. versionadded:: 2024.12
 
@@ -7893,46 +7889,56 @@ class matmul[TArray: Array](Protocol):
     """
     Computes the matrix product.
 
-    .. note::
-    The ``matmul`` function must implement the same semantics as the built-in ``@`` operator (see `PEP 465 <https://www.python.org/dev/peps/pep-0465>`_).
-
     Parameters
     ----------
     x1: array
-    first input array. Should have a numeric data type. Must have at least one dimension. If ``x1`` is one-dimensional having shape ``(M,)`` and ``x2`` has more than one dimension, ``x1`` must be promoted to a two-dimensional array by prepending ``1`` to its dimensions (i.e., must have shape ``(1, M)``). After matrix multiplication, the prepended dimensions in the returned array must be removed. If ``x1`` has more than one dimension (including after vector-to-matrix promotion), ``shape(x1)[:-2]`` must be compatible with ``shape(x2)[:-2]`` (after vector-to-matrix promotion) (see :ref:`broadcasting`). If ``x1`` has shape ``(..., M, K)``, the innermost two dimensions form matrices on which to perform matrix multiplication.
+    first input array. **Should** have a numeric data type. **Must** have at least one dimension.
+
+    -   If ``x1`` is a one-dimensional array having shape ``(M,)`` and ``x2`` has more than one dimension, ``x1`` **must** be promoted to a two-dimensional array by prepending ``1`` to its dimensions (i.e., **must** have shape ``(1, M)``). After matrix multiplication, the prepended dimensions in the returned array **must** be removed.
+    -   If ``x1`` has more than one dimension (including after vector-to-matrix promotion), ``shape(x1)[:-2]`` **must** be compatible with ``shape(x2)[:-2]`` (after vector-to-matrix promotion) (see :ref:`broadcasting`).
+    -   If ``x1`` has shape ``(..., M, K)``, the innermost two dimensions form matrices on which to perform matrix multiplication.
+
     x2: array
-    second input array. Should have a numeric data type. Must have at least one dimension. If ``x2`` is one-dimensional having shape ``(N,)`` and ``x1`` has more than one dimension, ``x2`` must be promoted to a two-dimensional array by appending ``1`` to its dimensions (i.e., must have shape ``(N, 1)``). After matrix multiplication, the appended dimensions in the returned array must be removed. If ``x2`` has more than one dimension (including after vector-to-matrix promotion), ``shape(x2)[:-2]`` must be compatible with ``shape(x1)[:-2]`` (after vector-to-matrix promotion) (see :ref:`broadcasting`). If ``x2`` has shape ``(..., K, N)``, the innermost two dimensions form matrices on which to perform matrix multiplication.
+    second input array. **Should** have a numeric data type. **Must** have at least one dimension.
 
-
-    .. note::
-    If either ``x1`` or ``x2`` has a complex floating-point data type, neither argument must be complex-conjugated or transposed. If conjugation and/or transposition is desired, these operations should be explicitly performed prior to computing the matrix product.
+    -   If ``x2`` is one-dimensional array having shape ``(N,)`` and ``x1`` has more than one dimension, ``x2`` **must** be promoted to a two-dimensional array by appending ``1`` to its dimensions (i.e., **must** have shape ``(N, 1)``). After matrix multiplication, the appended dimensions in the returned array **must** be removed.
+    -   If ``x2`` has more than one dimension (including after vector-to-matrix promotion), ``shape(x2)[:-2]`` **must** be compatible with ``shape(x1)[:-2]`` (after vector-to-matrix promotion) (see :ref:`broadcasting`).
+    -   If ``x2`` has shape ``(..., K, N)``, the innermost two dimensions form matrices on which to perform matrix multiplication.
 
     Returns
     -------
     out: array
-    -   if both ``x1`` and ``x2`` are one-dimensional arrays having shape ``(N,)``, a zero-dimensional array containing the inner product as its only element.
-    -   if ``x1`` is a two-dimensional array having shape ``(M, K)`` and ``x2`` is a two-dimensional array having shape ``(K, N)``, a two-dimensional array containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ and having shape ``(M, N)``.
-    -   if ``x1`` is a one-dimensional array having shape ``(K,)`` and ``x2`` is an array having shape ``(..., K, N)``, an array having shape ``(..., N)`` (i.e., prepended dimensions during vector-to-matrix promotion must be removed) and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_.
-    -   if ``x1`` is an array having shape ``(..., M, K)`` and ``x2`` is a one-dimensional array having shape ``(K,)``, an array having shape ``(..., M)`` (i.e., appended dimensions during vector-to-matrix promotion must be removed) and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_.
-    -   if ``x1`` is a two-dimensional array having shape ``(M, K)`` and ``x2`` is an array having shape ``(..., K, N)``, an array having shape ``(..., M, N)`` and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.
-    -   if ``x1`` is an array having shape ``(..., M, K)`` and ``x2`` is a two-dimensional array having shape ``(K, N)``, an array having shape ``(..., M, N)`` and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.
-    -   if either ``x1`` or ``x2`` has more than two dimensions, an array having a shape determined by :ref:`broadcasting` ``shape(x1)[:-2]`` against ``shape(x2)[:-2]`` and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.
+    output array.
 
-    The returned array must have a data type determined by :ref:`type-promotion`.
+    -   If both ``x1`` and ``x2`` are one-dimensional arrays having shape ``(N,)``, the returned array **must** be a zero-dimensional array and **must** contain the inner product as its only element.
+    -   If ``x1`` is a two-dimensional array having shape ``(M, K)`` and ``x2`` is a two-dimensional array having shape ``(K, N)``, the returned array **must** be a two-dimensional array and **must** contain the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ and having shape ``(M, N)``.
+    -   If ``x1`` is a one-dimensional array having shape ``(K,)`` and ``x2`` is an array having shape ``(..., K, N)``, the returned array **must** be an array having shape ``(..., N)`` (i.e., prepended dimensions during vector-to-matrix promotion **must** be removed) and **must** contain the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_.
+    -   If ``x1`` is an array having shape ``(..., M, K)`` and ``x2`` is a one-dimensional array having shape ``(K,)``, the returned array **must** be an array having shape ``(..., M)`` (i.e., appended dimensions during vector-to-matrix promotion **must** be removed) and **must** contain the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_.
+    -   If ``x1`` is a two-dimensional array having shape ``(M, K)`` and ``x2`` is an array having shape ``(..., K, N)``, the returned array **must** be an array having shape ``(..., M, N)`` and **must** contain the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.
+    -   If ``x1`` is an array having shape ``(..., M, K)`` and ``x2`` is a two-dimensional array having shape ``(K, N)``, the returned array **must** be an array having shape ``(..., M, N)`` and **must** contain the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.
+    -   If either ``x1`` or ``x2`` has more than two dimensions, the returned array **must** be an array having a shape determined by :ref:`broadcasting` ``shape(x1)[:-2]`` against ``shape(x2)[:-2]`` and **must** contain the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.
 
-    Notes
-    -----
+    The returned array **must** have a data type determined by :ref:`type-promotion`.
 
-    .. versionchanged:: 2022.12
-    Added complex data type support.
-
-    **Raises**
+    Raises
+    ------
+    Exception
+    an exception **should** be raised in the following circumstances:
 
     -   if either ``x1`` or ``x2`` is a zero-dimensional array.
     -   if ``x1`` is a one-dimensional array having shape ``(K,)``, ``x2`` is a one-dimensional array having shape ``(L,)``, and ``K != L``.
     -   if ``x1`` is a one-dimensional array having shape ``(K,)``, ``x2`` is an array having shape ``(..., L, N)``, and ``K != L``.
     -   if ``x1`` is an array having shape ``(..., M, K)``, ``x2`` is a one-dimensional array having shape ``(L,)``, and ``K != L``.
     -   if ``x1`` is an array having shape ``(..., M, K)``, ``x2`` is an array having shape ``(..., L, N)``, and ``K != L``.
+
+    Notes
+    -----
+    -   The ``matmul`` function **must** implement the same semantics as the built-in ``@`` operator (see `PEP 465 <https://www.python.org/dev/peps/pep-0465>`_).
+
+    -   If either ``x1`` or ``x2`` has a complex floating-point data type, the function **must not** complex-conjugate or tranpose either argument. If conjugation and/or transposition is desired, a user can explicitly perform these operations prior to computing the matrix product.
+
+    .. versionchanged:: 2022.12
+    Added complex data type support.
 
     """
 
@@ -7953,7 +7959,7 @@ class matrix_transpose[TArray: Array](Protocol):
     Returns
     -------
     out: array
-    an array containing the transpose for each matrix and having shape ``(..., N, M)``. The returned array must have the same data type as ``x``.
+    an array containing the transpose for each matrix. The returned array **must** have shape ``(..., N, M)``. The returned array **must** have the same data type as ``x``.
 
     """
 
@@ -7966,41 +7972,35 @@ class tensordot[TArray: Array](Protocol):
     """
     Returns a tensor contraction of ``x1`` and ``x2`` over specific axes.
 
-    .. note::
-    The ``tensordot`` function corresponds to the generalized matrix product.
-
     Parameters
     ----------
     x1: array
-    first input array. Should have a numeric data type.
+    first input array. **Should** have a numeric data type.
     x2: array
-    second input array. Should have a numeric data type. Corresponding contracted axes of ``x1`` and ``x2`` must be equal.
-
-    .. note::
-       Contracted axes (dimensions) must not be broadcasted.
+    second input array. **Should** have a numeric data type. Corresponding contracted axes of ``x1`` and ``x2`` **must** be equal.
 
     axes: Union[int, Tuple[Sequence[int], Sequence[int]]]
-    number of axes (dimensions) to contract or explicit sequences of axis (dimension) indices for ``x1`` and ``x2``, respectively.
+    number of axes to contract or explicit sequences of axis indices for ``x1`` and ``x2``, respectively.
 
-    If ``axes`` is an ``int`` equal to ``N``, then contraction must be performed over the last ``N`` axes of ``x1`` and the first ``N`` axes of ``x2`` in order. The size of each corresponding axis (dimension) must match. Must be nonnegative.
+    If ``axes`` is an ``int`` equal to ``N``, then contraction **must** be performed over the last ``N`` axes of ``x1`` and the first ``N`` axes of ``x2`` in order. The size of each corresponding axis **must** match. An integer ``axes`` value **must** be nonnegative.
 
-    -   If ``N`` equals ``0``, the result is the tensor (outer) product.
-    -   If ``N`` equals ``1``, the result is the tensor dot product.
-    -   If ``N`` equals ``2``, the result is the tensor double contraction (default).
+    -   If ``N`` equals ``0``, the result **must** be the tensor (outer) product.
+    -   If ``N`` equals ``1``, the result **must** be the tensor dot product.
+    -   If ``N`` equals ``2``, the result **must** be the tensor double contraction (default).
 
-    If ``axes`` is a tuple of two sequences ``(x1_axes, x2_axes)``, the first sequence must apply to ``x1`` and the second sequence to ``x2``. Both sequences must have the same length. Each axis (dimension) ``x1_axes[i]`` for ``x1`` must have the same size as the respective axis (dimension) ``x2_axes[i]`` for ``x2``. Each index referred to in a sequence must be unique. If ``x1`` has rank (i.e, number of dimensions) ``N``, a valid ``x1`` axis must reside on the half-open interval ``[-N, N)``. If ``x2`` has rank ``M``, a valid ``x2`` axis must reside on the half-open interval ``[-M, M)``.
+    If ``axes`` is a tuple of two sequences ``(x1_axes, x2_axes)``, the first sequence **must** apply to ``x1`` and the second sequence **must** apply to ``x2``. Both sequences **must** have the same length. Each axis ``x1_axes[i]`` for ``x1`` **must** have the same size as the respective axis ``x2_axes[i]`` for ``x2``. Each index referred to in a sequence **must** be unique. A valid axis **must** be an integer on the interval ``[-S, S)``, where ``S`` is the number of axes in respective array. Hence, if ``x1`` has ``N`` axes, a valid ``x1`` axes **must** be an integer on the interval ``[-N, N)``. If ``x2`` has ``M`` axes, a valid ``x2`` axes **must** be an integer on the interval ``[-M, M)``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception.
 
-
-    .. note::
-    If either ``x1`` or ``x2`` has a complex floating-point data type, neither argument must be complex-conjugated or transposed. If conjugation and/or transposition is desired, these operations should be explicitly performed prior to computing the generalized matrix product.
 
     Returns
     -------
     out: array
-    an array containing the tensor contraction whose shape consists of the non-contracted axes (dimensions) of the first array ``x1``, followed by the non-contracted axes (dimensions) of the second array ``x2``. The returned array must have a data type determined by :ref:`type-promotion`.
+    an array containing the tensor contraction. The returned array **must** have a shape which consists of the non-contracted axes of the first array ``x1``, followed by the non-contracted axes of the second array ``x2``. The returned array **must** have a data type determined by :ref:`type-promotion`.
 
     Notes
     -----
+    -   The ``tensordot`` function corresponds to the generalized matrix product.
+    -   Contracted axes **must** not be broadcasted.
+    -   If either ``x1`` or ``x2`` has a complex floating-point data type, the function **must not** complex-conjugate or transpose either argument. If conjugation and/or transposition is desired, a user can explicitly perform these operations prior to computing the generalized matrix product.
 
     .. versionchanged:: 2022.12
     Added complex data type support.
@@ -8024,31 +8024,32 @@ class vecdot[TArray: Array](Protocol):
     .. math::
     \\mathbf{a} \\cdot \\mathbf{b} = \\sum_{i=0}^{n-1} \\overline{a_i}b_i
 
-    over the dimension specified by ``axis`` and where :math:`n` is the dimension size and :math:`\\overline{a_i}` denotes the complex conjugate if :math:`a_i` is complex and the identity if :math:`a_i` is real-valued.
+    over the axis specified by ``axis`` and where :math:`n` is the axis size and :math:`\\overline{a_i}` denotes the complex conjugate if :math:`a_i` is complex and the identity if :math:`a_i` is real-valued.
 
     Parameters
     ----------
     x1: array
-    first input array. Should have a floating-point data type.
+    first input array. **Should** have a floating-point data type.
     x2: array
-    second input array. Must be compatible with ``x1`` for all non-contracted axes (see :ref:`broadcasting`). The size of the axis over which to compute the dot product must be the same size as the respective axis in ``x1``. Should have a floating-point data type.
-
-    .. note::
-       The contracted axis (dimension) must not be broadcasted.
-
+    second input array. **Must** be compatible with ``x1`` for all non-contracted axes (see :ref:`broadcasting`). The size of the axis over which to compute the dot product **must** be the same size as the respective axis in ``x1``. **Should** have a floating-point data type.
     axis: int
-    the axis (dimension) of ``x1`` and ``x2`` containing the vectors for which to compute the dot product. Should be an integer on the interval ``[-N, -1]``, where ``N`` is ``min(x1.ndim, x2.ndim)``. The function must determine the axis along which to compute the dot product by counting backward from the last dimension (where ``-1`` refers to the last dimension). By default, the function must compute the dot product over the last axis. Default: ``-1``.
+    axis of ``x1`` and ``x2`` containing the vectors for which to compute the dot product. **Should** be an integer on the interval ``[-N, -1]``, where ``N`` is ``min(x1.ndim, x2.ndim)``. The function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). By default, the function **must** compute the dot product over the last axis. Default: ``-1``.
 
     Returns
     -------
     out: array
-    if ``x1`` and ``x2`` are both one-dimensional arrays, a zero-dimensional containing the dot product; otherwise, a non-zero-dimensional array containing the dot products and having rank ``N-1``, where ``N`` is the rank (number of dimensions) of the shape determined according to :ref:`broadcasting` along the non-contracted axes. The returned array must have a data type determined by :ref:`type-promotion`.
+    if ``x1`` and ``x2`` are both one-dimensional arrays, a zero-dimensional containing the dot product; otherwise, a non-zero-dimensional array containing the dot products and having ``N-1`` axes, where ``N`` is number of axes in the shape determined according to :ref:`broadcasting` along the non-contracted axes. The returned array **must** have a data type determined by :ref:`type-promotion`.
+
+    Raises
+    ------
+    Exception
+    an exception **should** be raised in the following circumstances:
+
+    -   if the size of the axis over which to compute the dot product is not the same (before broadcasting) for both ``x1`` and ``x2``.
 
     Notes
     -----
-    **Raises**
-
-    -   if the size of the axis over which to compute the dot product is not the same (before broadcasting) for both ``x1`` and ``x2``.
+    -   The contracted axis **must** not be broadcasted.
 
     .. versionchanged:: 2022.12
     Added complex data type support.
@@ -8075,7 +8076,7 @@ class broadcast_arrays[TArray: Array](Protocol):
     Returns
     -------
     out: List[array]
-    a list of broadcasted arrays. Each array must have the same shape. Each array must have the same dtype as its corresponding input array.
+    a list of broadcasted arrays. Each array **must** have the same shape. Each array **must** have the same dtype as its corresponding input array.
 
     """
 
@@ -8091,14 +8092,14 @@ class broadcast_to[TArray: Array](Protocol):
     Parameters
     ----------
     x: array
-    array to broadcast. Must be capable of being broadcast to the specified ``shape`` (see :ref:`broadcasting`). If the array is incompatible with the specified shape, the function must raise an exception.
+    array to broadcast. **Must** be capable of being broadcast to the specified ``shape`` (see :ref:`broadcasting`). If the array is incompatible with the specified shape, the function **must** raise an exception.
     shape: Tuple[int, ...]
     array shape.
 
     Returns
     -------
     out: array
-    an array having the specified shape. Must have the same data type as ``x``.
+    an array having the specified shape. **Must** have the same data type as ``x``.
 
     .. versionchanged:: 2024.12
     Clarified broadcast behavior.
@@ -8117,17 +8118,17 @@ class concat[TArray: Array](Protocol):
     Parameters
     ----------
     arrays: Union[Tuple[array, ...], List[array]]
-    input arrays to join. The arrays must have the same shape, except in the dimension specified by ``axis``.
+    input arrays to join. The arrays **must** have the same shape, except in the dimension specified by ``axis``.
     axis: Optional[int]
-    axis along which the arrays will be joined. If ``axis`` is ``None``, arrays must be flattened before concatenation. If ``axis`` is negative, the function must determine the axis along which to join by counting from the last dimension. Default: ``0``.
+    axis along which to join the arrays. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in each array. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. If ``axis`` is ``None``, arrays **must** be flattened before concatenation. Default: ``0``.
 
     Returns
     -------
     out: array
-    an output array containing the concatenated values. If the input arrays have different data types, normal :ref:`type-promotion` must apply. If the input arrays have the same data type, the output array must have the same data type as the input arrays.
+    an output array containing the concatenated values. If the input arrays have different data types, normal :ref:`type-promotion` **must** apply. If the input arrays have the same data type, the output array **must** have the same data type as the input arrays.
 
     .. note::
-       This specification leaves type promotion between data type families (i.e., ``intxx`` and ``floatxx``) unspecified.
+       This specification leaves type promotion between data type families (i.e., ``intxx`` and ``floatxx``) unspecified and thus implementation-defined.
 
     """
 
@@ -8138,24 +8139,24 @@ class concat[TArray: Array](Protocol):
 @runtime_checkable
 class expand_dims[TArray: Array](Protocol):
     """
-    Expands the shape of an array by inserting a new axis (dimension) of size one at the position specified by ``axis``.
+    Expands the shape of an array by inserting a new axis of size one at the position specified by ``axis``.
 
     Parameters
     ----------
     x: array
     input array.
     axis: int
-    axis position (zero-based). If ``x`` has rank (i.e, number of dimensions) ``N``, a valid ``axis`` must reside on the closed-interval ``[-N-1, N]``. If provided a negative ``axis``, the axis position at which to insert a singleton dimension must be computed as ``N + axis + 1``. Hence, if provided ``-1``, the resolved axis position must be ``N`` (i.e., a singleton dimension must be appended to the input array ``x``). If provided ``-N-1``, the resolved axis position must be ``0`` (i.e., a singleton dimension must be prepended to the input array ``x``).
+    axis position (zero-based). A valid ``axis`` **must** reside on the closed-interval ``[-N-1, N]``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the axis position at which to insert a singleton dimension **must** be computed as ``N + axis + 1``. Hence, if provided ``-1``, the resolved axis position **must** be ``N`` (i.e., a singleton dimension **must** be appended to the input array ``x``). If provided ``-N-1``, the resolved axis position **must** be ``0`` (i.e., a singleton dimension **must** be prepended to the input array ``x``). If provided an invalid axis, the function **must** raise an exception. Default: ``0``.
 
     Returns
     -------
     out: array
-    an expanded output array having the same data type as ``x``.
+    an expanded output array. **Must** have the same data type as ``x``.
 
     Raises
     ------
     IndexError
-    If provided an invalid ``axis`` position, an ``IndexError`` should be raised.
+    If provided an invalid ``axis``, an ``IndexError`` **should** be raised.
 
     """
 
@@ -8166,19 +8167,19 @@ class expand_dims[TArray: Array](Protocol):
 @runtime_checkable
 class flip[TArray: Array](Protocol):
     """
-    Reverses the order of elements in an array along the given axis. The shape of the array must be preserved.
+    Reverses the order of elements in an array along the given axis.
 
     Parameters
     ----------
     x: array
     input array.
     axis: Optional[Union[int, Tuple[int, ...]]]
-    axis (or axes) along which to flip. If ``axis`` is ``None``, the function must flip all input array axes. If ``axis`` is negative, the function must count from the last dimension. If provided more than one axis, the function must flip only the specified axes. Default: ``None``.
+    axis (or axes) along which to reverse elements. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. If ``axis`` is ``None``, the function **must** flip all input array axes. If provided more than one axis, the function **must** flip only the specified axes. Default: ``None``.
 
     Returns
     -------
     out: array
-    an output array having the same data type and shape as ``x`` and whose elements, relative to ``x``, are reordered.
+    an output array. The returned array **must** have the same data type and shape as ``x``. The returned array must have the same elements as ``x``, but which are reordered relative to ``x``.
 
     """
 
@@ -8189,21 +8190,21 @@ class flip[TArray: Array](Protocol):
 @runtime_checkable
 class moveaxis[TArray: Array](Protocol):
     """
-    Moves array axes (dimensions) to new positions, while leaving other axes in their original positions.
+    Moves array axes to new positions, while leaving other axes in their original positions.
 
     Parameters
     ----------
     x: array
     input array.
     source: Union[int, Tuple[int, ...]]
-    Axes to move. Provided axes must be unique. If ``x`` has rank (i.e, number of dimensions) ``N``, a valid axis must reside on the half-open interval ``[-N, N)``.
+    axis (or axes) to move. Provided source axes **must** be unique. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception.
     destination: Union[int, Tuple[int, ...]]
-    indices defining the desired positions for each respective ``source`` axis index. Provided indices must be unique. If ``x`` has rank (i.e, number of dimensions) ``N``, a valid axis must reside on the half-open interval ``[-N, N)``.
+    axis (or axes) defining the desired position(s) for each respective ``source`` axis index. Provided destination axes **must** be unique. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception.
 
     Returns
     -------
     out: array
-    an array containing reordered axes. The returned array must have the same data type as ``x``.
+    an array containing reordered axes. The returned array **must** have the same data type as ``x``.
 
     Notes
     -----
@@ -8219,19 +8220,19 @@ class moveaxis[TArray: Array](Protocol):
 @runtime_checkable
 class permute_dims[TArray: Array](Protocol):
     """
-    Permutes the axes (dimensions) of an array ``x``.
+    Permutes the axes of an array ``x``.
 
     Parameters
     ----------
     x: array
     input array.
     axes: Tuple[int, ...]
-    tuple containing a permutation of ``(0, 1, ..., N-1)`` where ``N`` is the number of axes (dimensions) of ``x``.
+    tuple containing a permutation of ``(0, 1, ..., N-1)`` where ``N`` is the number of axes in ``x``.
 
     Returns
     -------
     out: array
-    an array containing the axes permutation. The returned array must have the same data type as ``x``.
+    an array containing the axes permutation. The returned array **must** have the same data type as ``x``.
 
     """
 
@@ -8247,7 +8248,7 @@ class repeat[TArray: Array](Protocol):
     .. admonition:: Data-dependent output shape
     :class: important
 
-    When ``repeats`` is an array, the shape of the output array for this function depends on the data values in the ``repeats`` array; hence, array libraries which build computation graphs (e.g., JAX, Dask, etc.) may find this function difficult to implement without knowing the values in ``repeats``. Accordingly, such libraries may choose to omit support for ``repeats`` arrays; however, conforming implementations must support providing a literal ``int``. See :ref:`data-dependent-output-shapes` section for more details.
+    When ``repeats`` is an array, the shape of the output array for this function depends on the data values in the ``repeats`` array; hence, array libraries which build computation graphs (e.g., JAX, Dask, etc.) can find this function difficult to implement without knowing the values in ``repeats``. Accordingly, such libraries **may** choose to omit support for ``repeats`` arrays; however, conforming implementations **must** support providing a literal ``int``. See :ref:`data-dependent-output-shapes` section for more details.
 
     Parameters
     ----------
@@ -8256,31 +8257,29 @@ class repeat[TArray: Array](Protocol):
     repeats: Union[int, array]
     the number of repetitions for each element.
 
-    If ``axis`` is ``None``, let ``N = prod(x.shape)`` and
+    If ``axis`` is ``None``, let ``M = prod(x.shape)`` and
 
-    -   if ``repeats`` is an array, ``repeats`` must be broadcast compatible with the shape ``(N,)`` (i.e., be a one-dimensional array having shape ``(1,)`` or ``(N,)``).
-    -   if ``repeats`` is an integer, ``repeats`` must be broadcasted to the shape `(N,)`.
+    -   if ``repeats`` is an array, ``repeats`` **must** be broadcast compatible with the shape ``(M,)`` (i.e., be a one-dimensional array having shape ``(1,)`` or ``(M,)``).
+    -   if ``repeats`` is an integer, ``repeats`` **must** be broadcasted to the shape `(M,)`.
 
-    If ``axis`` is not ``None``, let ``M = x.shape[axis]`` and
+    If ``axis`` is not ``None``, let ``S = x.shape[axis]`` and
 
-    -   if ``repeats`` is an array, ``repeats`` must be broadcast compatible with the shape ``(M,)`` (i.e., be a one-dimensional array having shape ``(1,)`` or ``(M,)``).
-    -   if ``repeats`` is an integer, ``repeats`` must be broadcasted to the shape ``(M,)``.
+    -   if ``repeats`` is an array, ``repeats`` **must** be broadcast compatible with the shape ``(S,)`` (i.e., be a one-dimensional array having shape ``(1,)`` or ``(S,)``).
+    -   if ``repeats`` is an integer, ``repeats`` **must** be broadcasted to the shape ``(S,)``.
 
-    If ``repeats`` is an array, the array must have an integer data type.
-
-    .. note::
-       For specification-conforming array libraries supporting hardware acceleration, providing an array for ``repeats`` may cause device synchronization due to an unknown output shape. For those array libraries where synchronization concerns are applicable, conforming array libraries are advised to include a warning in their documentation regarding potential performance degradation when ``repeats`` is an array.
+    If ``repeats`` is an array, the array **must** have an integer data type.
 
     axis: Optional[int]
-    the axis (dimension) along which to repeat elements. If ``axis`` is `None`, the function must flatten the input array ``x`` and then repeat elements of the flattened input array and return the result as a one-dimensional output array. A flattened input array must be flattened in row-major, C-style order. Default: ``None``.
+    the axis along which to repeat elements. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. If ``axis`` is `None`, the function **must** flatten the input array ``x`` and then repeat elements of the flattened input array and return the result as a one-dimensional output array. A flattened input array **must** be flattened in row-major, C-style order. Default: ``None``.
 
     Returns
     -------
     out: array
-    an output array containing repeated elements. The returned array must have the same data type as ``x``. If ``axis`` is ``None``, the returned array must be a one-dimensional array; otherwise, the returned array must have the same shape as ``x``, except for the axis (dimension) along which elements were repeated.
+    an output array containing repeated elements. The returned array **must** have the same data type as ``x``. If ``axis`` is ``None``, the returned array **must** be a one-dimensional array; otherwise, the returned array **must** have the same shape as ``x``, except for the axis along which elements were repeated.
 
     Notes
     -----
+    -   For specification-conforming array libraries supporting hardware acceleration, providing an array for ``repeats`` can cause device synchronization due to an unknown output shape. For those array libraries where synchronization concerns are applicable, conforming array libraries **should** include a warning in their documentation regarding potential performance degradation when ``repeats`` is an array.
 
     .. versionadded:: 2023.12
 
@@ -8300,20 +8299,19 @@ class reshape[TArray: Array](Protocol):
     x: array
     input array to reshape.
     shape: Tuple[int, ...]
-    a new shape compatible with the original shape. One shape dimension is allowed to be ``-1``. When a shape dimension is ``-1``, the corresponding output array shape dimension must be inferred from the length of the array and the remaining dimensions.
+    a new shape compatible with the original shape. Only one shape dimension **must** be allowed to be ``-1``. When a shape dimension is ``-1``, the corresponding output array shape dimension **must** be inferred from the length of the array and the remaining dimensions.
     copy: Optional[bool]
-    whether or not to copy the input array. If ``True``, the function must always copy (see :ref:`copy-keyword-argument`). If ``False``, the function must never copy. If ``None``, the function must avoid copying, if possible, and may copy otherwise. Default: ``None``.
+    whether or not to copy the input array. If ``True``, the function **must** always copy (see :ref:`copy-keyword-argument`). If ``False``, the function **must** never copy. If ``None``, the function **must** avoid copying, if possible, and **may** copy otherwise. Default: ``None``.
 
     Returns
     -------
     out: array
-    an output array having the same data type and elements as ``x``.
+    an output array. The returned array **must** have the same data type and the same elements as ``x``.
 
     Raises
     ------
     ValueError
-    If ``copy=False`` and a copy would be necessary, a ``ValueError``
-    should be raised.
+    If ``copy=False`` and a copy would be necessary, a ``ValueError`` **should** be raised.
 
     """
 
@@ -8324,21 +8322,25 @@ class reshape[TArray: Array](Protocol):
 @runtime_checkable
 class roll[TArray: Array](Protocol):
     """
-    Rolls array elements along a specified axis. Array elements that roll beyond the last position are re-introduced at the first position. Array elements that roll beyond the first position are re-introduced at the last position.
+    Rolls array elements along a specified axis.
+
+    Array elements that roll beyond the last position are re-introduced at the first position.
+
+    Array elements that roll beyond the first position are re-introduced at the last position.
 
     Parameters
     ----------
     x: array
     input array.
     shift: Union[int, Tuple[int, ...]]
-    number of places by which the elements are shifted. If ``shift`` is a tuple, then ``axis`` must be a tuple of the same size, and each of the given axes must be shifted by the corresponding element in ``shift``. If ``shift`` is an ``int`` and ``axis`` a tuple, then the same ``shift`` must be used for all specified axes. If a shift is positive, then array elements must be shifted positively (toward larger indices) along the dimension of ``axis``. If a shift is negative, then array elements must be shifted negatively (toward smaller indices) along the dimension of ``axis``.
+    number of places by which the elements are shifted. If ``shift`` is a tuple, then ``axis`` **must** be a tuple of the same size, and each of the given axes **must** be shifted by the corresponding element in ``shift``. If ``shift`` is an ``int`` and ``axis`` a tuple, then the same ``shift`` **must** be used for all specified axes. If a shift is positive, then array elements **must** be shifted positively (toward larger indices) along the dimension of ``axis``. If a shift is negative, then array elements **must** be shifted negatively (toward smaller indices) along the dimension of ``axis``.
     axis: Optional[Union[int, Tuple[int, ...]]]
-    axis (or axes) along which elements to shift. If ``axis`` is ``None``, the array must be flattened, shifted, and then restored to its original shape. Default: ``None``.
+    axis (or axes) along which elements to shift. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. If ``axis`` is ``None``, the array **must** be flattened, shifted, and then restored to its original shape. Default: ``None``.
 
     Returns
     -------
     out: array
-    an output array having the same data type as ``x`` and whose elements, relative to ``x``, are shifted.
+    an output array. The returned array **must** have the same data type as ``x``. The returned array **must** have the same elements as ``x``, but which are shifted relative to ``x``.
 
     """
 
@@ -8349,25 +8351,24 @@ class roll[TArray: Array](Protocol):
 @runtime_checkable
 class squeeze[TArray: Array](Protocol):
     """
-    Removes singleton dimensions (axes) from ``x``.
+    Removes singleton axes from ``x``.
 
     Parameters
     ----------
     x: array
     input array.
     axis: Union[int, Tuple[int, ...]]
-    axis (or axes) to squeeze.
+    axis (or axes) to squeeze. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception.
 
     Returns
     -------
     out: array
-    an output array having the same data type and elements as ``x``.
+    an output array. The returned array **must** have the same data type and the same elements as ``x``.
 
     Raises
     ------
     ValueError
-    If a specified axis has a size greater than one (i.e., it is not a
-    singleton dimension), a ``ValueError`` should be raised.
+    If a specified axis has a size greater than one (i.e., it is not a singleton axis), a ``ValueError`` **should** be raised.
 
     """
 
@@ -8383,17 +8384,18 @@ class stack[TArray: Array](Protocol):
     Parameters
     ----------
     arrays: Union[Tuple[array, ...], List[array]]
-    input arrays to join. Each array must have the same shape.
+    input arrays to join. Each array **must** have the same shape.
     axis: int
-    axis along which the arrays will be joined. Providing an ``axis`` specifies the index of the new axis in the dimensions of the result. For example, if ``axis`` is ``0``, the new axis will be the first dimension and the output array will have shape ``(N, A, B, C)``; if ``axis`` is ``1``, the new axis will be the second dimension and the output array will have shape ``(A, N, B, C)``; and, if ``axis`` is ``-1``, the new axis will be the last dimension and the output array will have shape ``(A, B, C, N)``. A valid ``axis`` must be on the interval ``[-N, N)``, where ``N`` is the rank (number of dimensions) of ``x``. If provided an ``axis`` outside of the required interval, the function must raise an exception. Default: ``0``.
+    axis along which to join the arrays. Providing an ``axis`` specifies the index of the new axis in the shape of the result. For example, if ``axis`` is ``0``, the new axis **must** be the first dimension and the output array **must** have shape ``(N, A, B, C)``; if ``axis`` is ``1``, the new axis will be the second dimension and the output array will have shape ``(A, N, B, C)``; and, if ``axis`` is ``-1``, the new axis will be the last dimension and the output array will have shape ``(A, B, C, N)``. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. Default: ``0``.
 
     Returns
     -------
     out: array
-    an output array having rank ``N+1``, where ``N`` is the rank (number of dimensions) of ``x``. If the input arrays have different data types, normal :ref:`type-promotion` must apply. If the input arrays have the same data type, the output array must have the same data type as the input arrays.
+    an output array. The returned array **must** have ``N+1`` axes, where ``N`` is the number of axes in ``x``. If the input arrays have different data types, normal :ref:`type-promotion` **must** apply. If the input arrays have the same data type, the output array **must** have the same data type as the input arrays.
 
-    .. note::
-       This specification leaves type promotion between data type families (i.e., ``intxx`` and ``floatxx``) unspecified.
+    Notes
+    -----
+    -   This specification leaves type promotion between data type families (i.e., ``intxx`` and ``floatxx``) unspecified and thus implementation-defined.
 
     """
 
@@ -8411,18 +8413,18 @@ class tile[TArray: Array](Protocol):
     x: array
     input array.
     repetitions: Tuple[int, ...]
-    number of repetitions along each axis (dimension).
+    number of repetitions along each axis.
 
     Let ``N = len(x.shape)`` and ``M = len(repetitions)``.
 
-    If ``N > M``, the function must prepend ones until all axes (dimensions) are specified (e.g., if ``x`` has shape ``(8,6,4,2)`` and ``repetitions`` is the tuple ``(3,3)``, then ``repetitions`` must be treated as ``(1,1,3,3)``).
+    If ``N > M``, the function **must** prepend ones until all axes are specified (e.g., if ``x`` has shape ``(8,6,4,2)`` and ``repetitions`` is the tuple ``(3,3)``, then ``repetitions`` **must** be treated as ``(1,1,3,3)``).
 
-    If ``N < M``, the function must prepend singleton axes (dimensions) to ``x`` until ``x`` has as many axes (dimensions) as ``repetitions`` specifies (e.g., if ``x`` has shape ``(4,2)`` and ``repetitions`` is the tuple ``(3,3,3,3)``, then ``x`` must be treated as if it has shape ``(1,1,4,2)``).
+    If ``N < M``, the function **must** prepend singleton axes to ``x`` until ``x`` has as many axes as ``repetitions`` specifies (e.g., if ``x`` has shape ``(4,2)`` and ``repetitions`` is the tuple ``(3,3,3,3)``, then ``x`` **must** be treated as if it has shape ``(1,1,4,2)``).
 
     Returns
     -------
     out: array
-    a tiled output array. The returned array must have the same data type as ``x`` and must have a rank (i.e., number of dimensions) equal to ``max(N, M)``. If ``S`` is the shape of the tiled array after prepending singleton dimensions (if necessary) and ``r`` is the tuple of repetitions after prepending ones (if necessary), then the number of elements along each axis (dimension) must satisfy ``S[i]*r[i]``, where ``i`` refers to the ``i`` th axis (dimension).
+    a tiled output array. The returned array **must** have the same data type as ``x`` and **must** have a number of axes equal to ``max(N, M)``. If ``S`` is the shape of the tiled array after prepending singleton dimensions (if necessary) and ``r`` is the tuple of repetitions after prepending ones (if necessary), then the number of elements along each axis **must** satisfy ``S[i]*r[i]``, where ``i`` refers to the ``i`` th axis.
 
     Notes
     -----
@@ -8445,12 +8447,12 @@ class unstack[TArray: Array](Protocol):
     x: array
     input array.
     axis: int
-    axis along which the array will be split. A valid ``axis`` must be on the interval ``[-N, N)``, where ``N`` is the rank (number of dimensions) of ``x``. If provided an ``axis`` outside of the required interval, the function must raise an exception. Default: ``0``.
+    axis along which to split an array. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. Default: ``0``.
 
     Returns
     -------
     out: Tuple[array, ...]
-    tuple of slices along the given dimension. All the arrays have the same shape.
+    tuple of slices along the given dimension. Each returned array **must** have the same shape.
 
     Notes
     -----
@@ -8471,39 +8473,36 @@ class unique_all[TArray: Array](Protocol):
     .. admonition:: Data-dependent output shape
     :class: important
 
-    The shapes of two of the output arrays for this function depend on the data values in the input array; hence, array libraries which build computation graphs (e.g., JAX, Dask, etc.) may find this function difficult to implement without knowing array values. Accordingly, such libraries may choose to omit this function. See :ref:`data-dependent-output-shapes` section for more details.
-
-    .. note::
-    Uniqueness should be determined based on value equality (see :func:`~array_api.equal`). For input arrays having floating-point data types, value-based equality implies the following behavior.
-
-    -   As ``nan`` values compare as ``False``, ``nan`` values should be considered distinct.
-    -   As complex floating-point values having at least one ``nan`` component compare as ``False``, complex floating-point values having ``nan`` components should be considered distinct.
-    -   As ``-0`` and ``+0`` compare as ``True``, signed zeros should not be considered distinct, and the corresponding unique element will be implementation-dependent (e.g., an implementation could choose to return ``-0`` if ``-0`` occurs before ``+0``).
-
-    As signed zeros are not distinct, using ``inverse_indices`` to reconstruct the input array is not guaranteed to return an array having the exact same values.
-
-    Each ``nan`` value and each complex floating-point value having a ``nan`` component should have a count of one, while the counts for signed zeros should be aggregated as a single count.
+    The shapes of two of the output arrays for this function depend on the data values in the input array; hence, array libraries which build computation graphs (e.g., JAX, Dask, et cetera) can find this function difficult to implement without knowing array values. Accordingly, such libraries **may** choose to omit this function. See :ref:`data-dependent-output-shapes` section for more details.
 
     Parameters
     ----------
     x: array
-    input array. If ``x`` has more than one dimension, the function must flatten ``x`` and return the unique elements of the flattened array.
+    input array. If ``x`` has more than one dimension, the function **must** flatten ``x`` and return the unique elements of the flattened array.
 
     Returns
     -------
     out: Tuple[array, array, array, array]
     a namedtuple ``(values, indices, inverse_indices, counts)`` whose
 
-    - first element must have the field name ``values`` and must be a one-dimensional array containing the unique elements of ``x``. The array must have the same data type as ``x``.
-    - second element must have the field name ``indices`` and must be an array containing the indices (first occurrences) of a flattened ``x`` that result in ``values``. The array must have the same shape as ``values`` and must have the default array index data type.
-    - third element must have the field name ``inverse_indices`` and must be an array containing the indices of ``values`` that reconstruct ``x``. The array must have the same shape as ``x`` and must have the default array index data type.
-    - fourth element must have the field name ``counts`` and must be an array containing the number of times each unique element occurs in ``x``. The order of the returned counts must match the order of ``values``, such that a specific element in ``counts`` corresponds to the respective unique element in ``values``. The returned array must have same shape as ``values`` and must have the default array index data type.
-
-    .. note::
-       The order of unique elements is not specified and may vary between implementations.
+    -   first element **must** have the field name ``values`` and **must** be a one-dimensional array containing the unique elements of ``x``. The array **must** have the same data type as ``x``.
+    -   second element **must** have the field name ``indices`` and **must** be an array containing the indices (first occurrences) of a flattened ``x`` that result in ``values``. The array **must** have the same shape as ``values`` and **must** have the default array index data type.
+    -   third element **must** have the field name ``inverse_indices`` and **must** be an array containing the indices of ``values`` that reconstruct ``x``. The array **must** have the same shape as ``x`` and **must** have the default array index data type.
+    -   fourth element **must** have the field name ``counts`` and **must** be an array containing the number of times each unique element occurs in ``x``. The order of the returned counts **must** match the order of ``values``, such that a specific element in ``counts`` corresponds to the respective unique element in ``values``. The returned array **must** have same shape as ``values`` and **must** have the default array index data type.
 
     Notes
     -----
+    -   The order of unique elements returned by this function is unspecified and thus implementation-defined. As a consequence, element order **may** vary between implementations.
+
+    -   Uniqueness **should** be determined based on value equality (see :func:`~array_api.equal`). For input arrays having floating-point data types, value-based equality implies the following behavior.
+
+    -   As ``nan`` values compare as ``False``, ``nan`` values **should** be considered distinct.
+    -   As complex floating-point values having at least one ``nan`` component compare as ``False``, complex floating-point values having ``nan`` components **should** be considered distinct.
+    -   As ``-0`` and ``+0`` compare as ``True``, signed zeros **should not** be considered distinct, and the corresponding unique element **may** be implementation-defined (e.g., an implementation **may** choose to return ``-0`` if ``-0`` occurs before ``+0``).
+
+    As signed zeros are not distinct, using ``inverse_indices`` to reconstruct the input array is not guaranteed to return an array having the exact same values.
+
+    Each ``nan`` value and each complex floating-point value having a ``nan`` component **should** have a count of one, while the counts for signed zeros **should** be aggregated as a single count.
 
     .. versionchanged:: 2022.12
     Added complex data type support.
@@ -8525,35 +8524,32 @@ class unique_counts[TArray: Array](Protocol):
     .. admonition:: Data-dependent output shape
     :class: important
 
-    The shapes of two of the output arrays for this function depend on the data values in the input array; hence, array libraries which build computation graphs (e.g., JAX, Dask, etc.) may find this function difficult to implement without knowing array values. Accordingly, such libraries may choose to omit this function. See :ref:`data-dependent-output-shapes` section for more details.
-
-    .. note::
-    Uniqueness should be determined based on value equality (see :func:`~array_api.equal`). For input arrays having floating-point data types, value-based equality implies the following behavior.
-
-    -   As ``nan`` values compare as ``False``, ``nan`` values should be considered distinct.
-    -   As complex floating-point values having at least one ``nan`` component compare as ``False``, complex floating-point values having ``nan`` components should be considered distinct.
-    -   As ``-0`` and ``+0`` compare as ``True``, signed zeros should not be considered distinct, and the corresponding unique element will be implementation-dependent (e.g., an implementation could choose to return ``-0`` if ``-0`` occurs before ``+0``).
-
-    Each ``nan`` value and each complex floating-point value having a ``nan`` component should have a count of one, while the counts for signed zeros should be aggregated as a single count.
+    The shapes of two of the output arrays for this function depend on the data values in the input array; hence, array libraries which build computation graphs (e.g., JAX, Dask, etc.) can find this function difficult to implement without knowing array values. Accordingly, such libraries **may** choose to omit this function. See :ref:`data-dependent-output-shapes` section for more details.
 
     Parameters
     ----------
     x: array
-    input array. If ``x`` has more than one dimension, the function must flatten ``x`` and return the unique elements of the flattened array.
+    input array. If ``x`` has more than one dimension, the function **must** flatten ``x`` and return the unique elements of the flattened array.
 
     Returns
     -------
     out: Tuple[array, array]
     a namedtuple `(values, counts)` whose
 
-    -   first element must have the field name ``values`` and must be a one-dimensional array containing the unique elements of ``x``. The array must have the same data type as ``x``.
-    -   second element must have the field name `counts` and must be an array containing the number of times each unique element occurs in ``x``. The order of the returned counts must match the order of ``values``, such that a specific element in ``counts`` corresponds to the respective unique element in ``values``. The returned array must have same shape as ``values`` and must have the default array index data type.
-
-    .. note::
-       The order of unique elements is not specified and may vary between implementations.
+    -   first element **must** have the field name ``values`` and **must** be a one-dimensional array containing the unique elements of ``x``. The array **must** have the same data type as ``x``.
+    -   second element **must** have the field name `counts` and **must** be an array containing the number of times each unique element occurs in ``x``. The order of the returned counts **must** match the order of ``values``, such that a specific element in ``counts`` corresponds to the respective unique element in ``values``. The returned array **must** have same shape as ``values`` and **must** have the default array index data type.
 
     Notes
     -----
+    -   The order of unique elements returned by this function is unspecified and thus implementation-defined. As a consequence, element order **may** vary between implementations.
+
+    -   Uniqueness **should** be determined based on value equality (see :func:`~array_api.equal`). For input arrays having floating-point data types, value-based equality implies the following behavior.
+
+    -   As ``nan`` values compare as ``False``, ``nan`` values **should** be considered distinct.
+    -   As complex floating-point values having at least one ``nan`` component compare as ``False``, complex floating-point values having ``nan`` components **should** be considered distinct.
+    -   As ``-0`` and ``+0`` compare as ``True``, signed zeros **should not** be considered distinct, and the corresponding unique element **may** be implementation-defined (e.g., an implementation **may** choose to return ``-0`` if ``-0`` occurs before ``+0``).
+
+    Each ``nan`` value and each complex floating-point value having a ``nan`` component **should** have a count of one, while the counts for signed zeros **should** be aggregated as a single count.
 
     .. versionchanged:: 2022.12
     Added complex data type support.
@@ -8575,35 +8571,32 @@ class unique_inverse[TArray: Array](Protocol):
     .. admonition:: Data-dependent output shape
     :class: important
 
-    The shapes of two of the output arrays for this function depend on the data values in the input array; hence, array libraries which build computation graphs (e.g., JAX, Dask, etc.) may find this function difficult to implement without knowing array values. Accordingly, such libraries may choose to omit this function. See :ref:`data-dependent-output-shapes` section for more details.
-
-    .. note::
-    Uniqueness should be determined based on value equality (see :func:`~array_api.equal`). For input arrays having floating-point data types, value-based equality implies the following behavior.
-
-    -   As ``nan`` values compare as ``False``, ``nan`` values should be considered distinct.
-    -   As complex floating-point values having at least one ``nan`` component compare as ``False``, complex floating-point values having ``nan`` components should be considered distinct.
-    -   As ``-0`` and ``+0`` compare as ``True``, signed zeros should not be considered distinct, and the corresponding unique element will be implementation-dependent (e.g., an implementation could choose to return ``-0`` if ``-0`` occurs before ``+0``).
-
-    As signed zeros are not distinct, using ``inverse_indices`` to reconstruct the input array is not guaranteed to return an array having the exact same values.
+    The shapes of two of the output arrays for this function depend on the data values in the input array; hence, array libraries which build computation graphs (e.g., JAX, Dask, etc.) can find this function difficult to implement without knowing array values. Accordingly, such libraries **may** choose to omit this function. See :ref:`data-dependent-output-shapes` section for more details.
 
     Parameters
     ----------
     x: array
-    input array. If ``x`` has more than one dimension, the function must flatten ``x`` and return the unique elements of the flattened array.
+    input array. If ``x`` has more than one dimension, the function **must** flatten ``x`` and return the unique elements of the flattened array.
 
     Returns
     -------
     out: Tuple[array, array]
     a namedtuple ``(values, inverse_indices)`` whose
 
-    -   first element must have the field name ``values`` and must be a one-dimensional array containing the unique elements of ``x``. The array must have the same data type as ``x``.
-    -   second element must have the field name ``inverse_indices`` and must be an array containing the indices of ``values`` that reconstruct ``x``. The array must have the same shape as ``x`` and have the default array index data type.
-
-    .. note::
-       The order of unique elements is not specified and may vary between implementations.
+    -   first element **must** have the field name ``values`` and **must** be a one-dimensional array containing the unique elements of ``x``. The array **must** have the same data type as ``x``.
+    -   second element **must** have the field name ``inverse_indices`` and **must** be an array containing the indices of ``values`` that reconstruct ``x``. The array **must** have the same shape as ``x`` and have the default array index data type.
 
     Notes
     -----
+    -   The order of unique elements returned by this function is unspecified and thus implementation-defined. As a consequence, element order **may** vary between implementations.
+
+    -   Uniqueness **should** be determined based on value equality (see :func:`~array_api.equal`). For input arrays having floating-point data types, value-based equality implies the following behavior.
+
+    -   As ``nan`` values compare as ``False``, ``nan`` values **should** be considered distinct.
+    -   As complex floating-point values having at least one ``nan`` component compare as ``False``, complex floating-point values having ``nan`` components **should** be considered distinct.
+    -   As ``-0`` and ``+0`` compare as ``True``, signed zeros **should not** be considered distinct, and the corresponding unique element **may** be implementation-defined (e.g., an implementation **may** choose to return ``-0`` if ``-0`` occurs before ``+0``).
+
+    As signed zeros are not distinct, using ``inverse_indices`` to reconstruct the input array is not guaranteed to return an array having the exact same values.
 
     .. versionchanged:: 2022.12
     Added complex data type support.
@@ -8625,30 +8618,27 @@ class unique_values[TArray: Array](Protocol):
     .. admonition:: Data-dependent output shape
     :class: important
 
-    The shapes of two of the output arrays for this function depend on the data values in the input array; hence, array libraries which build computation graphs (e.g., JAX, Dask, etc.) may find this function difficult to implement without knowing array values. Accordingly, such libraries may choose to omit this function. See :ref:`data-dependent-output-shapes` section for more details.
-
-    .. note::
-    Uniqueness should be determined based on value equality (see :func:`~array_api.equal`). For input arrays having floating-point data types, value-based equality implies the following behavior.
-
-    -   As ``nan`` values compare as ``False``, ``nan`` values should be considered distinct.
-    -   As complex floating-point values having at least one ``nan`` component compare as ``False``, complex floating-point values having ``nan`` components should be considered distinct.
-    -   As ``-0`` and ``+0`` compare as ``True``, signed zeros should not be considered distinct, and the corresponding unique element will be implementation-dependent (e.g., an implementation could choose to return ``-0`` if ``-0`` occurs before ``+0``).
+    The shapes of two of the output arrays for this function depend on the data values in the input array; hence, array libraries which build computation graphs (e.g., JAX, Dask, etc.) can find this function difficult to implement without knowing array values. Accordingly, such libraries **may** choose to omit this function. See :ref:`data-dependent-output-shapes` section for more details.
 
     Parameters
     ----------
     x: array
-    input array. If ``x`` has more than one dimension, the function must flatten ``x`` and return the unique elements of the flattened array.
+    input array. If ``x`` has more than one dimension, the function **must** flatten ``x`` and return the unique elements of the flattened array.
 
     Returns
     -------
     out: array
-    a one-dimensional array containing the set of unique elements in ``x``. The returned array must have the same data type as ``x``.
-
-    .. note::
-       The order of unique elements is not specified and may vary between implementations.
+    a one-dimensional array containing the set of unique elements in ``x``. The returned array **must** have the same data type as ``x``.
 
     Notes
     -----
+    -   The order of unique elements returned by this function is unspecified and thus implementation-defined. As a consequence, element order **may** vary between implementations.
+
+    -   Uniqueness **should** be determined based on value equality (see :func:`~array_api.equal`). For input arrays having floating-point data types, value-based equality implies the following behavior.
+
+    -   As ``nan`` values compare as ``False``, ``nan`` values **should** be considered distinct.
+    -   As complex floating-point values having at least one ``nan`` component compare as ``False``, complex floating-point values having ``nan`` components **should** be considered distinct.
+    -   As ``-0`` and ``+0`` compare as ``True``, signed zeros **should not** be considered distinct, and the corresponding unique element **may** be implementation-defined (e.g., an implementation **may** choose to return ``-0`` if ``-0`` occurs before ``+0``).
 
     .. versionchanged:: 2022.12
     Added complex data type support.
@@ -8677,26 +8667,26 @@ class ArrayNamespace[TCapabilities, TDatatypes, TDefaultdatatypes, TSupportsbuff
     result_type: result_type[TArray, TDtype]
     "Returns the dtype that results from applying type promotion rules (see :ref:`type-promotion`) to the arguments.\n\nParameters\n----------\narrays_and_dtypes: Union[array, int, float, complex, bool, dtype]\n    an arbitrary number of input arrays, scalars, and/or dtypes.\n\nReturns\n-------\nout: dtype\n    the dtype resulting from an operation involving the input arrays, scalars, and/or dtypes.\n\nNotes\n-----\n\n-   At least one argument must be an array or a dtype.\n-   If provided array and/or dtype arguments having mixed data type kinds (e.g., integer and floating-point), the returned dtype is unspecified and thus implementation-dependent.\n-   If at least one argument is an array, the function must determine the resulting dtype according to the type promotion graph of the array device which is shared among all array arguments. As not all devices can support all data types, full support for type promotion rules (see :ref:`type-promotion`) may not be possible. Accordingly, the returned dtype may differ from that determined from the complete type promotion graph defined in this specification (see :ref:`type-promotion`).\n-   If two or more arguments are arrays belonging to different devices, behavior is unspecified and thus implementation-dependent. Conforming implementations may choose to ignore device attributes, raise an exception, or some other behavior.\n\n.. versionchanged:: 2024.12\n   Added scalar argument support.\n\n.. versionchanged:: 2024.12\n   Required that the application of type promotion rules must account for device context."
     cumulative_prod: cumulative_prod[TArray, TDtype]
-    "Calculates the cumulative product of elements in the input array ``x``.\n\nParameters\n----------\nx: array\n    input array. Should have one or more dimensions (axes). Should have a numeric data type.\naxis: Optional[int]\n    axis along which a cumulative product must be computed. If ``axis`` is negative, the function must determine the axis along which to compute a cumulative product by counting from the last dimension.\n\n    If ``x`` is a one-dimensional array, providing an ``axis`` is optional; however, if ``x`` has more than one dimension, providing an ``axis`` is required.\n\ndtype: Optional[dtype]\n    data type of the returned array. If ``None``, the returned array must have the same data type as ``x``, unless ``x`` has an integer data type supporting a smaller range of values than the default integer data type (e.g., ``x`` has an ``int16`` or ``uint32`` data type and the default integer data type is ``int64``). In those latter cases:\n\n    -   if ``x`` has a signed integer data type (e.g., ``int16``), the returned array must have the default integer data type.\n    -   if ``x`` has an unsigned integer data type (e.g., ``uint16``), the returned array must have an unsigned integer data type having the same number of bits as the default integer data type (e.g., if the default integer data type is ``int32``, the returned array must have a ``uint32`` data type).\n\n    If the data type (either specified or resolved) differs from the data type of ``x``, the input array should be cast to the specified data type before computing the product (rationale: the ``dtype`` keyword argument is intended to help prevent overflows). Default: ``None``.\n\ninclude_initial: bool\n    boolean indicating whether to include the initial value as the first value in the output. By convention, the initial value must be the multiplicative identity (i.e., one). Default: ``False``.\n\nReturns\n-------\nout: array\n    an array containing the cumulative products. The returned array must have a data type as described by the ``dtype`` parameter above.\n\n    Let ``N`` be the size of the axis along which to compute the cumulative product. The returned array must have a shape determined according to the following rules:\n\n    -   if ``include_initial`` is ``True``, the returned array must have the same shape as ``x``, except the size of the axis along which to compute the cumulative product must be ``N+1``.\n    -   if ``include_initial`` is ``False``, the returned array must have the same shape as ``x``.\n\nNotes\n-----\n\n-   When ``x`` is a zero-dimensional array, behavior is unspecified and thus implementation-defined.\n\n**Special Cases**\n\nFor both real-valued and complex floating-point operands, special cases must be handled as if the operation is implemented by successive application of :func:`~array_api.multiply`.\n\n.. versionadded:: 2024.12"
+    "Calculates the cumulative product of elements in the input array ``x``.\n\nParameters\n----------\nx: array\n    input array. **Should** have one or more dimensions (axes). **Should** have a numeric data type.\naxis: Optional[int]\n    axis along which to compute the cumulative product. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception.\n\n    If ``x`` is a one-dimensional array, providing an ``axis`` **must** be optional; however, if ``x`` has more than one dimension, providing an ``axis`` **must** be required.\n\ndtype: Optional[dtype]\n    data type of the returned array. If ``None``, the returned array **must** have the same data type as ``x``, unless ``x`` has an integer data type supporting a smaller range of values than the default integer data type (e.g., ``x`` has an ``int16`` or ``uint32`` data type and the default integer data type is ``int64``). In those latter cases:\n\n    -   if ``x`` has a signed integer data type (e.g., ``int16``), the returned array **must** have the default integer data type.\n    -   if ``x`` has an unsigned integer data type (e.g., ``uint16``), the returned array **must** have an unsigned integer data type having the same number of bits as the default integer data type (e.g., if the default integer data type is ``int32``, the returned array **must** have a ``uint32`` data type).\n\n    If the data type (either specified or resolved) differs from the data type of ``x``, the input array **should** be cast to the specified data type before computing the product (rationale: the ``dtype`` keyword argument is intended to help prevent overflows). Default: ``None``.\n\ninclude_initial: bool\n    boolean indicating whether to include the initial value as the first value in the output. By convention, the initial value **must** be the multiplicative identity (i.e., one). Default: ``False``.\n\nReturns\n-------\nout: array\n    an array containing the cumulative products. The returned array **must** have a data type as described by the ``dtype`` parameter above.\n\n    Let ``M`` be the size of the axis along which to compute the cumulative product. The returned array **must** have a shape determined according to the following rules:\n\n    -   if ``include_initial`` is ``True``, the returned array **must** have the same shape as ``x``, except the size of the axis along which to compute the cumulative product **must** be ``M+1``.\n    -   if ``include_initial`` is ``False``, the returned array **must** have the same shape as ``x``.\n\nNotes\n-----\n\n-   When ``x`` is a zero-dimensional array, behavior is unspecified and thus implementation-defined.\n\n**Special Cases**\n\nFor both real-valued and complex floating-point operands, special cases **must** be handled as if the operation is implemented by successive application of :func:`~array_api.multiply`.\n\n.. versionadded:: 2024.12"
     cumulative_sum: cumulative_sum[TArray, TDtype]
-    "Calculates the cumulative sum of elements in the input array ``x``.\n\nParameters\n----------\nx: array\n    input array. Should have one or more dimensions (axes). Should have a numeric data type.\naxis: Optional[int]\n    axis along which a cumulative sum must be computed. If ``axis`` is negative, the function must determine the axis along which to compute a cumulative sum by counting from the last dimension.\n\n    If ``x`` is a one-dimensional array, providing an ``axis`` is optional; however, if ``x`` has more than one dimension, providing an ``axis`` is required.\n\ndtype: Optional[dtype]\n    data type of the returned array. If ``None``, the returned array must have the same data type as ``x``, unless ``x`` has an integer data type supporting a smaller range of values than the default integer data type (e.g., ``x`` has an ``int16`` or ``uint32`` data type and the default integer data type is ``int64``). In those latter cases:\n\n    -   if ``x`` has a signed integer data type (e.g., ``int16``), the returned array must have the default integer data type.\n    -   if ``x`` has an unsigned integer data type (e.g., ``uint16``), the returned array must have an unsigned integer data type having the same number of bits as the default integer data type (e.g., if the default integer data type is ``int32``, the returned array must have a ``uint32`` data type).\n\n    If the data type (either specified or resolved) differs from the data type of ``x``, the input array should be cast to the specified data type before computing the sum (rationale: the ``dtype`` keyword argument is intended to help prevent overflows). Default: ``None``.\n\ninclude_initial: bool\n    boolean indicating whether to include the initial value as the first value in the output. By convention, the initial value must be the additive identity (i.e., zero). Default: ``False``.\n\nReturns\n-------\nout: array\n    an array containing the cumulative sums. The returned array must have a data type as described by the ``dtype`` parameter above.\n\n    Let ``N`` be the size of the axis along which to compute the cumulative sum. The returned array must have a shape determined according to the following rules:\n\n    -   if ``include_initial`` is ``True``, the returned array must have the same shape as ``x``, except the size of the axis along which to compute the cumulative sum must be ``N+1``.\n    -   if ``include_initial`` is ``False``, the returned array must have the same shape as ``x``.\n\nNotes\n-----\n\n-   When ``x`` is a zero-dimensional array, behavior is unspecified and thus implementation-defined.\n\n**Special Cases**\n\nFor both real-valued and complex floating-point operands, special cases must be handled as if the operation is implemented by successive application of :func:`~array_api.add`.\n\n.. versionadded:: 2023.12\n\n.. versionchanged:: 2024.12\n   Behavior when providing a zero-dimensional array is explicitly left unspecified."
+    "Calculates the cumulative sum of elements in the input array ``x``.\n\nParameters\n----------\nx: array\n    input array. **Should** have one or more dimensions (axes). **Should** have a numeric data type.\naxis: Optional[int]\n    axis along which to compute the cumulative sum. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception.\n\n    If ``x`` is a one-dimensional array, providing an ``axis`` **must** be optional; however, if ``x`` has more than one dimension, providing an ``axis`` **must** be required.\n\ndtype: Optional[dtype]\n    data type of the returned array. If ``None``, the returned array **must** have the same data type as ``x``, unless ``x`` has an integer data type supporting a smaller range of values than the default integer data type (e.g., ``x`` has an ``int16`` or ``uint32`` data type and the default integer data type is ``int64``). In those latter cases:\n\n    -   if ``x`` has a signed integer data type (e.g., ``int16``), the returned array **must** have the default integer data type.\n    -   if ``x`` has an unsigned integer data type (e.g., ``uint16``), the returned array **must** have an unsigned integer data type having the same number of bits as the default integer data type (e.g., if the default integer data type is ``int32``, the returned array **must** have a ``uint32`` data type).\n\n    If the data type (either specified or resolved) differs from the data type of ``x``, the input array **should** be cast to the specified data type before computing the sum (rationale: the ``dtype`` keyword argument is intended to help prevent overflows). Default: ``None``.\n\ninclude_initial: bool\n    boolean indicating whether to include the initial value as the first value in the output. By convention, the initial value **must** be the additive identity (i.e., zero). Default: ``False``.\n\nReturns\n-------\nout: array\n    an array containing the cumulative sums. The returned array **must** have a data type as described by the ``dtype`` parameter above.\n\n    Let ``M`` be the size of the axis along which to compute the cumulative sum. The returned array **must** have a shape determined according to the following rules:\n\n    -   if ``include_initial`` is ``True``, the returned array **must** have the same shape as ``x``, except the size of the axis along which to compute the cumulative sum **must** be ``M+1``.\n    -   if ``include_initial`` is ``False``, the returned array **must** have the same shape as ``x``.\n\nNotes\n-----\n\n-   When ``x`` is a zero-dimensional array, behavior is unspecified and thus implementation-defined.\n\n**Special Cases**\n\nFor both real-valued and complex floating-point operands, special cases **must** be handled as if the operation is implemented by successive application of :func:`~array_api.add`.\n\n.. versionadded:: 2023.12\n\n.. versionchanged:: 2024.12\n   Behavior when providing a zero-dimensional array is explicitly left unspecified."
     max: max[TArray,]
-    "Calculates the maximum value of the input array ``x``.\n\nParameters\n----------\nx: array\n    input array. Should have a real-valued data type.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis or axes along which maximum values must be computed. By default, the maximum value must be computed over the entire array. If a tuple of integers, maximum values must be computed over multiple axes. Default: ``None``.\nkeepdims: bool\n    if ``True``, the reduced axes (dimensions) must be included in the result as singleton dimensions, and, accordingly, the result must be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) must not be included in the result. Default: ``False``.\n\nReturns\n-------\nout: array\n    if the maximum value was computed over the entire array, a zero-dimensional array containing the maximum value; otherwise, a non-zero-dimensional array containing the maximum values. The returned array must have the same data type as ``x``.\n\nNotes\n-----\n\nWhen the number of elements over which to compute the maximum value is zero, the maximum value is implementation-defined. Specification-compliant libraries may choose to raise an error, return a sentinel value (e.g., if ``x`` is a floating-point input array, return ``NaN``), or return the minimum possible value for the input array ``x`` data type (e.g., if ``x`` is a floating-point array, return ``-infinity``).\n\nThe order of signed zeros is unspecified and thus implementation-defined. When choosing between ``-0`` or ``+0`` as a maximum value, specification-compliant libraries may choose to return either value.\n\nFor backward compatibility, conforming implementations may support complex numbers; however, inequality comparison of complex numbers is unspecified and thus implementation-defined (see :ref:`complex-number-ordering`).\n\n**Special Cases**\n\nFor floating-point operands,\n\n-   If ``x_i`` is ``NaN``, the maximum value is ``NaN`` (i.e., ``NaN`` values propagate).\n\n.. versionchanged:: 2023.12\n   Clarified that the order of signed zeros is implementation-defined."
+    "Calculates the maximum value of the input array ``x``.\n\nParameters\n----------\nx: array\n    input array. **Should** have a real-valued data type.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis or axes along which to compute maximum values. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. By default, the maximum value **must** be computed over the entire array. If a tuple of integers, maximum values **must** be computed over multiple axes. Default: ``None``.\nkeepdims: bool\n    if ``True``, the reduced axes (dimensions) **must** be included in the result as singleton dimensions, and, accordingly, the result **must** be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) **must** not be included in the result. Default: ``False``.\n\nReturns\n-------\nout: array\n    if the maximum value is computed over the entire array, a zero-dimensional array containing the maximum value; otherwise, a non-zero-dimensional array containing the maximum values. The returned array **must** have the same data type as ``x``.\n\nNotes\n-----\n\n-   When the number of elements over which to compute the maximum value is zero, the maximum value is implementation-defined. Specification-compliant libraries **may** choose to raise an error, return a sentinel value (e.g., if ``x`` is a floating-point input array, return ``NaN``), or return the minimum possible value for the input array ``x`` data type (e.g., if ``x`` is a floating-point array, return ``-infinity``).\n\n-   The order of signed zeros is unspecified and thus implementation-defined. When choosing between ``-0`` or ``+0`` as a maximum value, specification-compliant libraries **may** choose to return either value.\n\n-   For backward compatibility, conforming implementations **may** support complex numbers; however, inequality comparison of complex numbers is unspecified and thus implementation-defined (see :ref:`complex-number-ordering`).\n\n**Special Cases**\n\nFor floating-point operands,\n\n-   If ``x_i`` is ``NaN``, the maximum value **must** be ``NaN`` (i.e., ``NaN`` values propagate).\n\n.. versionchanged:: 2023.12\n   Clarified that the order of signed zeros is implementation-defined."
     mean: mean[TArray,]
-    "Calculates the arithmetic mean of the input array ``x``.\n\nParameters\n----------\nx: array\n    input array. Should have a floating-point data type.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis or axes along which arithmetic means must be computed. By default, the mean must be computed over the entire array. If a tuple of integers, arithmetic means must be computed over multiple axes. Default: ``None``.\nkeepdims: bool\n    if ``True``, the reduced axes (dimensions) must be included in the result as singleton dimensions, and, accordingly, the result must be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) must not be included in the result. Default: ``False``.\n\nReturns\n-------\nout: array\n    if the arithmetic mean was computed over the entire array, a zero-dimensional array containing the arithmetic mean; otherwise, a non-zero-dimensional array containing the arithmetic means. The returned array must have the same data type as ``x``.\n\n    .. note::\n       While this specification recommends that this function only accept input arrays having a floating-point data type, specification-compliant array libraries may choose to accept input arrays having an integer data type. While mixed data type promotion is implementation-defined, if the input array ``x`` has an integer data type, the returned array must have the default real-valued floating-point data type.\n\nNotes\n-----\n\n**Special Cases**\n\nLet ``N`` equal the number of elements over which to compute the arithmetic mean. For real-valued operands,\n\n-   If ``N`` is ``0``, the arithmetic mean is ``NaN``.\n-   If ``x_i`` is ``NaN``, the arithmetic mean is ``NaN`` (i.e., ``NaN`` values propagate).\n\nFor complex floating-point operands, real-valued floating-point special cases should independently apply to the real and imaginary component operations involving real numbers. For example, let ``a = real(x_i)`` and ``b = imag(x_i)``, and\n\n-   If ``N`` is ``0``, the arithmetic mean is ``NaN + NaN j``.\n-   If ``a`` is ``NaN``, the real component of the result is ``NaN``.\n-   Similarly, if ``b`` is ``NaN``, the imaginary component of the result is ``NaN``.\n\n.. note::\n   Array libraries, such as NumPy, PyTorch, and JAX, currently deviate from this specification in their handling of components which are ``NaN`` when computing the arithmetic mean. In general, consumers of array libraries implementing this specification should use :func:`~array_api.isnan` to test whether the result of computing the arithmetic mean over an array have a complex floating-point data type is ``NaN``, rather than relying on ``NaN`` propagation of individual components.\n\n.. versionchanged:: 2024.12\n   Added complex data type support."
+    "Calculates the arithmetic mean of the input array ``x``.\n\nParameters\n----------\nx: array\n    input array. **Should** have a floating-point data type.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis or axes along which to compute arithmetic means. By default, the mean **must** be computed over the entire array. If a tuple of integers, arithmetic means **must** be computed over multiple axes. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. Default: ``None``.\nkeepdims: bool\n    if ``True``, the reduced axes (dimensions) **must** be included in the result as singleton dimensions, and, accordingly, the result **must** be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) **must** not be included in the result. Default: ``False``.\n\nReturns\n-------\nout: array\n    if the arithmetic mean is computed over the entire array, a zero-dimensional array containing the arithmetic mean; otherwise, a non-zero-dimensional array containing the arithmetic means. The returned array **must** have the same data type as ``x``.\n\nNotes\n-----\n\n-   While this specification recommends that this function only accept input arrays having a floating-point data type, specification-compliant array libraries **may** choose to accept input arrays having an integer data type. While mixed data type promotion is implementation-defined, if the input array ``x`` has an integer data type, the returned array **must** have the default real-valued floating-point data type.\n\n**Special Cases**\n\nLet ``M`` equal the number of elements over which to compute the arithmetic mean. For real-valued operands,\n\n-   If ``M`` is ``0``, the arithmetic mean **must** be ``NaN``.\n-   If ``x_i`` is ``NaN``, the arithmetic mean **must** be ``NaN`` (i.e., ``NaN`` values propagate).\n\nFor complex floating-point operands, real-valued floating-point special cases **should** independently apply to the real and imaginary component operations involving real numbers. For example, let ``a = real(x_i)`` and ``b = imag(x_i)``, and\n\n-   If ``M`` is ``0``, the arithmetic mean **must** be ``NaN + NaN j``.\n-   If ``a`` is ``NaN``, the real component of the result **must** be ``NaN``.\n-   Similarly, if ``b`` is ``NaN``, the imaginary component of the result **must** be ``NaN``.\n\n.. note::\n   Array libraries, such as NumPy, PyTorch, and JAX, currently deviate from this specification in their handling of components which are ``NaN`` when computing the arithmetic mean. In general, consumers of array libraries implementing this specification are recommended to use :func:`~array_api.isnan` to test whether the result of computing the arithmetic mean over an array have a complex floating-point data type is ``NaN``, rather than relying on ``NaN`` propagation of individual components.\n\n.. versionchanged:: 2024.12\n   Added complex data type support."
     min: min[TArray,]
-    "Calculates the minimum value of the input array ``x``.\n\nParameters\n----------\nx: array\n    input array. Should have a real-valued data type.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis or axes along which minimum values must be computed. By default, the minimum value must be computed over the entire array. If a tuple of integers, minimum values must be computed over multiple axes. Default: ``None``.\nkeepdims: bool\n    if ``True``, the reduced axes (dimensions) must be included in the result as singleton dimensions, and, accordingly, the result must be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) must not be included in the result. Default: ``False``.\n\nReturns\n-------\nout: array\n    if the minimum value was computed over the entire array, a zero-dimensional array containing the minimum value; otherwise, a non-zero-dimensional array containing the minimum values. The returned array must have the same data type as ``x``.\n\nNotes\n-----\n\nWhen the number of elements over which to compute the minimum value is zero, the minimum value is implementation-defined. Specification-compliant libraries may choose to raise an error, return a sentinel value (e.g., if ``x`` is a floating-point input array, return ``NaN``), or return the maximum possible value for the input array ``x`` data type (e.g., if ``x`` is a floating-point array, return ``+infinity``).\n\nThe order of signed zeros is unspecified and thus implementation-defined. When choosing between ``-0`` or ``+0`` as a minimum value, specification-compliant libraries may choose to return either value.\n\nFor backward compatibility, conforming implementations may support complex numbers; however, inequality comparison of complex numbers is unspecified and thus implementation-defined (see :ref:`complex-number-ordering`).\n\n**Special Cases**\n\nFor floating-point operands,\n\n-   If ``x_i`` is ``NaN``, the minimum value is ``NaN`` (i.e., ``NaN`` values propagate).\n\n.. versionchanged:: 2023.12\n   Clarified that the order of signed zeros is implementation-defined."
+    "Calculates the minimum value of the input array ``x``.\n\nParameters\n----------\nx: array\n    input array. **Should** have a real-valued data type.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis or axes along which to compute minimum values. By default, the minimum value **must** be computed over the entire array. If a tuple of integers, minimum values **must** be computed over multiple axes. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. Default: ``None``.\nkeepdims: bool\n    if ``True``, the reduced axes (dimensions) **must** be included in the result as singleton dimensions, and, accordingly, the result **must** be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) **must** not be included in the result. Default: ``False``.\n\nReturns\n-------\nout: array\n    if the minimum value is computed over the entire array, a zero-dimensional array containing the minimum value; otherwise, a non-zero-dimensional array containing the minimum values. The returned array **must** have the same data type as ``x``.\n\nNotes\n-----\n\n-   When the number of elements over which to compute the minimum value is zero, the minimum value is implementation-defined. Specification-compliant libraries **may** choose to raise an error, return a sentinel value (e.g., if ``x`` is a floating-point input array, return ``NaN``), or return the maximum possible value for the input array ``x`` data type (e.g., if ``x`` is a floating-point array, return ``+infinity``).\n\n-   The order of signed zeros is unspecified and thus implementation-defined. When choosing between ``-0`` or ``+0`` as a minimum value, specification-compliant libraries **may** choose to return either value.\n\n-   For backward compatibility, conforming implementations **may** support complex numbers; however, inequality comparison of complex numbers is unspecified and thus implementation-defined (see :ref:`complex-number-ordering`).\n\n**Special Cases**\n\nFor floating-point operands,\n\n-   If ``x_i`` is ``NaN``, the minimum value **must** be ``NaN`` (i.e., ``NaN`` values propagate).\n\n.. versionchanged:: 2023.12\n   Clarified that the order of signed zeros is implementation-defined."
     prod: prod[TArray, TDtype]
-    "Calculates the product of input array ``x`` elements.\n\nParameters\n----------\nx: array\n    input array. Should have a numeric data type.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis or axes along which products must be computed. By default, the product must be computed over the entire array. If a tuple of integers, products must be computed over multiple axes. Default: ``None``.\n\ndtype: Optional[dtype]\n    data type of the returned array. If ``None``, the returned array must have the same data type as ``x``, unless ``x`` has an integer data type supporting a smaller range of values than the default integer data type (e.g., ``x`` has an ``int16`` or ``uint32`` data type and the default integer data type is ``int64``). In those latter cases:\n\n    -   if ``x`` has a signed integer data type (e.g., ``int16``), the returned array must have the default integer data type.\n    -   if ``x`` has an unsigned integer data type (e.g., ``uint16``), the returned array must have an unsigned integer data type having the same number of bits as the default integer data type (e.g., if the default integer data type is ``int32``, the returned array must have a ``uint32`` data type).\n\n    If the data type (either specified or resolved) differs from the data type of ``x``, the input array should be cast to the specified data type before computing the sum (rationale: the ``dtype`` keyword argument is intended to help prevent overflows). Default: ``None``.\n\nkeepdims: bool\n    if ``True``, the reduced axes (dimensions) must be included in the result as singleton dimensions, and, accordingly, the result must be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) must not be included in the result. Default: ``False``.\n\nReturns\n-------\nout: array\n    if the product was computed over the entire array, a zero-dimensional array containing the product; otherwise, a non-zero-dimensional array containing the products. The returned array must have a data type as described by the ``dtype`` parameter above.\n\nNotes\n-----\n\n**Special Cases**\n\nLet ``N`` equal the number of elements over which to compute the product.\n\n-   If ``N`` is ``0``, the product is `1` (i.e., the empty product).\n\nFor both real-valued and complex floating-point operands, special cases must be handled as if the operation is implemented by successive application of :func:`~array_api.multiply`.\n\n.. versionchanged:: 2022.12\n   Added complex data type support.\n\n.. versionchanged:: 2023.12\n   Required the function to return a floating-point array having the same data type as the input array when provided a floating-point array."
+    "Calculates the product of input array ``x`` elements.\n\nParameters\n----------\nx: array\n    input array. **Should** have a numeric data type.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis or axes along which to compute products. By default, the product **must** be computed over the entire array. If a tuple of integers, products **must** be computed over multiple axes. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. Default: ``None``.\n\ndtype: Optional[dtype]\n    data type of the returned array. If ``None``, the returned array **must** have the same data type as ``x``, unless ``x`` has an integer data type supporting a smaller range of values than the default integer data type (e.g., ``x`` has an ``int16`` or ``uint32`` data type and the default integer data type is ``int64``). In those latter cases:\n\n    -   if ``x`` has a signed integer data type (e.g., ``int16``), the returned array **must** have the default integer data type.\n    -   if ``x`` has an unsigned integer data type (e.g., ``uint16``), the returned array **must** have an unsigned integer data type having the same number of bits as the default integer data type (e.g., if the default integer data type is ``int32``, the returned array **must** have a ``uint32`` data type).\n\n    If the data type (either specified or resolved) differs from the data type of ``x``, the input array **should** be cast to the specified data type before computing the sum (rationale: the ``dtype`` keyword argument is intended to help prevent overflows). Default: ``None``.\n\nkeepdims: bool\n    if ``True``, the reduced axes (dimensions) **must** be included in the result as singleton dimensions, and, accordingly, the result **must** be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) **must** not be included in the result. Default: ``False``.\n\nReturns\n-------\nout: array\n    if the product is computed over the entire array, a zero-dimensional array containing the product; otherwise, a non-zero-dimensional array containing the products. The returned array **must** have a data type as described by the ``dtype`` parameter above.\n\nNotes\n-----\n\n**Special Cases**\n\nLet ``M`` equal the number of elements over which to compute the product.\n\n-   If ``M`` is ``0``, the product **must** be `1` (i.e., the empty product).\n\nFor both real-valued and complex floating-point operands, special cases **must** be handled as if the operation is implemented by successive application of :func:`~array_api.multiply`.\n\n.. versionchanged:: 2022.12\n   Added complex data type support.\n\n.. versionchanged:: 2023.12\n   Required the function to return a floating-point array having the same data type as the input array when provided a floating-point array."
     std: std[TArray,]
-    "Calculates the standard deviation of the input array ``x``.\n\nParameters\n----------\nx: array\n    input array. Should have a real-valued floating-point data type.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis or axes along which standard deviations must be computed. By default, the standard deviation must be computed over the entire array. If a tuple of integers, standard deviations must be computed over multiple axes. Default: ``None``.\ncorrection: Union[int, float]\n    degrees of freedom adjustment. Setting this parameter to a value other than ``0`` has the effect of adjusting the divisor during the calculation of the standard deviation according to ``N-c`` where ``N`` corresponds to the total number of elements over which the standard deviation is computed and ``c`` corresponds to the provided degrees of freedom adjustment. When computing the standard deviation of a population, setting this parameter to ``0`` is the standard choice (i.e., the provided array contains data constituting an entire population). When computing the corrected sample standard deviation, setting this parameter to ``1`` is the standard choice (i.e., the provided array contains data sampled from a larger population; this is commonly referred to as Bessel's correction). Default: ``0``.\nkeepdims: bool\n    if ``True``, the reduced axes (dimensions) must be included in the result as singleton dimensions, and, accordingly, the result must be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) must not be included in the result. Default: ``False``.\n\nReturns\n-------\nout: array\n    if the standard deviation was computed over the entire array, a zero-dimensional array containing the standard deviation; otherwise, a non-zero-dimensional array containing the standard deviations. The returned array must have the same data type as ``x``.\n\n    .. note::\n       While this specification recommends that this function only accept input arrays having a real-valued floating-point data type, specification-compliant array libraries may choose to accept input arrays having an integer data type. While mixed data type promotion is implementation-defined, if the input array ``x`` has an integer data type, the returned array must have the default real-valued floating-point data type.\n\nNotes\n-----\n\n**Special Cases**\n\nLet ``N`` equal the number of elements over which to compute the standard deviation.\n\n-   If ``N - correction`` is less than or equal to ``0``, the standard deviation is ``NaN``.\n-   If ``x_i`` is ``NaN``, the standard deviation is ``NaN`` (i.e., ``NaN`` values propagate)."
+    "Calculates the standard deviation of the input array ``x``.\n\nParameters\n----------\nx: array\n    input array. **Should** have a real-valued floating-point data type.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis or axes along which to compute standard deviations. By default, the standard deviation **must** be computed over the entire array. If a tuple of integers, standard deviations **must** be computed over multiple axes. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. Default: ``None``.\ncorrection: Union[int, float]\n    degrees of freedom adjustment. Setting this parameter to a value other than ``0`` has the effect of adjusting the divisor during the calculation of the standard deviation according to ``M-c`` where ``M`` corresponds to the total number of elements over which the standard deviation is computed and ``c`` corresponds to the provided degrees of freedom adjustment. When computing the standard deviation of a population, setting this parameter to ``0`` is the standard choice (i.e., the provided array contains data constituting an entire population). When computing the corrected sample standard deviation, setting this parameter to ``1`` is the standard choice (i.e., the provided array contains data sampled from a larger population; this is commonly referred to as Bessel's correction). Default: ``0``.\nkeepdims: bool\n    if ``True``, the reduced axes (dimensions) **must** be included in the result as singleton dimensions, and, accordingly, the result **must** be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) **must** not be included in the result. Default: ``False``.\n\nReturns\n-------\nout: array\n    if the standard deviation is computed over the entire array, a zero-dimensional array containing the standard deviation; otherwise, a non-zero-dimensional array containing the standard deviations. The returned array **must** have the same data type as ``x``.\n\nNotes\n-----\n\n-   While this specification recommends that this function only accept input arrays having a real-valued floating-point data type, specification-compliant array libraries **may** choose to accept input arrays having an integer data type. While mixed data type promotion is implementation-defined, if the input array ``x`` has an integer data type, the returned array **must** have the default real-valued floating-point data type.\n\n**Special Cases**\n\nLet ``M`` equal the number of elements over which to compute the standard deviation.\n\n-   If ``M - correction`` is less than or equal to ``0``, the standard deviation **must** be ``NaN``.\n-   If ``x_i`` is ``NaN``, the standard deviation **must** be ``NaN`` (i.e., ``NaN`` values propagate)."
     sum: sum[TArray, TDtype]
-    "Calculates the sum of the input array ``x``.\n\nParameters\n----------\nx: array\n    input array. Should have a numeric data type.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis or axes along which sums must be computed. By default, the sum must be computed over the entire array. If a tuple of integers, sums must be computed over multiple axes. Default: ``None``.\n\ndtype: Optional[dtype]\n    data type of the returned array. If ``None``, the returned array must have the same data type as ``x``, unless ``x`` has an integer data type supporting a smaller range of values than the default integer data type (e.g., ``x`` has an ``int16`` or ``uint32`` data type and the default integer data type is ``int64``). In those latter cases:\n\n    -   if ``x`` has a signed integer data type (e.g., ``int16``), the returned array must have the default integer data type.\n    -   if ``x`` has an unsigned integer data type (e.g., ``uint16``), the returned array must have an unsigned integer data type having the same number of bits as the default integer data type (e.g., if the default integer data type is ``int32``, the returned array must have a ``uint32`` data type).\n\n    If the data type (either specified or resolved) differs from the data type of ``x``, the input array should be cast to the specified data type before computing the sum (rationale: the ``dtype`` keyword argument is intended to help prevent overflows). Default: ``None``.\n\nkeepdims: bool\n    if ``True``, the reduced axes (dimensions) must be included in the result as singleton dimensions, and, accordingly, the result must be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) must not be included in the result. Default: ``False``.\n\nReturns\n-------\nout: array\n    if the sum was computed over the entire array, a zero-dimensional array containing the sum; otherwise, an array containing the sums. The returned array must have a data type as described by the ``dtype`` parameter above.\n\nNotes\n-----\n\n**Special Cases**\n\nLet ``N`` equal the number of elements over which to compute the sum.\n\n-   If ``N`` is ``0``, the sum is ``0`` (i.e., the empty sum).\n\nFor both real-valued and complex floating-point operands, special cases must be handled as if the operation is implemented by successive application of :func:`~array_api.add`.\n\n.. versionchanged:: 2022.12\n   Added complex data type support.\n\n.. versionchanged:: 2023.12\n   Required the function to return a floating-point array having the same data type as the input array when provided a floating-point array."
+    "Calculates the sum of the input array ``x``.\n\nParameters\n----------\nx: array\n    input array. **Should** have a numeric data type.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis or axes along which sums **must** be computed. By default, the sum **must** be computed over the entire array. If a tuple of integers, sums **must** be computed over multiple axes. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. Default: ``None``.\n\ndtype: Optional[dtype]\n    data type of the returned array. If ``None``, the returned array **must** have the same data type as ``x``, unless ``x`` has an integer data type supporting a smaller range of values than the default integer data type (e.g., ``x`` has an ``int16`` or ``uint32`` data type and the default integer data type is ``int64``). In those latter cases:\n\n    -   if ``x`` has a signed integer data type (e.g., ``int16``), the returned array **must** have the default integer data type.\n    -   if ``x`` has an unsigned integer data type (e.g., ``uint16``), the returned array **must** have an unsigned integer data type having the same number of bits as the default integer data type (e.g., if the default integer data type is ``int32``, the returned array **must** have a ``uint32`` data type).\n\n    If the data type (either specified or resolved) differs from the data type of ``x``, the input array **should** be cast to the specified data type before computing the sum (rationale: the ``dtype`` keyword argument is intended to help prevent overflows). Default: ``None``.\n\nkeepdims: bool\n    if ``True``, the reduced axes (dimensions) **must** be included in the result as singleton dimensions, and, accordingly, the result **must** be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) **must** not be included in the result. Default: ``False``.\n\nReturns\n-------\nout: array\n    if the sum is computed over the entire array, a zero-dimensional array containing the sum; otherwise, an array containing the sums. The returned array **must** have a data type as described by the ``dtype`` parameter above.\n\nNotes\n-----\n\n**Special Cases**\n\nLet ``M`` equal the number of elements over which to compute the sum.\n\n-   If ``M`` is ``0``, the sum **must** be ``0`` (i.e., the empty sum).\n\nFor both real-valued and complex floating-point operands, special cases **must** be handled as if the operation is implemented by successive application of :func:`~array_api.add`.\n\n.. versionchanged:: 2022.12\n   Added complex data type support.\n\n.. versionchanged:: 2023.12\n   Required the function to return a floating-point array having the same data type as the input array when provided a floating-point array."
     var: var[TArray,]
-    "Calculates the variance of the input array ``x``.\n\nParameters\n----------\nx: array\n    input array. Should have a real-valued floating-point data type.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis or axes along which variances must be computed. By default, the variance must be computed over the entire array. If a tuple of integers, variances must be computed over multiple axes. Default: ``None``.\ncorrection: Union[int, float]\n    degrees of freedom adjustment. Setting this parameter to a value other than ``0`` has the effect of adjusting the divisor during the calculation of the variance according to ``N-c`` where ``N`` corresponds to the total number of elements over which the variance is computed and ``c`` corresponds to the provided degrees of freedom adjustment. When computing the variance of a population, setting this parameter to ``0`` is the standard choice (i.e., the provided array contains data constituting an entire population). When computing the unbiased sample variance, setting this parameter to ``1`` is the standard choice (i.e., the provided array contains data sampled from a larger population; this is commonly referred to as Bessel's correction). Default: ``0``.\nkeepdims: bool\n    if ``True``, the reduced axes (dimensions) must be included in the result as singleton dimensions, and, accordingly, the result must be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) must not be included in the result. Default: ``False``.\n\nReturns\n-------\nout: array\n    if the variance was computed over the entire array, a zero-dimensional array containing the variance; otherwise, a non-zero-dimensional array containing the variances. The returned array must have the same data type as ``x``.\n\n\n.. note::\n   While this specification recommends that this function only accept input arrays having a real-valued floating-point data type, specification-compliant array libraries may choose to accept input arrays having an integer data type. While mixed data type promotion is implementation-defined, if the input array ``x`` has an integer data type, the returned array must have the default real-valued floating-point data type.\n\nNotes\n-----\n\n**Special Cases**\n\nLet ``N`` equal the number of elements over which to compute the variance.\n\n-   If ``N - correction`` is less than or equal to ``0``, the variance is ``NaN``.\n-   If ``x_i`` is ``NaN``, the variance is ``NaN`` (i.e., ``NaN`` values propagate)."
+    "Calculates the variance of the input array ``x``.\n\nParameters\n----------\nx: array\n    input array. **Should** have a real-valued floating-point data type.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis or axes along which variances **must** be computed. By default, the variance **must** be computed over the entire array. If a tuple of integers, variances **must** be computed over multiple axes. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. Default: ``None``.\ncorrection: Union[int, float]\n    degrees of freedom adjustment. Setting this parameter to a value other than ``0`` has the effect of adjusting the divisor during the calculation of the variance according to ``M-c`` where ``M`` corresponds to the total number of elements over which the variance is computed and ``c`` corresponds to the provided degrees of freedom adjustment. When computing the variance of a population, setting this parameter to ``0`` is the standard choice (i.e., the provided array contains data constituting an entire population). When computing the unbiased sample variance, setting this parameter to ``1`` is the standard choice (i.e., the provided array contains data sampled from a larger population; this is commonly referred to as Bessel's correction). Default: ``0``.\nkeepdims: bool\n    if ``True``, the reduced axes (dimensions) **must** be included in the result as singleton dimensions, and, accordingly, the result **must** be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) **must** not be included in the result. Default: ``False``.\n\nReturns\n-------\nout: array\n    if the variance is computed over the entire array, a zero-dimensional array containing the variance; otherwise, a non-zero-dimensional array containing the variances. The returned array **must** have the same data type as ``x``.\n\nNotes\n-----\n\n-   While this specification recommends that this function only accept input arrays having a real-valued floating-point data type, specification-compliant array libraries **may** choose to accept input arrays having an integer data type. While mixed data type promotion is implementation-defined, if the input array ``x`` has an integer data type, the returned array **must** have the default real-valued floating-point data type.\n\n**Special Cases**\n\nLet ``M`` equal the number of elements over which to compute the variance.\n\n-   If ``M - correction`` is less than or equal to ``0``, the variance **must** be ``NaN``.\n-   If ``x_i`` is ``NaN``, the variance **must** be ``NaN`` (i.e., ``NaN`` values propagate)."
     arange: arange[TArray, TDevice, TDtype]
     "Returns evenly spaced values within the half-open interval ``[start, stop)`` as a one-dimensional array.\n\nParameters\n----------\nstart: Union[int, float]\n    if ``stop`` is specified, the start of interval (inclusive); otherwise, the end of the interval (exclusive). If ``stop`` is not specified, the default starting value is ``0``.\nstop: Optional[Union[int, float]]\n    the end of the interval. Default: ``None``.\nstep: Union[int, float]\n    the distance between two adjacent elements (``out[i+1] - out[i]``). Must not be ``0``; may be negative, this results in an empty array if ``stop >= start``. Default: ``1``.\ndtype: Optional[dtype]\n    output array data type. If ``dtype`` is ``None``, the output array data type must be inferred from ``start``, ``stop`` and ``step``. If those are all integers, the output array dtype must be the default integer dtype; if one or more have type ``float``, then the output array dtype must be the default real-valued floating-point data type. Default: ``None``.\ndevice: Optional[device]\n    device on which to place the created array. Default: ``None``.\n\n\n.. note::\n   This function cannot guarantee that the interval does not include the ``stop`` value in those cases where ``step`` is not an integer and floating-point rounding errors affect the length of the output array.\n\nReturns\n-------\nout: array\n    a one-dimensional array containing evenly spaced values. The length of the output array must be ``ceil((stop-start)/step)`` if ``stop - start`` and ``step`` have the same sign, and length ``0`` otherwise."
-    asarray: asarray[TSupportsbufferprotocol, TArray, TDevice, TDtype]
+    asarray: asarray[TArray, TDevice, TDtype, TSupportsbufferprotocol]
     "Convert the input to an array.\n\nParameters\n----------\nobj: Union[array, bool, int, float, complex, NestedSequence[bool | int | float | complex], SupportsBufferProtocol]\n    object to be converted to an array. May be a Python scalar, a (possibly nested) sequence of Python scalars, or an object supporting the Python buffer protocol.\n\n    .. admonition:: Tip\n       :class: important\n\n       An object supporting the buffer protocol can be turned into a memoryview through ``memoryview(obj)``.\n\ndtype: Optional[dtype]\n    output array data type. If ``dtype`` is ``None``, the output array data type must be inferred from the data type(s) in ``obj``. If all input values are Python scalars, then, in order of precedence,\n\n    -   if all values are of type ``bool``, the output data type must be ``bool``.\n    -   if all values are of type ``int`` or are a mixture of ``bool`` and ``int``, the output data type must be the default integer data type.\n    -   if one or more values are ``complex`` numbers, the output data type must be the default complex floating-point data type.\n    -   if one or more values are ``float``\\s, the output data type must be the default real-valued floating-point data type.\n\n    Default: ``None``.\n\ndevice: Optional[device]\n    device on which to place the created array. If ``device`` is ``None`` and ``obj`` is an array, the output array device must be inferred from ``obj``. Default: ``None``.\ncopy: Optional[bool]\n    boolean indicating whether or not to copy the input. If ``True``, the function must always copy (see :ref:`copy-keyword-argument`). If ``False``, the function must never copy for input which supports the buffer protocol and must raise a ``ValueError`` in case a copy would be necessary. If ``None``, the function must reuse existing memory buffer if possible and copy otherwise. Default: ``None``.\n\nReturns\n-------\nout: array\n    an array containing the data from ``obj``.\n\nNotes\n-----\n\n-   If ``obj`` is a sequence with some elements being arrays, behavior is unspecified and thus implementation-defined. Conforming implementations may perform a conversion or raise an exception. To join a sequence of arrays along a new axis, see :func:`~array_api.stack`.\n-   If ``dtype`` is not ``None``, then array conversions should obey :ref:`type-promotion` rules. Conversions not specified according to :ref:`type-promotion` rules may or may not be permitted by a conforming array library. To perform an explicit cast, use :func:`array_api.astype`.\n-   If an input value exceeds the precision of the resolved output array data type, behavior is unspecified and thus implementation-defined.\n\n.. versionchanged:: 2022.12\n   Added complex data type support."
     empty: empty[TArray, TDevice, TDtype]
     "Returns an uninitialized array having a specified `shape`.\n\nParameters\n----------\nshape: Union[int, Tuple[int, ...]]\n    output array shape.\ndtype: Optional[dtype]\n    output array data type. If ``dtype`` is ``None``, the output array data type must be the default real-valued floating-point data type. Default: ``None``.\ndevice: Optional[device]\n    device on which to place the created array. Default: ``None``.\n\nReturns\n-------\nout: array\n    an array containing uninitialized data."
@@ -8882,48 +8872,48 @@ class ArrayNamespace[TCapabilities, TDatatypes, TDefaultdatatypes, TSupportsbuff
     "Tests whether any input array element evaluates to ``True`` along a specified axis.\n\nParameters\n----------\nx: array\n    input array.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis or axes along which to perform a logical OR reduction. By default, a logical OR reduction **must** be performed over the entire array. If a tuple of integers, logical OR reductions **must** be performed over multiple axes. A valid ``axis`` must be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an ``axis`` is specified as a negative integer, the function **must** determine the axis along which to perform a reduction by counting backward from the last dimension (where ``-1`` refers to the last axis). If provided an invalid ``axis``, the function **must** raise an exception. Default: ``None``.\nkeepdims: bool\n    If ``True``, the reduced axes **must** be included in the result as singleton dimensions, and, accordingly, the result **must** be broadcast-compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes **must not** be included in the result. Default: ``False``.\n\nReturns\n-------\nout: array\n    if a logical OR reduction was performed over the entire array, the returned array **must** be a zero-dimensional array containing the test result. Otherwise, the returned array **must** be a non-zero-dimensional array containing the test results. The returned array **must** have a data type of ``bool``.\n\nNotes\n-----\n\n-   Positive infinity, negative infinity, and NaN **must** evaluate to ``True``.\n-   If ``x`` has a complex floating-point data type, elements having a non-zero component (real or imaginary) **must** evaluate to ``True``.\n-   If ``x`` is an empty array or the size of the axis along which to evaluate elements is zero, the test result **must** be ``False``.\n\n.. versionchanged:: 2022.12\n   Added complex data type support."
     diff: diff[TArray,]
     "Calculates the n-th discrete forward difference along a specified axis.\n\nParameters\n----------\nx: array\n    input array. **Should** have a numeric data type.\naxis: int\n    axis along which to compute differences. A valid ``axis`` **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an ``axis`` is specified as a negative integer, the function **must** determine the axis along which to compute differences by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid ``axis``, the function **must** raise an exception. Default: ``-1``.\nn: int\n    number of times to recursively compute differences. Default: ``1``.\nprepend: Optional[array]\n    values to prepend to a specified axis prior to computing differences. **Must** have the same shape as ``x``, except for the axis specified by ``axis`` which can have any size. **Should** have the same data type as ``x``. Default: ``None``.\nappend: Optional[array]\n    values to append to a specified axis prior to computing differences. **Must** have the same shape as ``x``, except for the axis specified by ``axis`` which can have any size. **Should** have the same data type as ``x``. Default: ``None``.\n\nReturns\n-------\nout: array\n    an array containing the n-th differences. **Should** have the same data type as ``x``. **Must** have the same shape as ``x``, except for the axis specified by ``axis`` which **must** have a size determined as follows:\n\n    -   Let ``M`` be the number of elements along an axis specified by ``axis``.\n    -   Let ``N1`` be the number of prepended values along an axis specified by ``axis``.\n    -   Let ``N2`` be the number of appended values along an axis specified by ``axis``.\n    -   The final size of the axis specified by ``axis`` **must** be ``M + N1 + N2 - n``.\n\nNotes\n-----\n\n-   The first-order differences are given by ``out[i] = x[i+1] - x[i]`` along a specified axis. Higher-order differences **must** be calculated recursively (e.g., by calling ``diff(out, axis=axis, n=n-1)``).\n-   If a conforming implementation chooses to support ``prepend`` and ``append`` arrays which have a different data type than ``x``, behavior is unspecified and thus implementation-defined. Implementations **may** choose to type promote (:ref:`type-promotion`), cast ``prepend`` and/or ``append`` to the same data type as ``x``, or raise an exception.\n\n.. versionadded:: 2024.12"
-    __array_namespace_info__: __array_namespace_info__[TCapabilities, TDatatypes, TDefaultdatatypes, TArray, TDevice, TDtype]
-    "Returns a namespace with Array API namespace inspection utilities.\n\nSee :ref:`inspection` for a list of inspection APIs.\n\nReturns\n-------\nout: Info\n    An object containing Array API namespace inspection utilities.\n\nNotes\n-----\n\nThe returned object may be either a namespace or a class, so long as an Array API user can access inspection utilities as follows:\n\n::\n\n  info = xp.__array_namespace_info__()\n  info.capabilities()\n  info.devices()\n  info.dtypes()\n  info.default_dtypes()\n  # ...\n\n.. versionadded: 2023.12"
+    __array_namespace_info__: __array_namespace_info__[TArray, TCapabilities, TDatatypes, TDefaultdatatypes, TDevice, TDtype]
+    "Returns a namespace with Array API namespace inspection utilities.\n\nReturns\n-------\nout: Info\n    an object containing Array API namespace inspection utilities.\n\nNotes\n-----\n\n-   See :ref:`inspection` for a list of inspection APIs.\n\n-   The returned object **may** be either a namespace or a class, as long as an Array API user can access inspection utilities as follows:\n\n::\n\n  info = xp.__array_namespace_info__()\n  info.capabilities()\n  info.devices()\n  info.dtypes()\n  info.default_dtypes()\n  # ...\n\n.. versionadded: 2023.12"
     take: take[TArray,]
-    "Returns elements of an array along an axis.\n\nParameters\n----------\nx: array\n    input array. Should have one or more dimensions (axes).\nindices: array\n    array indices. The array must be one-dimensional and have an integer data type. If an index is negative, the function must determine the element to select along a specified axis (dimension) by counting from the last element (where ``-1`` refers to the last element).\naxis: Optional[int]\n    axis over which to select values. If ``axis`` is negative, the function must determine the axis along which to select values by counting from the last dimension (where ``-1`` refers to the last dimension).\n\n    If ``x`` is a one-dimensional array, providing an ``axis`` is optional; however, if ``x`` has more than one dimension, providing an ``axis`` is required.\n\nReturns\n-------\nout: array\n    an array having the same data type as ``x``. The output array must have the same rank (i.e., number of dimensions) as ``x`` and must have the same shape as ``x``, except for the axis specified by ``axis`` whose size must equal the number of elements in ``indices``.\n\nNotes\n-----\n\n-   Conceptually, ``take(x, indices, axis=3)`` is equivalent to ``x[:,:,:,indices,...]``; however, explicit indexing via arrays of indices is not currently supported in this specification due to concerns regarding ``__setitem__`` and array mutation semantics.\n-   This specification does not require bounds checking. The behavior for out-of-bounds indices is left unspecified.\n-   When ``x`` is a zero-dimensional array, behavior is unspecified and thus implementation-defined.\n\n.. versionadded:: 2022.12\n\n.. versionchanged:: 2023.12\n   Out-of-bounds behavior is explicitly left unspecified.\n\n.. versionchanged:: 2024.12\n   Behavior when provided a zero-dimensional input array is explicitly left unspecified.\n\n.. versionchanged:: 2024.12\n   Clarified support for negative indices."
+    "Returns elements of an array along an axis.\n\nParameters\n----------\nx: array\n    input array. **Should** have one or more axes.\nindices: array\n    array indices. The array **must** be one-dimensional and have an integer data type. If an index is negative, the function **must** determine the element to select along a specified axis by counting from the last element (where ``-1`` refers to the last element).\naxis: Optional[int]\n    axis over which to select values. If ``axis`` is negative, the function **must** determine the axis along which to select values by counting from the last axis (where ``-1`` refers to the last axis).\n\n    If ``x`` is a one-dimensional array, providing an ``axis`` **must** be optional; however, if ``x`` has more than one axis, providing an ``axis`` **must** be required.\n\nReturns\n-------\nout: array\n    an array having the same data type as ``x``. The output array **must** have the same number of axes as ``x`` and **must** have the same shape as ``x``, except for the axis specified by ``axis`` whose size **must** equal the number of elements in ``indices``.\n\nNotes\n-----\n\n-   This specification does not require bounds checking. The behavior for out-of-bounds indices is unspecified and thus implementation-defined.\n\n-   When ``x`` is a zero-dimensional array, behavior is unspecified and thus implementation-defined.\n\n.. versionadded:: 2022.12\n\n.. versionchanged:: 2023.12\n   Out-of-bounds behavior is explicitly left unspecified.\n\n.. versionchanged:: 2024.12\n   Behavior when provided a zero-dimensional input array is explicitly left unspecified.\n\n.. versionchanged:: 2024.12\n   Clarified support for negative indices."
     take_along_axis: take_along_axis[TArray,]
-    "Returns elements from an array at the one-dimensional indices specified by ``indices`` along a provided ``axis``.\n\nParameters\n----------\nx: array\n    input array. Must be compatible with ``indices``, except for the axis (dimension) specified by ``axis`` (see :ref:`broadcasting`).\nindices: array\n    array indices. Must have the same rank (i.e., number of dimensions) as ``x``. If an index is negative, the function must determine the element to select along a specified axis (dimension) by counting from the last element (where ``-1`` refers to the last element).\naxis: int\n    axis along which to select values. If ``axis`` is negative, the function must determine the axis along which to select values by counting from the last dimension (where ``-1`` refers to the last dimension). Default: ``-1``.\n\nReturns\n-------\nout: array\n    an array having the same data type as ``x``. Must have the same rank (i.e., number of dimensions) as ``x`` and must have a shape determined according to :ref:`broadcasting`, except for the axis (dimension) specified by ``axis`` whose size must equal the size of the corresponding axis (dimension) in ``indices``.\n\nNotes\n-----\n\n-   This specification does not require bounds checking. The behavior for out-of-bounds indices is left unspecified.\n\n.. versionadded:: 2024.12"
+    "Returns elements from an array at the one-dimensional indices specified by ``indices`` along a provided ``axis``.\n\nParameters\n----------\nx: array\n    input array. **Must** be compatible with ``indices``, except for the axis specified by ``axis`` (see :ref:`broadcasting`).\nindices: array\n    array indices. **Must** have the same number of axes as ``x`` and **must** be compatible with ``x``, except for the axis specified by ``axis`` (see :ref:`broadcasting`). If an index is negative, the function **must** determine the element to select along a specified axis by counting from the last element (where ``-1`` refers to the last element).\naxis: int\n    axis along which to select values. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. Default: ``-1``.\n\nReturns\n-------\nout: array\n    an array containing elements from ``x``. The returned array **must** have the same data type as ``x``. The returned array **must** have the same number of axes as ``x`` and **must** have a shape determined according to :ref:`broadcasting`, except for the axis specified by ``axis`` whose size **must** equal the size of the corresponding axis in ``indices``.\n\nNotes\n-----\n\n-   This specification does not require bounds checking. The behavior for out-of-bounds indices is unspecified and thus implementation-defined.\n\n.. versionadded:: 2024.12"
     matmul: matmul[TArray,]
-    "Computes the matrix product.\n\n.. note::\n   The ``matmul`` function must implement the same semantics as the built-in ``@`` operator (see `PEP 465 <https://www.python.org/dev/peps/pep-0465>`_).\n\nParameters\n----------\nx1: array\n    first input array. Should have a numeric data type. Must have at least one dimension. If ``x1`` is one-dimensional having shape ``(M,)`` and ``x2`` has more than one dimension, ``x1`` must be promoted to a two-dimensional array by prepending ``1`` to its dimensions (i.e., must have shape ``(1, M)``). After matrix multiplication, the prepended dimensions in the returned array must be removed. If ``x1`` has more than one dimension (including after vector-to-matrix promotion), ``shape(x1)[:-2]`` must be compatible with ``shape(x2)[:-2]`` (after vector-to-matrix promotion) (see :ref:`broadcasting`). If ``x1`` has shape ``(..., M, K)``, the innermost two dimensions form matrices on which to perform matrix multiplication.\nx2: array\n    second input array. Should have a numeric data type. Must have at least one dimension. If ``x2`` is one-dimensional having shape ``(N,)`` and ``x1`` has more than one dimension, ``x2`` must be promoted to a two-dimensional array by appending ``1`` to its dimensions (i.e., must have shape ``(N, 1)``). After matrix multiplication, the appended dimensions in the returned array must be removed. If ``x2`` has more than one dimension (including after vector-to-matrix promotion), ``shape(x2)[:-2]`` must be compatible with ``shape(x1)[:-2]`` (after vector-to-matrix promotion) (see :ref:`broadcasting`). If ``x2`` has shape ``(..., K, N)``, the innermost two dimensions form matrices on which to perform matrix multiplication.\n\n\n.. note::\n   If either ``x1`` or ``x2`` has a complex floating-point data type, neither argument must be complex-conjugated or transposed. If conjugation and/or transposition is desired, these operations should be explicitly performed prior to computing the matrix product.\n\nReturns\n-------\nout: array\n    -   if both ``x1`` and ``x2`` are one-dimensional arrays having shape ``(N,)``, a zero-dimensional array containing the inner product as its only element.\n    -   if ``x1`` is a two-dimensional array having shape ``(M, K)`` and ``x2`` is a two-dimensional array having shape ``(K, N)``, a two-dimensional array containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ and having shape ``(M, N)``.\n    -   if ``x1`` is a one-dimensional array having shape ``(K,)`` and ``x2`` is an array having shape ``(..., K, N)``, an array having shape ``(..., N)`` (i.e., prepended dimensions during vector-to-matrix promotion must be removed) and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_.\n    -   if ``x1`` is an array having shape ``(..., M, K)`` and ``x2`` is a one-dimensional array having shape ``(K,)``, an array having shape ``(..., M)`` (i.e., appended dimensions during vector-to-matrix promotion must be removed) and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_.\n    -   if ``x1`` is a two-dimensional array having shape ``(M, K)`` and ``x2`` is an array having shape ``(..., K, N)``, an array having shape ``(..., M, N)`` and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.\n    -   if ``x1`` is an array having shape ``(..., M, K)`` and ``x2`` is a two-dimensional array having shape ``(K, N)``, an array having shape ``(..., M, N)`` and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.\n    -   if either ``x1`` or ``x2`` has more than two dimensions, an array having a shape determined by :ref:`broadcasting` ``shape(x1)[:-2]`` against ``shape(x2)[:-2]`` and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.\n\n    The returned array must have a data type determined by :ref:`type-promotion`.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support.\n\n**Raises**\n\n-   if either ``x1`` or ``x2`` is a zero-dimensional array.\n-   if ``x1`` is a one-dimensional array having shape ``(K,)``, ``x2`` is a one-dimensional array having shape ``(L,)``, and ``K != L``.\n-   if ``x1`` is a one-dimensional array having shape ``(K,)``, ``x2`` is an array having shape ``(..., L, N)``, and ``K != L``.\n-   if ``x1`` is an array having shape ``(..., M, K)``, ``x2`` is a one-dimensional array having shape ``(L,)``, and ``K != L``.\n-   if ``x1`` is an array having shape ``(..., M, K)``, ``x2`` is an array having shape ``(..., L, N)``, and ``K != L``."
+    "Computes the matrix product.\n\nParameters\n----------\nx1: array\n    first input array. **Should** have a numeric data type. **Must** have at least one dimension.\n\n    -   If ``x1`` is a one-dimensional array having shape ``(M,)`` and ``x2`` has more than one dimension, ``x1`` **must** be promoted to a two-dimensional array by prepending ``1`` to its dimensions (i.e., **must** have shape ``(1, M)``). After matrix multiplication, the prepended dimensions in the returned array **must** be removed.\n    -   If ``x1`` has more than one dimension (including after vector-to-matrix promotion), ``shape(x1)[:-2]`` **must** be compatible with ``shape(x2)[:-2]`` (after vector-to-matrix promotion) (see :ref:`broadcasting`).\n    -   If ``x1`` has shape ``(..., M, K)``, the innermost two dimensions form matrices on which to perform matrix multiplication.\n\nx2: array\n    second input array. **Should** have a numeric data type. **Must** have at least one dimension.\n\n    -   If ``x2`` is one-dimensional array having shape ``(N,)`` and ``x1`` has more than one dimension, ``x2`` **must** be promoted to a two-dimensional array by appending ``1`` to its dimensions (i.e., **must** have shape ``(N, 1)``). After matrix multiplication, the appended dimensions in the returned array **must** be removed.\n    -   If ``x2`` has more than one dimension (including after vector-to-matrix promotion), ``shape(x2)[:-2]`` **must** be compatible with ``shape(x1)[:-2]`` (after vector-to-matrix promotion) (see :ref:`broadcasting`).\n    -   If ``x2`` has shape ``(..., K, N)``, the innermost two dimensions form matrices on which to perform matrix multiplication.\n\nReturns\n-------\nout: array\n    output array.\n\n    -   If both ``x1`` and ``x2`` are one-dimensional arrays having shape ``(N,)``, the returned array **must** be a zero-dimensional array and **must** contain the inner product as its only element.\n    -   If ``x1`` is a two-dimensional array having shape ``(M, K)`` and ``x2`` is a two-dimensional array having shape ``(K, N)``, the returned array **must** be a two-dimensional array and **must** contain the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ and having shape ``(M, N)``.\n    -   If ``x1`` is a one-dimensional array having shape ``(K,)`` and ``x2`` is an array having shape ``(..., K, N)``, the returned array **must** be an array having shape ``(..., N)`` (i.e., prepended dimensions during vector-to-matrix promotion **must** be removed) and **must** contain the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_.\n    -   If ``x1`` is an array having shape ``(..., M, K)`` and ``x2`` is a one-dimensional array having shape ``(K,)``, the returned array **must** be an array having shape ``(..., M)`` (i.e., appended dimensions during vector-to-matrix promotion **must** be removed) and **must** contain the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_.\n    -   If ``x1`` is a two-dimensional array having shape ``(M, K)`` and ``x2`` is an array having shape ``(..., K, N)``, the returned array **must** be an array having shape ``(..., M, N)`` and **must** contain the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.\n    -   If ``x1`` is an array having shape ``(..., M, K)`` and ``x2`` is a two-dimensional array having shape ``(K, N)``, the returned array **must** be an array having shape ``(..., M, N)`` and **must** contain the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.\n    -   If either ``x1`` or ``x2`` has more than two dimensions, the returned array **must** be an array having a shape determined by :ref:`broadcasting` ``shape(x1)[:-2]`` against ``shape(x2)[:-2]`` and **must** contain the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.\n\n    The returned array **must** have a data type determined by :ref:`type-promotion`.\n\nRaises\n------\nException\n    an exception **should** be raised in the following circumstances:\n\n    -   if either ``x1`` or ``x2`` is a zero-dimensional array.\n    -   if ``x1`` is a one-dimensional array having shape ``(K,)``, ``x2`` is a one-dimensional array having shape ``(L,)``, and ``K != L``.\n    -   if ``x1`` is a one-dimensional array having shape ``(K,)``, ``x2`` is an array having shape ``(..., L, N)``, and ``K != L``.\n    -   if ``x1`` is an array having shape ``(..., M, K)``, ``x2`` is a one-dimensional array having shape ``(L,)``, and ``K != L``.\n    -   if ``x1`` is an array having shape ``(..., M, K)``, ``x2`` is an array having shape ``(..., L, N)``, and ``K != L``.\n\nNotes\n-----\n\n-   The ``matmul`` function **must** implement the same semantics as the built-in ``@`` operator (see `PEP 465 <https://www.python.org/dev/peps/pep-0465>`_).\n\n-   If either ``x1`` or ``x2`` has a complex floating-point data type, the function **must not** complex-conjugate or tranpose either argument. If conjugation and/or transposition is desired, a user can explicitly perform these operations prior to computing the matrix product.\n\n.. versionchanged:: 2022.12\n   Added complex data type support."
     matrix_transpose: matrix_transpose[TArray,]
-    "Transposes a matrix (or a stack of matrices) ``x``.\n\nParameters\n----------\nx: array\n    input array having shape ``(..., M, N)`` and whose innermost two dimensions form ``MxN`` matrices.\n\nReturns\n-------\nout: array\n    an array containing the transpose for each matrix and having shape ``(..., N, M)``. The returned array must have the same data type as ``x``."
+    "Transposes a matrix (or a stack of matrices) ``x``.\n\nParameters\n----------\nx: array\n    input array having shape ``(..., M, N)`` and whose innermost two dimensions form ``MxN`` matrices.\n\nReturns\n-------\nout: array\n    an array containing the transpose for each matrix. The returned array **must** have shape ``(..., N, M)``. The returned array **must** have the same data type as ``x``."
     tensordot: tensordot[TArray,]
-    "Returns a tensor contraction of ``x1`` and ``x2`` over specific axes.\n\n.. note::\n   The ``tensordot`` function corresponds to the generalized matrix product.\n\nParameters\n----------\nx1: array\n    first input array. Should have a numeric data type.\nx2: array\n    second input array. Should have a numeric data type. Corresponding contracted axes of ``x1`` and ``x2`` must be equal.\n\n    .. note::\n       Contracted axes (dimensions) must not be broadcasted.\n\naxes: Union[int, Tuple[Sequence[int], Sequence[int]]]\n    number of axes (dimensions) to contract or explicit sequences of axis (dimension) indices for ``x1`` and ``x2``, respectively.\n\n    If ``axes`` is an ``int`` equal to ``N``, then contraction must be performed over the last ``N`` axes of ``x1`` and the first ``N`` axes of ``x2`` in order. The size of each corresponding axis (dimension) must match. Must be nonnegative.\n\n    -   If ``N`` equals ``0``, the result is the tensor (outer) product.\n    -   If ``N`` equals ``1``, the result is the tensor dot product.\n    -   If ``N`` equals ``2``, the result is the tensor double contraction (default).\n\n    If ``axes`` is a tuple of two sequences ``(x1_axes, x2_axes)``, the first sequence must apply to ``x1`` and the second sequence to ``x2``. Both sequences must have the same length. Each axis (dimension) ``x1_axes[i]`` for ``x1`` must have the same size as the respective axis (dimension) ``x2_axes[i]`` for ``x2``. Each index referred to in a sequence must be unique. If ``x1`` has rank (i.e, number of dimensions) ``N``, a valid ``x1`` axis must reside on the half-open interval ``[-N, N)``. If ``x2`` has rank ``M``, a valid ``x2`` axis must reside on the half-open interval ``[-M, M)``.\n\n\n.. note::\n   If either ``x1`` or ``x2`` has a complex floating-point data type, neither argument must be complex-conjugated or transposed. If conjugation and/or transposition is desired, these operations should be explicitly performed prior to computing the generalized matrix product.\n\nReturns\n-------\nout: array\n    an array containing the tensor contraction whose shape consists of the non-contracted axes (dimensions) of the first array ``x1``, followed by the non-contracted axes (dimensions) of the second array ``x2``. The returned array must have a data type determined by :ref:`type-promotion`.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support.\n\n.. versionchanged:: 2023.12\n   Allow negative axes."
+    "Returns a tensor contraction of ``x1`` and ``x2`` over specific axes.\n\nParameters\n----------\nx1: array\n    first input array. **Should** have a numeric data type.\nx2: array\n    second input array. **Should** have a numeric data type. Corresponding contracted axes of ``x1`` and ``x2`` **must** be equal.\n\naxes: Union[int, Tuple[Sequence[int], Sequence[int]]]\n    number of axes to contract or explicit sequences of axis indices for ``x1`` and ``x2``, respectively.\n\n    If ``axes`` is an ``int`` equal to ``N``, then contraction **must** be performed over the last ``N`` axes of ``x1`` and the first ``N`` axes of ``x2`` in order. The size of each corresponding axis **must** match. An integer ``axes`` value **must** be nonnegative.\n\n    -   If ``N`` equals ``0``, the result **must** be the tensor (outer) product.\n    -   If ``N`` equals ``1``, the result **must** be the tensor dot product.\n    -   If ``N`` equals ``2``, the result **must** be the tensor double contraction (default).\n\n    If ``axes`` is a tuple of two sequences ``(x1_axes, x2_axes)``, the first sequence **must** apply to ``x1`` and the second sequence **must** apply to ``x2``. Both sequences **must** have the same length. Each axis ``x1_axes[i]`` for ``x1`` **must** have the same size as the respective axis ``x2_axes[i]`` for ``x2``. Each index referred to in a sequence **must** be unique. A valid axis **must** be an integer on the interval ``[-S, S)``, where ``S`` is the number of axes in respective array. Hence, if ``x1`` has ``N`` axes, a valid ``x1`` axes **must** be an integer on the interval ``[-N, N)``. If ``x2`` has ``M`` axes, a valid ``x2`` axes **must** be an integer on the interval ``[-M, M)``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception.\n\n\nReturns\n-------\nout: array\n    an array containing the tensor contraction. The returned array **must** have a shape which consists of the non-contracted axes of the first array ``x1``, followed by the non-contracted axes of the second array ``x2``. The returned array **must** have a data type determined by :ref:`type-promotion`.\n\nNotes\n-----\n\n-   The ``tensordot`` function corresponds to the generalized matrix product.\n-   Contracted axes **must** not be broadcasted.\n-   If either ``x1`` or ``x2`` has a complex floating-point data type, the function **must not** complex-conjugate or transpose either argument. If conjugation and/or transposition is desired, a user can explicitly perform these operations prior to computing the generalized matrix product.\n\n.. versionchanged:: 2022.12\n   Added complex data type support.\n\n.. versionchanged:: 2023.12\n   Allow negative axes."
     vecdot: vecdot[TArray,]
-    "Computes the (vector) dot product of two arrays.\n\nLet :math:`\\mathbf{a}` be a vector in ``x1`` and :math:`\\mathbf{b}` be a corresponding vector in ``x2``. The dot product is defined as\n\n.. math::\n   \\mathbf{a} \\cdot \\mathbf{b} = \\sum_{i=0}^{n-1} \\overline{a_i}b_i\n\nover the dimension specified by ``axis`` and where :math:`n` is the dimension size and :math:`\\overline{a_i}` denotes the complex conjugate if :math:`a_i` is complex and the identity if :math:`a_i` is real-valued.\n\nParameters\n----------\nx1: array\n    first input array. Should have a floating-point data type.\nx2: array\n    second input array. Must be compatible with ``x1`` for all non-contracted axes (see :ref:`broadcasting`). The size of the axis over which to compute the dot product must be the same size as the respective axis in ``x1``. Should have a floating-point data type.\n\n    .. note::\n       The contracted axis (dimension) must not be broadcasted.\n\naxis: int\n    the axis (dimension) of ``x1`` and ``x2`` containing the vectors for which to compute the dot product. Should be an integer on the interval ``[-N, -1]``, where ``N`` is ``min(x1.ndim, x2.ndim)``. The function must determine the axis along which to compute the dot product by counting backward from the last dimension (where ``-1`` refers to the last dimension). By default, the function must compute the dot product over the last axis. Default: ``-1``.\n\nReturns\n-------\nout: array\n    if ``x1`` and ``x2`` are both one-dimensional arrays, a zero-dimensional containing the dot product; otherwise, a non-zero-dimensional array containing the dot products and having rank ``N-1``, where ``N`` is the rank (number of dimensions) of the shape determined according to :ref:`broadcasting` along the non-contracted axes. The returned array must have a data type determined by :ref:`type-promotion`.\n\nNotes\n-----\n\n**Raises**\n\n-   if the size of the axis over which to compute the dot product is not the same (before broadcasting) for both ``x1`` and ``x2``.\n\n.. versionchanged:: 2022.12\n   Added complex data type support.\n\n.. versionchanged:: 2023.12\n   Restricted ``axis`` to only negative integers."
+    "Computes the (vector) dot product of two arrays.\n\nLet :math:`\\mathbf{a}` be a vector in ``x1`` and :math:`\\mathbf{b}` be a corresponding vector in ``x2``. The dot product is defined as\n\n.. math::\n   \\mathbf{a} \\cdot \\mathbf{b} = \\sum_{i=0}^{n-1} \\overline{a_i}b_i\n\nover the axis specified by ``axis`` and where :math:`n` is the axis size and :math:`\\overline{a_i}` denotes the complex conjugate if :math:`a_i` is complex and the identity if :math:`a_i` is real-valued.\n\nParameters\n----------\nx1: array\n    first input array. **Should** have a floating-point data type.\nx2: array\n    second input array. **Must** be compatible with ``x1`` for all non-contracted axes (see :ref:`broadcasting`). The size of the axis over which to compute the dot product **must** be the same size as the respective axis in ``x1``. **Should** have a floating-point data type.\naxis: int\n    axis of ``x1`` and ``x2`` containing the vectors for which to compute the dot product. **Should** be an integer on the interval ``[-N, -1]``, where ``N`` is ``min(x1.ndim, x2.ndim)``. The function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). By default, the function **must** compute the dot product over the last axis. Default: ``-1``.\n\nReturns\n-------\nout: array\n    if ``x1`` and ``x2`` are both one-dimensional arrays, a zero-dimensional containing the dot product; otherwise, a non-zero-dimensional array containing the dot products and having ``N-1`` axes, where ``N`` is number of axes in the shape determined according to :ref:`broadcasting` along the non-contracted axes. The returned array **must** have a data type determined by :ref:`type-promotion`.\n\nRaises\n------\nException\n    an exception **should** be raised in the following circumstances:\n\n    -   if the size of the axis over which to compute the dot product is not the same (before broadcasting) for both ``x1`` and ``x2``.\n\nNotes\n-----\n\n-   The contracted axis **must** not be broadcasted.\n\n.. versionchanged:: 2022.12\n   Added complex data type support.\n\n.. versionchanged:: 2023.12\n   Restricted ``axis`` to only negative integers."
     broadcast_arrays: broadcast_arrays[TArray,]
-    "Broadcasts one or more arrays against one another.\n\nParameters\n----------\narrays: array\n    an arbitrary number of to-be broadcasted arrays.\n\nReturns\n-------\nout: List[array]\n    a list of broadcasted arrays. Each array must have the same shape. Each array must have the same dtype as its corresponding input array."
+    "Broadcasts one or more arrays against one another.\n\nParameters\n----------\narrays: array\n    an arbitrary number of to-be broadcasted arrays.\n\nReturns\n-------\nout: List[array]\n    a list of broadcasted arrays. Each array **must** have the same shape. Each array **must** have the same dtype as its corresponding input array."
     broadcast_to: broadcast_to[TArray,]
-    "Broadcasts an array to a specified shape.\n\nParameters\n----------\nx: array\n    array to broadcast. Must be capable of being broadcast to the specified ``shape`` (see :ref:`broadcasting`). If the array is incompatible with the specified shape, the function must raise an exception.\nshape: Tuple[int, ...]\n    array shape.\n\nReturns\n-------\nout: array\n    an array having the specified shape. Must have the same data type as ``x``.\n\n.. versionchanged:: 2024.12\n   Clarified broadcast behavior."
+    "Broadcasts an array to a specified shape.\n\nParameters\n----------\nx: array\n    array to broadcast. **Must** be capable of being broadcast to the specified ``shape`` (see :ref:`broadcasting`). If the array is incompatible with the specified shape, the function **must** raise an exception.\nshape: Tuple[int, ...]\n    array shape.\n\nReturns\n-------\nout: array\n    an array having the specified shape. **Must** have the same data type as ``x``.\n\n.. versionchanged:: 2024.12\n   Clarified broadcast behavior."
     concat: concat[TArray,]
-    "Joins a sequence of arrays along an existing axis.\n\nParameters\n----------\narrays: Union[Tuple[array, ...], List[array]]\n    input arrays to join. The arrays must have the same shape, except in the dimension specified by ``axis``.\naxis: Optional[int]\n    axis along which the arrays will be joined. If ``axis`` is ``None``, arrays must be flattened before concatenation. If ``axis`` is negative, the function must determine the axis along which to join by counting from the last dimension. Default: ``0``.\n\nReturns\n-------\nout: array\n    an output array containing the concatenated values. If the input arrays have different data types, normal :ref:`type-promotion` must apply. If the input arrays have the same data type, the output array must have the same data type as the input arrays.\n\n    .. note::\n       This specification leaves type promotion between data type families (i.e., ``intxx`` and ``floatxx``) unspecified."
+    "Joins a sequence of arrays along an existing axis.\n\nParameters\n----------\narrays: Union[Tuple[array, ...], List[array]]\n    input arrays to join. The arrays **must** have the same shape, except in the dimension specified by ``axis``.\naxis: Optional[int]\n    axis along which to join the arrays. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in each array. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. If ``axis`` is ``None``, arrays **must** be flattened before concatenation. Default: ``0``.\n\nReturns\n-------\nout: array\n    an output array containing the concatenated values. If the input arrays have different data types, normal :ref:`type-promotion` **must** apply. If the input arrays have the same data type, the output array **must** have the same data type as the input arrays.\n\n    .. note::\n       This specification leaves type promotion between data type families (i.e., ``intxx`` and ``floatxx``) unspecified and thus implementation-defined."
     expand_dims: expand_dims[TArray,]
-    "Expands the shape of an array by inserting a new axis (dimension) of size one at the position specified by ``axis``.\n\nParameters\n----------\nx: array\n    input array.\naxis: int\n    axis position (zero-based). If ``x`` has rank (i.e, number of dimensions) ``N``, a valid ``axis`` must reside on the closed-interval ``[-N-1, N]``. If provided a negative ``axis``, the axis position at which to insert a singleton dimension must be computed as ``N + axis + 1``. Hence, if provided ``-1``, the resolved axis position must be ``N`` (i.e., a singleton dimension must be appended to the input array ``x``). If provided ``-N-1``, the resolved axis position must be ``0`` (i.e., a singleton dimension must be prepended to the input array ``x``).\n\nReturns\n-------\nout: array\n    an expanded output array having the same data type as ``x``.\n\nRaises\n------\nIndexError\n    If provided an invalid ``axis`` position, an ``IndexError`` should be raised."
+    "Expands the shape of an array by inserting a new axis of size one at the position specified by ``axis``.\n\nParameters\n----------\nx: array\n    input array.\naxis: int\n    axis position (zero-based). A valid ``axis`` **must** reside on the closed-interval ``[-N-1, N]``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the axis position at which to insert a singleton dimension **must** be computed as ``N + axis + 1``. Hence, if provided ``-1``, the resolved axis position **must** be ``N`` (i.e., a singleton dimension **must** be appended to the input array ``x``). If provided ``-N-1``, the resolved axis position **must** be ``0`` (i.e., a singleton dimension **must** be prepended to the input array ``x``). If provided an invalid axis, the function **must** raise an exception. Default: ``0``.\n\nReturns\n-------\nout: array\n    an expanded output array. **Must** have the same data type as ``x``.\n\nRaises\n------\nIndexError\n    If provided an invalid ``axis``, an ``IndexError`` **should** be raised."
     flip: flip[TArray,]
-    "Reverses the order of elements in an array along the given axis. The shape of the array must be preserved.\n\nParameters\n----------\nx: array\n    input array.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis (or axes) along which to flip. If ``axis`` is ``None``, the function must flip all input array axes. If ``axis`` is negative, the function must count from the last dimension. If provided more than one axis, the function must flip only the specified axes. Default: ``None``.\n\nReturns\n-------\nout: array\n    an output array having the same data type and shape as ``x`` and whose elements, relative to ``x``, are reordered."
+    "Reverses the order of elements in an array along the given axis.\n\nParameters\n----------\nx: array\n    input array.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis (or axes) along which to reverse elements. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. If ``axis`` is ``None``, the function **must** flip all input array axes. If provided more than one axis, the function **must** flip only the specified axes. Default: ``None``.\n\nReturns\n-------\nout: array\n    an output array. The returned array **must** have the same data type and shape as ``x``. The returned array must have the same elements as ``x``, but which are reordered relative to ``x``."
     moveaxis: moveaxis[TArray,]
-    "Moves array axes (dimensions) to new positions, while leaving other axes in their original positions.\n\nParameters\n----------\nx: array\n    input array.\nsource: Union[int, Tuple[int, ...]]\n    Axes to move. Provided axes must be unique. If ``x`` has rank (i.e, number of dimensions) ``N``, a valid axis must reside on the half-open interval ``[-N, N)``.\ndestination: Union[int, Tuple[int, ...]]\n    indices defining the desired positions for each respective ``source`` axis index. Provided indices must be unique. If ``x`` has rank (i.e, number of dimensions) ``N``, a valid axis must reside on the half-open interval ``[-N, N)``.\n\nReturns\n-------\nout: array\n    an array containing reordered axes. The returned array must have the same data type as ``x``.\n\nNotes\n-----\n\n.. versionadded:: 2023.12"
+    "Moves array axes to new positions, while leaving other axes in their original positions.\n\nParameters\n----------\nx: array\n    input array.\nsource: Union[int, Tuple[int, ...]]\n    axis (or axes) to move. Provided source axes **must** be unique. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception.\ndestination: Union[int, Tuple[int, ...]]\n    axis (or axes) defining the desired position(s) for each respective ``source`` axis index. Provided destination axes **must** be unique. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception.\n\nReturns\n-------\nout: array\n    an array containing reordered axes. The returned array **must** have the same data type as ``x``.\n\nNotes\n-----\n\n.. versionadded:: 2023.12"
     permute_dims: permute_dims[TArray,]
-    "Permutes the axes (dimensions) of an array ``x``.\n\nParameters\n----------\nx: array\n    input array.\naxes: Tuple[int, ...]\n    tuple containing a permutation of ``(0, 1, ..., N-1)`` where ``N`` is the number of axes (dimensions) of ``x``.\n\nReturns\n-------\nout: array\n    an array containing the axes permutation. The returned array must have the same data type as ``x``."
+    "Permutes the axes of an array ``x``.\n\nParameters\n----------\nx: array\n    input array.\naxes: Tuple[int, ...]\n    tuple containing a permutation of ``(0, 1, ..., N-1)`` where ``N`` is the number of axes in ``x``.\n\nReturns\n-------\nout: array\n    an array containing the axes permutation. The returned array **must** have the same data type as ``x``."
     repeat: repeat[TArray,]
-    "Repeats each element of an array a specified number of times on a per-element basis.\n\n.. admonition:: Data-dependent output shape\n    :class: important\n\n    When ``repeats`` is an array, the shape of the output array for this function depends on the data values in the ``repeats`` array; hence, array libraries which build computation graphs (e.g., JAX, Dask, etc.) may find this function difficult to implement without knowing the values in ``repeats``. Accordingly, such libraries may choose to omit support for ``repeats`` arrays; however, conforming implementations must support providing a literal ``int``. See :ref:`data-dependent-output-shapes` section for more details.\n\nParameters\n----------\nx: array\n    input array containing elements to repeat.\nrepeats: Union[int, array]\n    the number of repetitions for each element.\n\n    If ``axis`` is ``None``, let ``N = prod(x.shape)`` and\n\n    -   if ``repeats`` is an array, ``repeats`` must be broadcast compatible with the shape ``(N,)`` (i.e., be a one-dimensional array having shape ``(1,)`` or ``(N,)``).\n    -   if ``repeats`` is an integer, ``repeats`` must be broadcasted to the shape `(N,)`.\n\n    If ``axis`` is not ``None``, let ``M = x.shape[axis]`` and\n\n    -   if ``repeats`` is an array, ``repeats`` must be broadcast compatible with the shape ``(M,)`` (i.e., be a one-dimensional array having shape ``(1,)`` or ``(M,)``).\n    -   if ``repeats`` is an integer, ``repeats`` must be broadcasted to the shape ``(M,)``.\n\n    If ``repeats`` is an array, the array must have an integer data type.\n\n    .. note::\n       For specification-conforming array libraries supporting hardware acceleration, providing an array for ``repeats`` may cause device synchronization due to an unknown output shape. For those array libraries where synchronization concerns are applicable, conforming array libraries are advised to include a warning in their documentation regarding potential performance degradation when ``repeats`` is an array.\n\naxis: Optional[int]\n    the axis (dimension) along which to repeat elements. If ``axis`` is `None`, the function must flatten the input array ``x`` and then repeat elements of the flattened input array and return the result as a one-dimensional output array. A flattened input array must be flattened in row-major, C-style order. Default: ``None``.\n\nReturns\n-------\nout: array\n    an output array containing repeated elements. The returned array must have the same data type as ``x``. If ``axis`` is ``None``, the returned array must be a one-dimensional array; otherwise, the returned array must have the same shape as ``x``, except for the axis (dimension) along which elements were repeated.\n\nNotes\n-----\n\n.. versionadded:: 2023.12"
+    "Repeats each element of an array a specified number of times on a per-element basis.\n\n.. admonition:: Data-dependent output shape\n    :class: important\n\n    When ``repeats`` is an array, the shape of the output array for this function depends on the data values in the ``repeats`` array; hence, array libraries which build computation graphs (e.g., JAX, Dask, etc.) can find this function difficult to implement without knowing the values in ``repeats``. Accordingly, such libraries **may** choose to omit support for ``repeats`` arrays; however, conforming implementations **must** support providing a literal ``int``. See :ref:`data-dependent-output-shapes` section for more details.\n\nParameters\n----------\nx: array\n    input array containing elements to repeat.\nrepeats: Union[int, array]\n    the number of repetitions for each element.\n\n    If ``axis`` is ``None``, let ``M = prod(x.shape)`` and\n\n    -   if ``repeats`` is an array, ``repeats`` **must** be broadcast compatible with the shape ``(M,)`` (i.e., be a one-dimensional array having shape ``(1,)`` or ``(M,)``).\n    -   if ``repeats`` is an integer, ``repeats`` **must** be broadcasted to the shape `(M,)`.\n\n    If ``axis`` is not ``None``, let ``S = x.shape[axis]`` and\n\n    -   if ``repeats`` is an array, ``repeats`` **must** be broadcast compatible with the shape ``(S,)`` (i.e., be a one-dimensional array having shape ``(1,)`` or ``(S,)``).\n    -   if ``repeats`` is an integer, ``repeats`` **must** be broadcasted to the shape ``(S,)``.\n\n    If ``repeats`` is an array, the array **must** have an integer data type.\n\naxis: Optional[int]\n    the axis along which to repeat elements. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. If ``axis`` is `None`, the function **must** flatten the input array ``x`` and then repeat elements of the flattened input array and return the result as a one-dimensional output array. A flattened input array **must** be flattened in row-major, C-style order. Default: ``None``.\n\nReturns\n-------\nout: array\n    an output array containing repeated elements. The returned array **must** have the same data type as ``x``. If ``axis`` is ``None``, the returned array **must** be a one-dimensional array; otherwise, the returned array **must** have the same shape as ``x``, except for the axis along which elements were repeated.\n\nNotes\n-----\n\n-   For specification-conforming array libraries supporting hardware acceleration, providing an array for ``repeats`` can cause device synchronization due to an unknown output shape. For those array libraries where synchronization concerns are applicable, conforming array libraries **should** include a warning in their documentation regarding potential performance degradation when ``repeats`` is an array.\n\n.. versionadded:: 2023.12"
     reshape: reshape[TArray,]
-    "Reshapes an array without changing its data.\n\nParameters\n----------\nx: array\n    input array to reshape.\nshape: Tuple[int, ...]\n    a new shape compatible with the original shape. One shape dimension is allowed to be ``-1``. When a shape dimension is ``-1``, the corresponding output array shape dimension must be inferred from the length of the array and the remaining dimensions.\ncopy: Optional[bool]\n    whether or not to copy the input array. If ``True``, the function must always copy (see :ref:`copy-keyword-argument`). If ``False``, the function must never copy. If ``None``, the function must avoid copying, if possible, and may copy otherwise. Default: ``None``.\n\nReturns\n-------\nout: array\n    an output array having the same data type and elements as ``x``.\n\nRaises\n------\nValueError\n    If ``copy=False`` and a copy would be necessary, a ``ValueError``\n    should be raised."
+    "Reshapes an array without changing its data.\n\nParameters\n----------\nx: array\n    input array to reshape.\nshape: Tuple[int, ...]\n    a new shape compatible with the original shape. Only one shape dimension **must** be allowed to be ``-1``. When a shape dimension is ``-1``, the corresponding output array shape dimension **must** be inferred from the length of the array and the remaining dimensions.\ncopy: Optional[bool]\n    whether or not to copy the input array. If ``True``, the function **must** always copy (see :ref:`copy-keyword-argument`). If ``False``, the function **must** never copy. If ``None``, the function **must** avoid copying, if possible, and **may** copy otherwise. Default: ``None``.\n\nReturns\n-------\nout: array\n    an output array. The returned array **must** have the same data type and the same elements as ``x``.\n\nRaises\n------\nValueError\n    If ``copy=False`` and a copy would be necessary, a ``ValueError`` **should** be raised."
     roll: roll[TArray,]
-    "Rolls array elements along a specified axis. Array elements that roll beyond the last position are re-introduced at the first position. Array elements that roll beyond the first position are re-introduced at the last position.\n\nParameters\n----------\nx: array\n    input array.\nshift: Union[int, Tuple[int, ...]]\n    number of places by which the elements are shifted. If ``shift`` is a tuple, then ``axis`` must be a tuple of the same size, and each of the given axes must be shifted by the corresponding element in ``shift``. If ``shift`` is an ``int`` and ``axis`` a tuple, then the same ``shift`` must be used for all specified axes. If a shift is positive, then array elements must be shifted positively (toward larger indices) along the dimension of ``axis``. If a shift is negative, then array elements must be shifted negatively (toward smaller indices) along the dimension of ``axis``.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis (or axes) along which elements to shift. If ``axis`` is ``None``, the array must be flattened, shifted, and then restored to its original shape. Default: ``None``.\n\nReturns\n-------\nout: array\n    an output array having the same data type as ``x`` and whose elements, relative to ``x``, are shifted."
+    "Rolls array elements along a specified axis.\n\nArray elements that roll beyond the last position are re-introduced at the first position.\n\nArray elements that roll beyond the first position are re-introduced at the last position.\n\nParameters\n----------\nx: array\n    input array.\nshift: Union[int, Tuple[int, ...]]\n    number of places by which the elements are shifted. If ``shift`` is a tuple, then ``axis`` **must** be a tuple of the same size, and each of the given axes **must** be shifted by the corresponding element in ``shift``. If ``shift`` is an ``int`` and ``axis`` a tuple, then the same ``shift`` **must** be used for all specified axes. If a shift is positive, then array elements **must** be shifted positively (toward larger indices) along the dimension of ``axis``. If a shift is negative, then array elements **must** be shifted negatively (toward smaller indices) along the dimension of ``axis``.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis (or axes) along which elements to shift. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. If ``axis`` is ``None``, the array **must** be flattened, shifted, and then restored to its original shape. Default: ``None``.\n\nReturns\n-------\nout: array\n    an output array. The returned array **must** have the same data type as ``x``. The returned array **must** have the same elements as ``x``, but which are shifted relative to ``x``."
     squeeze: squeeze[TArray,]
-    "Removes singleton dimensions (axes) from ``x``.\n\nParameters\n----------\nx: array\n    input array.\naxis: Union[int, Tuple[int, ...]]\n    axis (or axes) to squeeze.\n\nReturns\n-------\nout: array\n    an output array having the same data type and elements as ``x``.\n\nRaises\n------\nValueError\n    If a specified axis has a size greater than one (i.e., it is not a\n    singleton dimension), a ``ValueError`` should be raised."
+    "Removes singleton axes from ``x``.\n\nParameters\n----------\nx: array\n    input array.\naxis: Union[int, Tuple[int, ...]]\n    axis (or axes) to squeeze. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception.\n\nReturns\n-------\nout: array\n    an output array. The returned array **must** have the same data type and the same elements as ``x``.\n\nRaises\n------\nValueError\n    If a specified axis has a size greater than one (i.e., it is not a singleton axis), a ``ValueError`` **should** be raised."
     stack: stack[TArray,]
-    "Joins a sequence of arrays along a new axis.\n\nParameters\n----------\narrays: Union[Tuple[array, ...], List[array]]\n    input arrays to join. Each array must have the same shape.\naxis: int\n    axis along which the arrays will be joined. Providing an ``axis`` specifies the index of the new axis in the dimensions of the result. For example, if ``axis`` is ``0``, the new axis will be the first dimension and the output array will have shape ``(N, A, B, C)``; if ``axis`` is ``1``, the new axis will be the second dimension and the output array will have shape ``(A, N, B, C)``; and, if ``axis`` is ``-1``, the new axis will be the last dimension and the output array will have shape ``(A, B, C, N)``. A valid ``axis`` must be on the interval ``[-N, N)``, where ``N`` is the rank (number of dimensions) of ``x``. If provided an ``axis`` outside of the required interval, the function must raise an exception. Default: ``0``.\n\nReturns\n-------\nout: array\n    an output array having rank ``N+1``, where ``N`` is the rank (number of dimensions) of ``x``. If the input arrays have different data types, normal :ref:`type-promotion` must apply. If the input arrays have the same data type, the output array must have the same data type as the input arrays.\n\n    .. note::\n       This specification leaves type promotion between data type families (i.e., ``intxx`` and ``floatxx``) unspecified."
+    "Joins a sequence of arrays along a new axis.\n\nParameters\n----------\narrays: Union[Tuple[array, ...], List[array]]\n    input arrays to join. Each array **must** have the same shape.\naxis: int\n    axis along which to join the arrays. Providing an ``axis`` specifies the index of the new axis in the shape of the result. For example, if ``axis`` is ``0``, the new axis **must** be the first dimension and the output array **must** have shape ``(N, A, B, C)``; if ``axis`` is ``1``, the new axis will be the second dimension and the output array will have shape ``(A, N, B, C)``; and, if ``axis`` is ``-1``, the new axis will be the last dimension and the output array will have shape ``(A, B, C, N)``. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. Default: ``0``.\n\nReturns\n-------\nout: array\n    an output array. The returned array **must** have ``N+1`` axes, where ``N`` is the number of axes in ``x``. If the input arrays have different data types, normal :ref:`type-promotion` **must** apply. If the input arrays have the same data type, the output array **must** have the same data type as the input arrays.\n\nNotes\n-----\n\n-   This specification leaves type promotion between data type families (i.e., ``intxx`` and ``floatxx``) unspecified and thus implementation-defined."
     tile: tile[TArray,]
-    "Constructs an array by tiling an input array.\n\nParameters\n----------\nx: array\n    input array.\nrepetitions: Tuple[int, ...]\n    number of repetitions along each axis (dimension).\n\n    Let ``N = len(x.shape)`` and ``M = len(repetitions)``.\n\n    If ``N > M``, the function must prepend ones until all axes (dimensions) are specified (e.g., if ``x`` has shape ``(8,6,4,2)`` and ``repetitions`` is the tuple ``(3,3)``, then ``repetitions`` must be treated as ``(1,1,3,3)``).\n\n    If ``N < M``, the function must prepend singleton axes (dimensions) to ``x`` until ``x`` has as many axes (dimensions) as ``repetitions`` specifies (e.g., if ``x`` has shape ``(4,2)`` and ``repetitions`` is the tuple ``(3,3,3,3)``, then ``x`` must be treated as if it has shape ``(1,1,4,2)``).\n\nReturns\n-------\nout: array\n    a tiled output array. The returned array must have the same data type as ``x`` and must have a rank (i.e., number of dimensions) equal to ``max(N, M)``. If ``S`` is the shape of the tiled array after prepending singleton dimensions (if necessary) and ``r`` is the tuple of repetitions after prepending ones (if necessary), then the number of elements along each axis (dimension) must satisfy ``S[i]*r[i]``, where ``i`` refers to the ``i`` th axis (dimension).\n\nNotes\n-----\n\n.. versionadded:: 2023.12"
+    "Constructs an array by tiling an input array.\n\nParameters\n----------\nx: array\n    input array.\nrepetitions: Tuple[int, ...]\n    number of repetitions along each axis.\n\n    Let ``N = len(x.shape)`` and ``M = len(repetitions)``.\n\n    If ``N > M``, the function **must** prepend ones until all axes are specified (e.g., if ``x`` has shape ``(8,6,4,2)`` and ``repetitions`` is the tuple ``(3,3)``, then ``repetitions`` **must** be treated as ``(1,1,3,3)``).\n\n    If ``N < M``, the function **must** prepend singleton axes to ``x`` until ``x`` has as many axes as ``repetitions`` specifies (e.g., if ``x`` has shape ``(4,2)`` and ``repetitions`` is the tuple ``(3,3,3,3)``, then ``x`` **must** be treated as if it has shape ``(1,1,4,2)``).\n\nReturns\n-------\nout: array\n    a tiled output array. The returned array **must** have the same data type as ``x`` and **must** have a number of axes equal to ``max(N, M)``. If ``S`` is the shape of the tiled array after prepending singleton dimensions (if necessary) and ``r`` is the tuple of repetitions after prepending ones (if necessary), then the number of elements along each axis **must** satisfy ``S[i]*r[i]``, where ``i`` refers to the ``i`` th axis.\n\nNotes\n-----\n\n.. versionadded:: 2023.12"
     unstack: unstack[TArray,]
-    "Splits an array into a sequence of arrays along the given axis.\n\nParameters\n----------\nx: array\n    input array.\naxis: int\n    axis along which the array will be split. A valid ``axis`` must be on the interval ``[-N, N)``, where ``N`` is the rank (number of dimensions) of ``x``. If provided an ``axis`` outside of the required interval, the function must raise an exception. Default: ``0``.\n\nReturns\n-------\nout: Tuple[array, ...]\n    tuple of slices along the given dimension. All the arrays have the same shape.\n\nNotes\n-----\n\n.. versionadded:: 2023.12"
+    "Splits an array into a sequence of arrays along the given axis.\n\nParameters\n----------\nx: array\n    input array.\naxis: int\n    axis along which to split an array. A valid axis **must** be an integer on the interval ``[-N, N)``, where ``N`` is the number of axes in ``x``. If an axis is specified as a negative integer, the function **must** determine the axis along which to perform the operation by counting backward from the last axis (where ``-1`` refers to the last axis). If provided an invalid axis, the function **must** raise an exception. Default: ``0``.\n\nReturns\n-------\nout: Tuple[array, ...]\n    tuple of slices along the given dimension. Each returned array **must** have the same shape.\n\nNotes\n-----\n\n.. versionadded:: 2023.12"
     e: float
     "\nIEEE 754 floating-point representation of Euler's constant.\n\n``e = 2.71828182845904523536028747135266249775724709369995...``\n"
     inf: float
@@ -8935,13 +8925,13 @@ class ArrayNamespace[TCapabilities, TDatatypes, TDefaultdatatypes, TSupportsbuff
     pi: float
     "\nIEEE 754 floating-point representation of the mathematical constant ``π``.\n\n``pi = 3.1415926535897932384626433...``\n"
     unique_all: unique_all[TArray,]
-    "Returns the unique elements of an input array ``x``, the first occurring indices for each unique element in ``x``, the indices from the set of unique elements that reconstruct ``x``, and the corresponding counts for each unique element in ``x``.\n\n.. admonition:: Data-dependent output shape\n    :class: important\n\n    The shapes of two of the output arrays for this function depend on the data values in the input array; hence, array libraries which build computation graphs (e.g., JAX, Dask, etc.) may find this function difficult to implement without knowing array values. Accordingly, such libraries may choose to omit this function. See :ref:`data-dependent-output-shapes` section for more details.\n\n.. note::\n   Uniqueness should be determined based on value equality (see :func:`~array_api.equal`). For input arrays having floating-point data types, value-based equality implies the following behavior.\n\n   -   As ``nan`` values compare as ``False``, ``nan`` values should be considered distinct.\n   -   As complex floating-point values having at least one ``nan`` component compare as ``False``, complex floating-point values having ``nan`` components should be considered distinct.\n   -   As ``-0`` and ``+0`` compare as ``True``, signed zeros should not be considered distinct, and the corresponding unique element will be implementation-dependent (e.g., an implementation could choose to return ``-0`` if ``-0`` occurs before ``+0``).\n\n   As signed zeros are not distinct, using ``inverse_indices`` to reconstruct the input array is not guaranteed to return an array having the exact same values.\n\n   Each ``nan`` value and each complex floating-point value having a ``nan`` component should have a count of one, while the counts for signed zeros should be aggregated as a single count.\n\nParameters\n----------\nx: array\n    input array. If ``x`` has more than one dimension, the function must flatten ``x`` and return the unique elements of the flattened array.\n\nReturns\n-------\nout: Tuple[array, array, array, array]\n    a namedtuple ``(values, indices, inverse_indices, counts)`` whose\n\n    - first element must have the field name ``values`` and must be a one-dimensional array containing the unique elements of ``x``. The array must have the same data type as ``x``.\n    - second element must have the field name ``indices`` and must be an array containing the indices (first occurrences) of a flattened ``x`` that result in ``values``. The array must have the same shape as ``values`` and must have the default array index data type.\n    - third element must have the field name ``inverse_indices`` and must be an array containing the indices of ``values`` that reconstruct ``x``. The array must have the same shape as ``x`` and must have the default array index data type.\n    - fourth element must have the field name ``counts`` and must be an array containing the number of times each unique element occurs in ``x``. The order of the returned counts must match the order of ``values``, such that a specific element in ``counts`` corresponds to the respective unique element in ``values``. The returned array must have same shape as ``values`` and must have the default array index data type.\n\n    .. note::\n       The order of unique elements is not specified and may vary between implementations.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support.\n\n.. versionchanged:: 2023.12\n   Clarified flattening behavior and required the order of ``counts`` match the order of ``values``."
+    "Returns the unique elements of an input array ``x``, the first occurring indices for each unique element in ``x``, the indices from the set of unique elements that reconstruct ``x``, and the corresponding counts for each unique element in ``x``.\n\n.. admonition:: Data-dependent output shape\n    :class: important\n\n    The shapes of two of the output arrays for this function depend on the data values in the input array; hence, array libraries which build computation graphs (e.g., JAX, Dask, et cetera) can find this function difficult to implement without knowing array values. Accordingly, such libraries **may** choose to omit this function. See :ref:`data-dependent-output-shapes` section for more details.\n\nParameters\n----------\nx: array\n    input array. If ``x`` has more than one dimension, the function **must** flatten ``x`` and return the unique elements of the flattened array.\n\nReturns\n-------\nout: Tuple[array, array, array, array]\n    a namedtuple ``(values, indices, inverse_indices, counts)`` whose\n\n    -   first element **must** have the field name ``values`` and **must** be a one-dimensional array containing the unique elements of ``x``. The array **must** have the same data type as ``x``.\n    -   second element **must** have the field name ``indices`` and **must** be an array containing the indices (first occurrences) of a flattened ``x`` that result in ``values``. The array **must** have the same shape as ``values`` and **must** have the default array index data type.\n    -   third element **must** have the field name ``inverse_indices`` and **must** be an array containing the indices of ``values`` that reconstruct ``x``. The array **must** have the same shape as ``x`` and **must** have the default array index data type.\n    -   fourth element **must** have the field name ``counts`` and **must** be an array containing the number of times each unique element occurs in ``x``. The order of the returned counts **must** match the order of ``values``, such that a specific element in ``counts`` corresponds to the respective unique element in ``values``. The returned array **must** have same shape as ``values`` and **must** have the default array index data type.\n\nNotes\n-----\n\n-   The order of unique elements returned by this function is unspecified and thus implementation-defined. As a consequence, element order **may** vary between implementations.\n\n-   Uniqueness **should** be determined based on value equality (see :func:`~array_api.equal`). For input arrays having floating-point data types, value-based equality implies the following behavior.\n\n    -   As ``nan`` values compare as ``False``, ``nan`` values **should** be considered distinct.\n    -   As complex floating-point values having at least one ``nan`` component compare as ``False``, complex floating-point values having ``nan`` components **should** be considered distinct.\n    -   As ``-0`` and ``+0`` compare as ``True``, signed zeros **should not** be considered distinct, and the corresponding unique element **may** be implementation-defined (e.g., an implementation **may** choose to return ``-0`` if ``-0`` occurs before ``+0``).\n\n    As signed zeros are not distinct, using ``inverse_indices`` to reconstruct the input array is not guaranteed to return an array having the exact same values.\n\n    Each ``nan`` value and each complex floating-point value having a ``nan`` component **should** have a count of one, while the counts for signed zeros **should** be aggregated as a single count.\n\n.. versionchanged:: 2022.12\n   Added complex data type support.\n\n.. versionchanged:: 2023.12\n   Clarified flattening behavior and required the order of ``counts`` match the order of ``values``."
     unique_counts: unique_counts[TArray,]
-    "Returns the unique elements of an input array ``x`` and the corresponding counts for each unique element in ``x``.\n\n.. admonition:: Data-dependent output shape\n    :class: important\n\n    The shapes of two of the output arrays for this function depend on the data values in the input array; hence, array libraries which build computation graphs (e.g., JAX, Dask, etc.) may find this function difficult to implement without knowing array values. Accordingly, such libraries may choose to omit this function. See :ref:`data-dependent-output-shapes` section for more details.\n\n.. note::\n   Uniqueness should be determined based on value equality (see :func:`~array_api.equal`). For input arrays having floating-point data types, value-based equality implies the following behavior.\n\n   -   As ``nan`` values compare as ``False``, ``nan`` values should be considered distinct.\n   -   As complex floating-point values having at least one ``nan`` component compare as ``False``, complex floating-point values having ``nan`` components should be considered distinct.\n   -   As ``-0`` and ``+0`` compare as ``True``, signed zeros should not be considered distinct, and the corresponding unique element will be implementation-dependent (e.g., an implementation could choose to return ``-0`` if ``-0`` occurs before ``+0``).\n\n   Each ``nan`` value and each complex floating-point value having a ``nan`` component should have a count of one, while the counts for signed zeros should be aggregated as a single count.\n\nParameters\n----------\nx: array\n    input array. If ``x`` has more than one dimension, the function must flatten ``x`` and return the unique elements of the flattened array.\n\nReturns\n-------\nout: Tuple[array, array]\n    a namedtuple `(values, counts)` whose\n\n    -   first element must have the field name ``values`` and must be a one-dimensional array containing the unique elements of ``x``. The array must have the same data type as ``x``.\n    -   second element must have the field name `counts` and must be an array containing the number of times each unique element occurs in ``x``. The order of the returned counts must match the order of ``values``, such that a specific element in ``counts`` corresponds to the respective unique element in ``values``. The returned array must have same shape as ``values`` and must have the default array index data type.\n\n    .. note::\n       The order of unique elements is not specified and may vary between implementations.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support.\n\n.. versionchanged:: 2023.12\n   Clarified flattening behavior and required the order of ``counts`` match the order of ``values``."
+    "Returns the unique elements of an input array ``x`` and the corresponding counts for each unique element in ``x``.\n\n.. admonition:: Data-dependent output shape\n    :class: important\n\n    The shapes of two of the output arrays for this function depend on the data values in the input array; hence, array libraries which build computation graphs (e.g., JAX, Dask, etc.) can find this function difficult to implement without knowing array values. Accordingly, such libraries **may** choose to omit this function. See :ref:`data-dependent-output-shapes` section for more details.\n\nParameters\n----------\nx: array\n    input array. If ``x`` has more than one dimension, the function **must** flatten ``x`` and return the unique elements of the flattened array.\n\nReturns\n-------\nout: Tuple[array, array]\n    a namedtuple `(values, counts)` whose\n\n    -   first element **must** have the field name ``values`` and **must** be a one-dimensional array containing the unique elements of ``x``. The array **must** have the same data type as ``x``.\n    -   second element **must** have the field name `counts` and **must** be an array containing the number of times each unique element occurs in ``x``. The order of the returned counts **must** match the order of ``values``, such that a specific element in ``counts`` corresponds to the respective unique element in ``values``. The returned array **must** have same shape as ``values`` and **must** have the default array index data type.\n\nNotes\n-----\n\n-   The order of unique elements returned by this function is unspecified and thus implementation-defined. As a consequence, element order **may** vary between implementations.\n\n-   Uniqueness **should** be determined based on value equality (see :func:`~array_api.equal`). For input arrays having floating-point data types, value-based equality implies the following behavior.\n\n    -   As ``nan`` values compare as ``False``, ``nan`` values **should** be considered distinct.\n    -   As complex floating-point values having at least one ``nan`` component compare as ``False``, complex floating-point values having ``nan`` components **should** be considered distinct.\n    -   As ``-0`` and ``+0`` compare as ``True``, signed zeros **should not** be considered distinct, and the corresponding unique element **may** be implementation-defined (e.g., an implementation **may** choose to return ``-0`` if ``-0`` occurs before ``+0``).\n\n    Each ``nan`` value and each complex floating-point value having a ``nan`` component **should** have a count of one, while the counts for signed zeros **should** be aggregated as a single count.\n\n.. versionchanged:: 2022.12\n   Added complex data type support.\n\n.. versionchanged:: 2023.12\n   Clarified flattening behavior and required the order of ``counts`` match the order of ``values``."
     unique_inverse: unique_inverse[TArray,]
-    "Returns the unique elements of an input array ``x`` and the indices from the set of unique elements that reconstruct ``x``.\n\n.. admonition:: Data-dependent output shape\n    :class: important\n\n    The shapes of two of the output arrays for this function depend on the data values in the input array; hence, array libraries which build computation graphs (e.g., JAX, Dask, etc.) may find this function difficult to implement without knowing array values. Accordingly, such libraries may choose to omit this function. See :ref:`data-dependent-output-shapes` section for more details.\n\n.. note::\n   Uniqueness should be determined based on value equality (see :func:`~array_api.equal`). For input arrays having floating-point data types, value-based equality implies the following behavior.\n\n   -   As ``nan`` values compare as ``False``, ``nan`` values should be considered distinct.\n   -   As complex floating-point values having at least one ``nan`` component compare as ``False``, complex floating-point values having ``nan`` components should be considered distinct.\n   -   As ``-0`` and ``+0`` compare as ``True``, signed zeros should not be considered distinct, and the corresponding unique element will be implementation-dependent (e.g., an implementation could choose to return ``-0`` if ``-0`` occurs before ``+0``).\n\n   As signed zeros are not distinct, using ``inverse_indices`` to reconstruct the input array is not guaranteed to return an array having the exact same values.\n\nParameters\n----------\nx: array\n    input array. If ``x`` has more than one dimension, the function must flatten ``x`` and return the unique elements of the flattened array.\n\nReturns\n-------\nout: Tuple[array, array]\n    a namedtuple ``(values, inverse_indices)`` whose\n\n    -   first element must have the field name ``values`` and must be a one-dimensional array containing the unique elements of ``x``. The array must have the same data type as ``x``.\n    -   second element must have the field name ``inverse_indices`` and must be an array containing the indices of ``values`` that reconstruct ``x``. The array must have the same shape as ``x`` and have the default array index data type.\n\n    .. note::\n       The order of unique elements is not specified and may vary between implementations.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support.\n\n.. versionchanged:: 2023.12\n   Clarified flattening behavior."
+    "Returns the unique elements of an input array ``x`` and the indices from the set of unique elements that reconstruct ``x``.\n\n.. admonition:: Data-dependent output shape\n    :class: important\n\n    The shapes of two of the output arrays for this function depend on the data values in the input array; hence, array libraries which build computation graphs (e.g., JAX, Dask, etc.) can find this function difficult to implement without knowing array values. Accordingly, such libraries **may** choose to omit this function. See :ref:`data-dependent-output-shapes` section for more details.\n\nParameters\n----------\nx: array\n    input array. If ``x`` has more than one dimension, the function **must** flatten ``x`` and return the unique elements of the flattened array.\n\nReturns\n-------\nout: Tuple[array, array]\n    a namedtuple ``(values, inverse_indices)`` whose\n\n    -   first element **must** have the field name ``values`` and **must** be a one-dimensional array containing the unique elements of ``x``. The array **must** have the same data type as ``x``.\n    -   second element **must** have the field name ``inverse_indices`` and **must** be an array containing the indices of ``values`` that reconstruct ``x``. The array **must** have the same shape as ``x`` and have the default array index data type.\n\nNotes\n-----\n\n-   The order of unique elements returned by this function is unspecified and thus implementation-defined. As a consequence, element order **may** vary between implementations.\n\n-   Uniqueness **should** be determined based on value equality (see :func:`~array_api.equal`). For input arrays having floating-point data types, value-based equality implies the following behavior.\n\n    -   As ``nan`` values compare as ``False``, ``nan`` values **should** be considered distinct.\n    -   As complex floating-point values having at least one ``nan`` component compare as ``False``, complex floating-point values having ``nan`` components **should** be considered distinct.\n    -   As ``-0`` and ``+0`` compare as ``True``, signed zeros **should not** be considered distinct, and the corresponding unique element **may** be implementation-defined (e.g., an implementation **may** choose to return ``-0`` if ``-0`` occurs before ``+0``).\n\n    As signed zeros are not distinct, using ``inverse_indices`` to reconstruct the input array is not guaranteed to return an array having the exact same values.\n\n.. versionchanged:: 2022.12\n   Added complex data type support.\n\n.. versionchanged:: 2023.12\n   Clarified flattening behavior."
     unique_values: unique_values[TArray,]
-    "Returns the unique elements of an input array ``x``.\n\n.. admonition:: Data-dependent output shape\n    :class: important\n\n    The shapes of two of the output arrays for this function depend on the data values in the input array; hence, array libraries which build computation graphs (e.g., JAX, Dask, etc.) may find this function difficult to implement without knowing array values. Accordingly, such libraries may choose to omit this function. See :ref:`data-dependent-output-shapes` section for more details.\n\n.. note::\n   Uniqueness should be determined based on value equality (see :func:`~array_api.equal`). For input arrays having floating-point data types, value-based equality implies the following behavior.\n\n   -   As ``nan`` values compare as ``False``, ``nan`` values should be considered distinct.\n   -   As complex floating-point values having at least one ``nan`` component compare as ``False``, complex floating-point values having ``nan`` components should be considered distinct.\n   -   As ``-0`` and ``+0`` compare as ``True``, signed zeros should not be considered distinct, and the corresponding unique element will be implementation-dependent (e.g., an implementation could choose to return ``-0`` if ``-0`` occurs before ``+0``).\n\nParameters\n----------\nx: array\n    input array. If ``x`` has more than one dimension, the function must flatten ``x`` and return the unique elements of the flattened array.\n\nReturns\n-------\nout: array\n    a one-dimensional array containing the set of unique elements in ``x``. The returned array must have the same data type as ``x``.\n\n    .. note::\n       The order of unique elements is not specified and may vary between implementations.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support.\n\n.. versionchanged:: 2023.12\n   Required that the output array must be one-dimensional."
+    "Returns the unique elements of an input array ``x``.\n\n.. admonition:: Data-dependent output shape\n    :class: important\n\n    The shapes of two of the output arrays for this function depend on the data values in the input array; hence, array libraries which build computation graphs (e.g., JAX, Dask, etc.) can find this function difficult to implement without knowing array values. Accordingly, such libraries **may** choose to omit this function. See :ref:`data-dependent-output-shapes` section for more details.\n\nParameters\n----------\nx: array\n    input array. If ``x`` has more than one dimension, the function **must** flatten ``x`` and return the unique elements of the flattened array.\n\nReturns\n-------\nout: array\n    a one-dimensional array containing the set of unique elements in ``x``. The returned array **must** have the same data type as ``x``.\n\nNotes\n-----\n\n-   The order of unique elements returned by this function is unspecified and thus implementation-defined. As a consequence, element order **may** vary between implementations.\n\n-   Uniqueness **should** be determined based on value equality (see :func:`~array_api.equal`). For input arrays having floating-point data types, value-based equality implies the following behavior.\n\n    -   As ``nan`` values compare as ``False``, ``nan`` values **should** be considered distinct.\n    -   As complex floating-point values having at least one ``nan`` component compare as ``False``, complex floating-point values having ``nan`` components **should** be considered distinct.\n    -   As ``-0`` and ``+0`` compare as ``True``, signed zeros **should not** be considered distinct, and the corresponding unique element **may** be implementation-defined (e.g., an implementation **may** choose to return ``-0`` if ``-0`` occurs before ``+0``).\n\n.. versionchanged:: 2022.12\n   Added complex data type support.\n\n.. versionchanged:: 2023.12\n   Required that the output array must be one-dimensional."
     bool: float
     complex128: float
     complex64: float
@@ -9041,6 +9031,6 @@ class FftNamespace[TArray: Array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class ArrayNamespaceFull[TCapabilities, TDatatypes, TDefaultdatatypes, TSupportsbufferprotocol, TArray: Array, TDevice, TDtype](ArrayNamespace[TCapabilities, TDatatypes, TDefaultdatatypes, TSupportsbufferprotocol, TArray, TDevice, TDtype], Protocol):
+class ArrayNamespaceFull[TArray: Array, TCapabilities, TDatatypes, TDefaultdatatypes, TDevice, TDtype, TSupportsbufferprotocol](ArrayNamespace[TCapabilities, TDatatypes, TDefaultdatatypes, TSupportsbufferprotocol, TArray, TDevice, TDtype], Protocol):
     linalg: LinalgNamespace[TArray, TDtype]
     fft: FftNamespace[TArray, TDevice, TDtype]

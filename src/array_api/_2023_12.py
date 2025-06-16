@@ -14,7 +14,7 @@ inf = float("inf")
 
 
 @runtime_checkable
-class Info[TCapabilities, TDatatypes, TDefaultdatatypes, TArray: Array, TDevice, TDtype](Protocol):
+class Info[TArray: Array, TCapabilities, TDatatypes, TDefaultdatatypes, TDevice, TDtype](Protocol):
     """Namespace returned by `__array_namespace_info__`."""
 
     def capabilities(self) -> TCapabilities: ...
@@ -58,7 +58,7 @@ class finfo_object[TDtype](Protocol):
 
 
 @runtime_checkable
-class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
+class Array[TArray: Array, TDevice, TDtype, TEllipsis, TPycapsule](Protocol):
     def __init__(self: TArray) -> None:
         """Initialize the attributes for the array object class."""
         ...
@@ -176,6 +176,88 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
+    def __abs__(self: TArray, /) -> TArray:
+        """
+        Calculates the absolute value for each element of an array instance.
+
+        For real-valued input arrays, the element-wise result has the same magnitude as the respective element in ``x`` but has positive sign.
+
+        .. note::
+           For signed integer data types, the absolute value of the minimum representable integer is implementation-dependent.
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have a numeric data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise absolute value. If ``self`` has a real-valued data type, the returned array must have the same data type as ``self``. If ``self`` has a complex floating-point data type, the returned arrayed must have a real-valued floating-point data type whose precision matches the precision of ``self`` (e.g., if ``self`` is ``complex128``, then the returned array must have a ``float64`` data type).
+
+        Notes
+        -----
+
+        .. note::
+           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.abs`.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __add__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
+        """
+        Calculates the sum for each element of an array instance with the respective element of the array ``other``.
+
+        Parameters
+        ----------
+        self: array
+            array instance (augend array). Should have a numeric data type.
+        other: Union[int, float, complex, array]
+            addend array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise sums. The returned array must have a data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+
+        .. note::
+           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.add`.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __and__(self: TArray, other: int | bool | TArray, /) -> TArray:
+        """
+        Evaluates ``self_i & other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have an integer or boolean data type.
+        other: Union[int, bool, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer or boolean data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
+
+
+        .. note::
+           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_and`.
+
+        """
+        ...
+
     def __array_namespace__(self: TArray, /, *, api_version: str | None = None) -> Any:
         """
         Returns an object that has all the array API functions on it.
@@ -191,6 +273,87 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         -------
         out: Any
             an object representing the array API namespace. It should have every top-level function defined in the specification as an attribute. It may contain other public names as well, but it is recommended to only include those names that are part of the specification.
+
+        """
+        ...
+
+    def __bool__(self: TArray, /) -> bool:
+        """
+        Converts a zero-dimensional array to a Python ``bool`` object.
+
+        Parameters
+        ----------
+        self: array
+            zero-dimensional array instance.
+
+        Returns
+        -------
+        out: bool
+            a Python ``bool`` object representing the single element of the array.
+
+        Notes
+        -----
+        **Special cases**
+
+        For real-valued floating-point operands,
+
+        - If ``self`` is ``NaN``, the result is ``True``.
+        - If ``self`` is either ``+infinity`` or ``-infinity``, the result is ``True``.
+        - If ``self`` is either ``+0`` or ``-0``, the result is ``False``.
+
+        For complex floating-point operands, special cases must be handled as if the operation is implemented as the logical OR of ``bool(real(self))`` and ``bool(imag(self))``.
+
+        **Lazy implementations**
+
+        The Python language requires the return value to be of type ``bool``. Lazy implementations are therefore not able to return any kind of lazy/delayed object here and should raise a ``ValueError`` instead.
+
+        .. versionchanged:: 2022.12
+            Added boolean and complex data type support.
+
+        .. versionchanged:: 2023.12
+            Allowed lazy implementations to error.
+
+        """
+        ...
+
+    def __complex__(self: TArray, /) -> complex:
+        """
+        Converts a zero-dimensional array to a Python ``complex`` object.
+
+        Parameters
+        ----------
+        self: array
+            zero-dimensional array instance.
+
+        Returns
+        -------
+        out: complex
+            a Python ``complex`` object representing the single element of the array instance.
+
+        Notes
+        -----
+        **Special cases**
+
+        For boolean operands,
+
+        - If ``self`` is ``True``, the result is ``1+0j``.
+        - If ``self`` is ``False``, the result is ``0+0j``.
+
+        For real-valued floating-point operands,
+
+        - If ``self`` is ``NaN``, the result is ``NaN + NaN j``.
+        - If ``self`` is ``+infinity``, the result is ``+infinity + 0j``.
+        - If ``self`` is ``-infinity``, the result is ``-infinity + 0j``.
+        - If ``self`` is a finite number, the result is ``self + 0j``.
+
+        **Lazy implementations**
+
+        The Python language requires the return value to be of type ``complex``. Lazy implementations are therefore not able to return any kind of lazy/delayed object here and should raise a ``ValueError`` instead.
+
+        .. versionadded:: 2022.12
+
+        .. versionchanged:: 2023.12
+            Allowed lazy implementations to error.
 
         """
         ...
@@ -392,252 +555,67 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def to_device(self: TArray, device: TDevice, /, *, stream: int | Any | None = None) -> TArray:
+    def __eq__(self: TArray, other: int | float | complex | bool | TArray, /) -> TArray:  # type: ignore[override]
         """
-        Copy the array from the device on which it currently resides to the specified ``device``.
+        Computes the truth value of ``self_i == other_i`` for each element of an array instance with the respective element of the array ``other``.
 
         Parameters
         ----------
         self: array
-            array instance.
-        device: device
-            a ``device`` object (see :ref:`device-support`).
-        stream: Optional[Union[int, Any]]
-            stream object to use during copy. In addition to the types supported in :meth:`array.__dlpack__`, implementations may choose to support any library-specific stream object with the caveat that any code using such an object would not be portable.
+            array instance. May have any data type.
+        other: Union[int, float, complex, bool, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). May have any data type.
 
         Returns
         -------
         out: array
-            an array with the same data and data type as ``self`` and located on the specified ``device``.
+            an array containing the element-wise results. The returned array must have a data type of ``bool``.
 
+
+        .. note::
+           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.equal`.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __float__(self: TArray, /) -> float:
+        """
+        Converts a zero-dimensional array to a Python ``float`` object.
+
+        .. note::
+           Casting integer values outside the representable bounds of Python's float type is not specified and is implementation-dependent.
+
+        Parameters
+        ----------
+        self: array
+            zero-dimensional array instance. Should have a real-valued or boolean data type. If ``self`` has a complex floating-point data type, the function must raise a ``TypeError``.
+
+        Returns
+        -------
+        out: float
+            a Python ``float`` object representing the single element of the array instance.
 
         Notes
         -----
-        -   When a provided ``device`` object corresponds to the same device on which an array instance resides, implementations may choose to perform an explicit copy or return ``self``.
-        -   If ``stream`` is provided, the copy operation should be enqueued on the provided ``stream``; otherwise, the copy operation should be enqueued on the default stream/queue. Whether the copy is performed synchronously or asynchronously is implementation-dependent. Accordingly, if synchronization is required to guarantee data safety, this must be clearly explained in a conforming array library's documentation.
+        **Special cases**
+
+        For boolean operands,
+
+        - If ``self`` is ``True``, the result is ``1``.
+        - If ``self`` is ``False``, the result is ``0``.
+
+        **Lazy implementations**
+
+        The Python language requires the return value to be of type ``float``. Lazy implementations are therefore not able to return any kind of lazy/delayed object here and should raise a ``ValueError`` instead.
+
+        .. versionchanged:: 2022.12
+            Added boolean and complex data type support.
 
         .. versionchanged:: 2023.12
-           Clarified behavior when a provided ``device`` object corresponds to the device on which an array instance resides.
-
-        """
-        ...
-
-    def __getitem__(self: TArray, key: int | slice | TEllipsis | None | tuple[int | slice | TEllipsis | None, ...] | TArray, /) -> TArray:
-        """
-        Returns ``self[key]``.
-
-        See :ref:`indexing` for details on supported indexing semantics.
-
-        Parameters
-        ----------
-        self: array
-            array instance.
-        key: Union[int, slice, ellipsis, None, Tuple[Union[int, slice, ellipsis, None], ...], array]
-            index key.
-
-        Returns
-        -------
-        out: array
-            an array containing the accessed value(s). The returned array must have the same data type as ``self``.
-
-        """
-        ...
-
-    def __setitem__(self: TArray, key: int | slice | TEllipsis | tuple[int | slice | TEllipsis, ...] | TArray, value: int | float | complex | bool | TArray, /) -> None:
-        """
-        Sets ``self[key]`` to ``value``.
-
-        See :ref:`indexing` for details on supported indexing semantics.
-
-        Parameters
-        ----------
-        self: array
-            array instance.
-        key: Union[int, slice, ellipsis, Tuple[Union[int, slice, ellipsis], ...], array]
-            index key.
-        value: Union[int, float, complex, bool, array]
-            value(s) to set. Must be compatible with ``self[key]`` (see :ref:`broadcasting`).
-
-
-        .. note::
-
-           Setting array values must not affect the data type of ``self``.
-
-           When ``value`` is a Python scalar (i.e., ``int``, ``float``, ``bool``), behavior must follow specification guidance on mixing arrays with Python scalars (see :ref:`type-promotion`).
-
-           When ``value`` is an ``array`` of a different data type than ``self``, how values are cast to the data type of ``self`` is implementation defined.
-
-        """
-        ...
-
-    def __add__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
-        """
-        Calculates the sum for each element of an array instance with the respective element of the array ``other``.
-
-        Parameters
-        ----------
-        self: array
-            array instance (augend array). Should have a numeric data type.
-        other: Union[int, float, complex, array]
-            addend array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise sums. The returned array must have a data type determined by :ref:`type-promotion`.
-
-        Notes
-        -----
-
-        .. note::
-           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.add`.
-
-        .. versionchanged:: 2022.12
-            Added complex data type support.
-
-        """
-        ...
-
-    def __sub__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
-        """
-        Calculates the difference for each element of an array instance with the respective element of the array ``other``.
-
-        The result of ``self_i - other_i`` must be the same as ``self_i + (-other_i)`` and must be governed by the same floating-point rules as addition (see :meth:`array.__add__`).
-
-        Parameters
-        ----------
-        self: array
-            array instance (minuend array). Should have a numeric data type.
-        other: Union[int, float, complex, array]
-            subtrahend array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise differences. The returned array must have a data type determined by :ref:`type-promotion`.
-
-        Notes
-        -----
-
-        .. note::
-           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.subtract`.
-
-        .. versionchanged:: 2022.12
-            Added complex data type support.
-
-        """
-        ...
-
-    def __mul__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
-        """
-        Calculates the product for each element of an array instance with the respective element of the array ``other``.
-
-        .. note::
-           Floating-point multiplication is not always associative due to finite precision.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have a numeric data type.
-        other: Union[int, float, complex, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise products. The returned array must have a data type determined by :ref:`type-promotion`.
-
-        Notes
-        -----
-
-        .. note::
-           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.multiply`.
-
-        .. versionchanged:: 2022.12
-            Added complex data type support.
-
-        """
-        ...
-
-    def __matmul__(self: TArray, other: TArray, /) -> TArray:
-        """
-        Computes the matrix product.
-
-        .. note::
-           The ``matmul`` function must implement the same semantics as the built-in ``@`` operator (see `PEP 465 <https://www.python.org/dev/peps/pep-0465>`_).
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have a numeric data type. Must have at least one dimension. If ``self`` is one-dimensional having shape ``(M,)`` and ``other`` has more than one dimension, ``self`` must be promoted to a two-dimensional array by prepending ``1`` to its dimensions (i.e., must have shape ``(1, M)``). After matrix multiplication, the prepended dimensions in the returned array must be removed. If ``self`` has more than one dimension (including after vector-to-matrix promotion), ``shape(self)[:-2]`` must be compatible with ``shape(other)[:-2]`` (after vector-to-matrix promotion) (see :ref:`broadcasting`). If ``self`` has shape ``(..., M, K)``, the innermost two dimensions form matrices on which to perform matrix multiplication.
-        other: array
-            other array. Should have a numeric data type. Must have at least one dimension. If ``other`` is one-dimensional having shape ``(N,)`` and ``self`` has more than one dimension, ``other`` must be promoted to a two-dimensional array by appending ``1`` to its dimensions (i.e., must have shape ``(N, 1)``). After matrix multiplication, the appended dimensions in the returned array must be removed. If ``other`` has more than one dimension (including after vector-to-matrix promotion), ``shape(other)[:-2]`` must be compatible with ``shape(self)[:-2]`` (after vector-to-matrix promotion) (see :ref:`broadcasting`). If ``other`` has shape ``(..., K, N)``, the innermost two dimensions form matrices on which to perform matrix multiplication.
-
-
-        .. note::
-           If either ``x1`` or ``x2`` has a complex floating-point data type, neither argument must be complex-conjugated or transposed. If conjugation and/or transposition is desired, these operations should be explicitly performed prior to computing the matrix product.
-
-        Returns
-        -------
-        out: array
-            -   if both ``self`` and ``other`` are one-dimensional arrays having shape ``(N,)``, a zero-dimensional array containing the inner product as its only element.
-            -   if ``self`` is a two-dimensional array having shape ``(M, K)`` and ``other`` is a two-dimensional array having shape ``(K, N)``, a two-dimensional array containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ and having shape ``(M, N)``.
-            -   if ``self`` is a one-dimensional array having shape ``(K,)`` and ``other`` is an array having shape ``(..., K, N)``, an array having shape ``(..., N)`` (i.e., prepended dimensions during vector-to-matrix promotion must be removed) and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_.
-            -   if ``self`` is an array having shape ``(..., M, K)`` and ``other`` is a one-dimensional array having shape ``(K,)``, an array having shape ``(..., M)`` (i.e., appended dimensions during vector-to-matrix promotion must be removed) and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_.
-            -   if ``self`` is a two-dimensional array having shape ``(M, K)`` and ``other`` is an array having shape ``(..., K, N)``, an array having shape ``(..., M, N)`` and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.
-            -   if ``self`` is an array having shape ``(..., M, K)`` and ``other`` is a two-dimensional array having shape ``(K, N)``, an array having shape ``(..., M, N)`` and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.
-            -   if either ``self`` or ``other`` has more than two dimensions, an array having a shape determined by :ref:`broadcasting` ``shape(self)[:-2]`` against ``shape(other)[:-2]`` and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.
-            -   The returned array must have a data type determined by :ref:`type-promotion`.
-
-        Notes
-        -----
-
-        .. note::
-           Results must equal the results returned by the equivalent function :func:`~array_api.matmul`.
-
-        **Raises**
-
-        - if either ``self`` or ``other`` is a zero-dimensional array.
-        - if ``self`` is a one-dimensional array having shape ``(K,)``, ``other`` is a one-dimensional array having shape ``(L,)``, and ``K != L``.
-        - if ``self`` is a one-dimensional array having shape ``(K,)``, ``other`` is an array having shape ``(..., L, N)``, and ``K != L``.
-        - if ``self`` is an array having shape ``(..., M, K)``, ``other`` is a one-dimensional array having shape ``(L,)``, and ``K != L``.
-        - if ``self`` is an array having shape ``(..., M, K)``, ``other`` is an array having shape ``(..., L, N)``, and ``K != L``.
-
-        .. versionchanged:: 2022.12
-            Added complex data type support.
-
-        """
-        ...
-
-    def __truediv__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
-        """
-        Evaluates ``self_i / other_i`` for each element of an array instance with the respective element of the array ``other``.
-
-        .. note::
-           If one or both of ``self`` and ``other`` have integer data types, the result is implementation-dependent, as type promotion between data type "kinds" (e.g., integer versus floating-point) is unspecified.
-
-           Specification-compliant libraries may choose to raise an error or return an array containing the element-wise results. If an array is returned, the array must have a real-valued floating-point data type.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have a numeric data type.
-        other: Union[int, float, complex, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. The returned array should have a floating-point data type determined by :ref:`type-promotion`.
-
-        Notes
-        -----
-
-        .. note::
-           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.divide`.
-
-        .. versionchanged:: 2022.12
-            Added complex data type support.
+            Allowed lazy implementations to error.
 
         """
         ...
@@ -668,293 +646,9 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __mod__(self: TArray, other: int | float | TArray, /) -> TArray:
+    def __ge__(self: TArray, other: int | float | TArray, /) -> TArray:
         """
-        Evaluates ``self_i % other_i`` for each element of an array instance with the respective element of the array ``other``.
-
-        .. note::
-           For input arrays which promote to an integer data type, the result of division by zero is unspecified and thus implementation-defined.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have a real-valued data type.
-        other: Union[int, float, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a real-valued data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. Each element-wise result must have the same sign as the respective element ``other_i``. The returned array must have a real-valued floating-point data type determined by :ref:`type-promotion`.
-
-
-        .. note::
-           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.remainder`.
-
-        """
-        ...
-
-    def __pow__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
-        """
-        Calculates an implementation-dependent approximation of exponentiation by raising each element (the base) of an array instance to the power of ``other_i`` (the exponent), where ``other_i`` is the corresponding element of the array ``other``.
-
-        .. note::
-           If both ``self`` and ``other`` have integer data types, the result of ``__pow__`` when `other_i` is negative (i.e., less than zero) is unspecified and thus implementation-dependent.
-
-           If ``self`` has an integer data type and ``other`` has a floating-point data type, behavior is implementation-dependent, as type promotion between data type "kinds" (e.g., integer versus floating-point) is unspecified.
-
-        Parameters
-        ----------
-        self: array
-            array instance whose elements correspond to the exponentiation base. Should have a numeric data type.
-        other: Union[int, float, complex, array]
-            other array whose elements correspond to the exponentiation exponent. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
-
-        Notes
-        -----
-
-        .. note::
-           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.pow`.
-
-        .. versionchanged:: 2022.12
-            Added complex data type support.
-
-        """
-        ...
-
-    def __lshift__(self: TArray, other: int | TArray, /) -> TArray:
-        """
-        Evaluates ``self_i << other_i`` for each element of an array instance with the respective element  of the array ``other``.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have an integer data type.
-        other: Union[int, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer data type. Each element must be greater than or equal to ``0``.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. The returned array must have the same data type as ``self``.
-
-
-        .. note::
-           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_left_shift`.
-
-        """
-        ...
-
-    def __rshift__(self: TArray, other: int | TArray, /) -> TArray:
-        """
-        Evaluates ``self_i >> other_i`` for each element of an array instance with the respective element of the array ``other``.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have an integer data type.
-        other: Union[int, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer data type. Each element must be greater than or equal to ``0``.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. The returned array must have the same data type as ``self``.
-
-
-        .. note::
-           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_right_shift`.
-
-        """
-        ...
-
-    def __and__(self: TArray, other: int | bool | TArray, /) -> TArray:
-        """
-        Evaluates ``self_i & other_i`` for each element of an array instance with the respective element of the array ``other``.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have an integer or boolean data type.
-        other: Union[int, bool, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer or boolean data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
-
-
-        .. note::
-           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_and`.
-
-        """
-        ...
-
-    def __xor__(self: TArray, other: int | bool | TArray, /) -> TArray:
-        """
-        Evaluates ``self_i ^ other_i`` for each element of an array instance with the respective element of the array ``other``.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have an integer or boolean data type.
-        other: Union[int, bool, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer or boolean data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
-
-
-        .. note::
-           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_xor`.
-
-        """
-        ...
-
-    def __or__(self: TArray, other: int | bool | TArray, /) -> TArray:
-        """
-        Evaluates ``self_i | other_i`` for each element of an array instance with the respective element of the array ``other``.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have an integer or boolean data type.
-        other: Union[int, bool, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer or boolean data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
-
-
-        .. note::
-           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_or`.
-
-        """
-        ...
-
-    def __neg__(self: TArray, /) -> TArray:
-        """
-        Evaluates ``-self_i`` for each element of an array instance.
-
-        .. note::
-           For signed integer data types, the numerical negative of the minimum representable integer is implementation-dependent.
-
-        .. note::
-           If ``self`` has a complex floating-point data type, both the real and imaginary components for each ``self_i`` must be negated (a result which follows from the rules of complex number multiplication).
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have a numeric data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the evaluated result for each element in ``self``. The returned array must have a data type determined by :ref:`type-promotion`.
-
-        Notes
-        -----
-
-        .. note::
-           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.negative`.
-
-        .. versionchanged:: 2022.12
-            Added complex data type support.
-
-        """
-        ...
-
-    def __pos__(self: TArray, /) -> TArray:
-        """
-        Evaluates ``+self_i`` for each element of an array instance.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have a numeric data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the evaluated result for each element. The returned array must have the same data type as ``self``.
-
-        Notes
-        -----
-
-        .. note::
-           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.positive`.
-
-        .. versionchanged:: 2022.12
-            Added complex data type support.
-
-        """
-        ...
-
-    def __abs__(self: TArray, /) -> TArray:
-        """
-        Calculates the absolute value for each element of an array instance.
-
-        For real-valued input arrays, the element-wise result has the same magnitude as the respective element in ``x`` but has positive sign.
-
-        .. note::
-           For signed integer data types, the absolute value of the minimum representable integer is implementation-dependent.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have a numeric data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise absolute value. If ``self`` has a real-valued data type, the returned array must have the same data type as ``self``. If ``self`` has a complex floating-point data type, the returned arrayed must have a real-valued floating-point data type whose precision matches the precision of ``self`` (e.g., if ``self`` is ``complex128``, then the returned array must have a ``float64`` data type).
-
-        Notes
-        -----
-
-        .. note::
-           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.abs`.
-
-        .. versionchanged:: 2022.12
-            Added complex data type support.
-
-        """
-        ...
-
-    def __invert__(self: TArray, /) -> TArray:
-        """
-        Evaluates ``~self_i`` for each element of an array instance.
-
-        Parameters
-        ----------
-        self: array
-            array instance. Should have an integer or boolean data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. The returned array must have the same data type as `self`.
-
-
-        .. note::
-           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_invert`.
-
-        """
-        ...
-
-    def __lt__(self: TArray, other: int | float | TArray, /) -> TArray:
-        """
-        Computes the truth value of ``self_i < other_i`` for each element of an array instance with the respective element of the array ``other``.
+        Computes the truth value of ``self_i >= other_i`` for each element of an array instance with the respective element of the array ``other``.
 
         .. note::
            For backward compatibility, conforming implementations may support complex numbers; however, inequality comparison of complex numbers is unspecified and thus implementation-dependent (see :ref:`complex-number-ordering`).
@@ -973,88 +667,28 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
 
 
         .. note::
-           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.less`.
+           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.greater_equal`.
 
         """
         ...
 
-    def __le__(self: TArray, other: int | float | TArray, /) -> TArray:
+    def __getitem__(self: TArray, key: int | slice | TEllipsis | None | tuple[int | slice | TEllipsis | None, ...] | TArray, /) -> TArray:
         """
-        Computes the truth value of ``self_i <= other_i`` for each element of an array instance with the respective element of the array ``other``.
+        Returns ``self[key]``.
 
-        .. note::
-           For backward compatibility, conforming implementations may support complex numbers; however, inequality comparison of complex numbers is unspecified and thus implementation-dependent (see :ref:`complex-number-ordering`).
+        See :ref:`indexing` for details on supported indexing semantics.
 
         Parameters
         ----------
         self: array
-            array instance. Should have a real-valued data type.
-        other: Union[int, float, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a real-valued data type.
+            array instance.
+        key: Union[int, slice, ellipsis, None, Tuple[Union[int, slice, ellipsis, None], ...], array]
+            index key.
 
         Returns
         -------
         out: array
-            an array containing the element-wise results. The returned array must have a data type of ``bool``.
-
-
-        .. note::
-           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.less_equal`.
-
-        """
-        ...
-
-    def __eq__(self: TArray, other: int | float | complex | bool | TArray, /) -> TArray:  # type: ignore[override]
-        """
-        Computes the truth value of ``self_i == other_i`` for each element of an array instance with the respective element of the array ``other``.
-
-        Parameters
-        ----------
-        self: array
-            array instance. May have any data type.
-        other: Union[int, float, complex, bool, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). May have any data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. The returned array must have a data type of ``bool``.
-
-
-        .. note::
-           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.equal`.
-
-        .. versionchanged:: 2022.12
-            Added complex data type support.
-
-        """
-        ...
-
-    def __ne__(self: TArray, other: int | float | complex | bool | TArray, /) -> TArray:  # type: ignore[override]
-        """
-        Computes the truth value of ``self_i != other_i`` for each element of an array instance with the respective element of the array ``other``.
-
-        Parameters
-        ----------
-        self: array
-            array instance. May have any data type.
-        other: Union[int, float, complex, bool, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). May have any data type.
-
-        Returns
-        -------
-        out: array
-            an array containing the element-wise results. The returned array must have a data type of ``bool`` (i.e., must be a boolean array).
-
-
-        Notes
-        -----
-
-        .. note::
-           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.not_equal`.
-
-        .. versionchanged:: 2022.12
-            Added complex data type support.
+            an array containing the accessed value(s). The returned array must have the same data type as ``self``.
 
         """
         ...
@@ -1085,106 +719,28 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __ge__(self: TArray, other: int | float | TArray, /) -> TArray:
+    def __index__(self: TArray, /) -> int:
         """
-        Computes the truth value of ``self_i >= other_i`` for each element of an array instance with the respective element of the array ``other``.
+        Converts a zero-dimensional integer array to a Python ``int`` object.
 
         .. note::
-           For backward compatibility, conforming implementations may support complex numbers; however, inequality comparison of complex numbers is unspecified and thus implementation-dependent (see :ref:`complex-number-ordering`).
+           This method is called to implement `operator.index() <https://docs.python.org/3/reference/datamodel.html#object.__index__>`_. See also `PEP 357 <https://www.python.org/dev/peps/pep-0357/>`_.
 
         Parameters
         ----------
         self: array
-            array instance. Should have a real-valued data type.
-        other: Union[int, float, array]
-            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a real-valued data type.
+            zero-dimensional array instance. Should have an integer data type. If ``self`` has a floating-point data type, the function must raise a ``TypeError``.
 
         Returns
         -------
-        out: array
-            an array containing the element-wise results. The returned array must have a data type of ``bool``.
-
-
-        .. note::
-           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.greater_equal`.
-
-        """
-        ...
-
-    def __bool__(self: TArray, /) -> bool:
-        """
-        Converts a zero-dimensional array to a Python ``bool`` object.
-
-        Parameters
-        ----------
-        self: array
-            zero-dimensional array instance.
-
-        Returns
-        -------
-        out: bool
-            a Python ``bool`` object representing the single element of the array.
+        out: int
+            a Python ``int`` object representing the single element of the array instance.
 
         Notes
         -----
-        **Special cases**
-
-        For real-valued floating-point operands,
-
-        - If ``self`` is ``NaN``, the result is ``True``.
-        - If ``self`` is either ``+infinity`` or ``-infinity``, the result is ``True``.
-        - If ``self`` is either ``+0`` or ``-0``, the result is ``False``.
-
-        For complex floating-point operands, special cases must be handled as if the operation is implemented as the logical OR of ``bool(real(self))`` and ``bool(imag(self))``.
-
         **Lazy implementations**
 
-        The Python language requires the return value to be of type ``bool``. Lazy implementations are therefore not able to return any kind of lazy/delayed object here and should raise a ``ValueError`` instead.
-
-        .. versionchanged:: 2022.12
-            Added boolean and complex data type support.
-
-        .. versionchanged:: 2023.12
-            Allowed lazy implementations to error.
-
-        """
-        ...
-
-    def __complex__(self: TArray, /) -> complex:
-        """
-        Converts a zero-dimensional array to a Python ``complex`` object.
-
-        Parameters
-        ----------
-        self: array
-            zero-dimensional array instance.
-
-        Returns
-        -------
-        out: complex
-            a Python ``complex`` object representing the single element of the array instance.
-
-        Notes
-        -----
-        **Special cases**
-
-        For boolean operands,
-
-        - If ``self`` is ``True``, the result is ``1+0j``.
-        - If ``self`` is ``False``, the result is ``0+0j``.
-
-        For real-valued floating-point operands,
-
-        - If ``self`` is ``NaN``, the result is ``NaN + NaN j``.
-        - If ``self`` is ``+infinity``, the result is ``+infinity + 0j``.
-        - If ``self`` is ``-infinity``, the result is ``-infinity + 0j``.
-        - If ``self`` is a finite number, the result is ``self + 0j``.
-
-        **Lazy implementations**
-
-        The Python language requires the return value to be of type ``complex``. Lazy implementations are therefore not able to return any kind of lazy/delayed object here and should raise a ``ValueError`` instead.
-
-        .. versionadded:: 2022.12
+        The Python language requires the return value to be of type ``int``. Lazy implementations are therefore not able to return any kind of lazy/delayed object here and should raise a ``ValueError`` instead.
 
         .. versionchanged:: 2023.12
             Allowed lazy implementations to error.
@@ -1242,70 +798,514 @@ class Array[TPycapsule, TArray: Array, TDevice, TDtype, TEllipsis](Protocol):
         """
         ...
 
-    def __float__(self: TArray, /) -> float:
+    def __invert__(self: TArray, /) -> TArray:
         """
-        Converts a zero-dimensional array to a Python ``float`` object.
-
-        .. note::
-           Casting integer values outside the representable bounds of Python's float type is not specified and is implementation-dependent.
+        Evaluates ``~self_i`` for each element of an array instance.
 
         Parameters
         ----------
         self: array
-            zero-dimensional array instance. Should have a real-valued or boolean data type. If ``self`` has a complex floating-point data type, the function must raise a ``TypeError``.
+            array instance. Should have an integer or boolean data type.
 
         Returns
         -------
-        out: float
-            a Python ``float`` object representing the single element of the array instance.
+        out: array
+            an array containing the element-wise results. The returned array must have the same data type as `self`.
 
-        Notes
-        -----
-        **Special cases**
 
-        For boolean operands,
-
-        - If ``self`` is ``True``, the result is ``1``.
-        - If ``self`` is ``False``, the result is ``0``.
-
-        **Lazy implementations**
-
-        The Python language requires the return value to be of type ``float``. Lazy implementations are therefore not able to return any kind of lazy/delayed object here and should raise a ``ValueError`` instead.
-
-        .. versionchanged:: 2022.12
-            Added boolean and complex data type support.
-
-        .. versionchanged:: 2023.12
-            Allowed lazy implementations to error.
+        .. note::
+           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_invert`.
 
         """
         ...
 
-    def __index__(self: TArray, /) -> int:
+    def __le__(self: TArray, other: int | float | TArray, /) -> TArray:
         """
-        Converts a zero-dimensional integer array to a Python ``int`` object.
+        Computes the truth value of ``self_i <= other_i`` for each element of an array instance with the respective element of the array ``other``.
 
         .. note::
-           This method is called to implement `operator.index() <https://docs.python.org/3/reference/datamodel.html#object.__index__>`_. See also `PEP 357 <https://www.python.org/dev/peps/pep-0357/>`_.
+           For backward compatibility, conforming implementations may support complex numbers; however, inequality comparison of complex numbers is unspecified and thus implementation-dependent (see :ref:`complex-number-ordering`).
 
         Parameters
         ----------
         self: array
-            zero-dimensional array instance. Should have an integer data type. If ``self`` has a floating-point data type, the function must raise a ``TypeError``.
+            array instance. Should have a real-valued data type.
+        other: Union[int, float, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a real-valued data type.
 
         Returns
         -------
-        out: int
-            a Python ``int`` object representing the single element of the array instance.
+        out: array
+            an array containing the element-wise results. The returned array must have a data type of ``bool``.
+
+
+        .. note::
+           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.less_equal`.
+
+        """
+        ...
+
+    def __lshift__(self: TArray, other: int | TArray, /) -> TArray:
+        """
+        Evaluates ``self_i << other_i`` for each element of an array instance with the respective element  of the array ``other``.
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have an integer data type.
+        other: Union[int, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer data type. Each element must be greater than or equal to ``0``.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have the same data type as ``self``.
+
+
+        .. note::
+           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_left_shift`.
+
+        """
+        ...
+
+    def __lt__(self: TArray, other: int | float | TArray, /) -> TArray:
+        """
+        Computes the truth value of ``self_i < other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        .. note::
+           For backward compatibility, conforming implementations may support complex numbers; however, inequality comparison of complex numbers is unspecified and thus implementation-dependent (see :ref:`complex-number-ordering`).
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have a real-valued data type.
+        other: Union[int, float, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a real-valued data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have a data type of ``bool``.
+
+
+        .. note::
+           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.less`.
+
+        """
+        ...
+
+    def __matmul__(self: TArray, other: TArray, /) -> TArray:
+        """
+        Computes the matrix product.
+
+        .. note::
+           The ``matmul`` function must implement the same semantics as the built-in ``@`` operator (see `PEP 465 <https://www.python.org/dev/peps/pep-0465>`_).
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have a numeric data type. Must have at least one dimension. If ``self`` is one-dimensional having shape ``(M,)`` and ``other`` has more than one dimension, ``self`` must be promoted to a two-dimensional array by prepending ``1`` to its dimensions (i.e., must have shape ``(1, M)``). After matrix multiplication, the prepended dimensions in the returned array must be removed. If ``self`` has more than one dimension (including after vector-to-matrix promotion), ``shape(self)[:-2]`` must be compatible with ``shape(other)[:-2]`` (after vector-to-matrix promotion) (see :ref:`broadcasting`). If ``self`` has shape ``(..., M, K)``, the innermost two dimensions form matrices on which to perform matrix multiplication.
+        other: array
+            other array. Should have a numeric data type. Must have at least one dimension. If ``other`` is one-dimensional having shape ``(N,)`` and ``self`` has more than one dimension, ``other`` must be promoted to a two-dimensional array by appending ``1`` to its dimensions (i.e., must have shape ``(N, 1)``). After matrix multiplication, the appended dimensions in the returned array must be removed. If ``other`` has more than one dimension (including after vector-to-matrix promotion), ``shape(other)[:-2]`` must be compatible with ``shape(self)[:-2]`` (after vector-to-matrix promotion) (see :ref:`broadcasting`). If ``other`` has shape ``(..., K, N)``, the innermost two dimensions form matrices on which to perform matrix multiplication.
+
+
+        .. note::
+           If either ``x1`` or ``x2`` has a complex floating-point data type, neither argument must be complex-conjugated or transposed. If conjugation and/or transposition is desired, these operations should be explicitly performed prior to computing the matrix product.
+
+        Returns
+        -------
+        out: array
+            -   if both ``self`` and ``other`` are one-dimensional arrays having shape ``(N,)``, a zero-dimensional array containing the inner product as its only element.
+            -   if ``self`` is a two-dimensional array having shape ``(M, K)`` and ``other`` is a two-dimensional array having shape ``(K, N)``, a two-dimensional array containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ and having shape ``(M, N)``.
+            -   if ``self`` is a one-dimensional array having shape ``(K,)`` and ``other`` is an array having shape ``(..., K, N)``, an array having shape ``(..., N)`` (i.e., prepended dimensions during vector-to-matrix promotion must be removed) and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_.
+            -   if ``self`` is an array having shape ``(..., M, K)`` and ``other`` is a one-dimensional array having shape ``(K,)``, an array having shape ``(..., M)`` (i.e., appended dimensions during vector-to-matrix promotion must be removed) and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_.
+            -   if ``self`` is a two-dimensional array having shape ``(M, K)`` and ``other`` is an array having shape ``(..., K, N)``, an array having shape ``(..., M, N)`` and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.
+            -   if ``self`` is an array having shape ``(..., M, K)`` and ``other`` is a two-dimensional array having shape ``(K, N)``, an array having shape ``(..., M, N)`` and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.
+            -   if either ``self`` or ``other`` has more than two dimensions, an array having a shape determined by :ref:`broadcasting` ``shape(self)[:-2]`` against ``shape(other)[:-2]`` and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.
+            -   The returned array must have a data type determined by :ref:`type-promotion`.
 
         Notes
         -----
-        **Lazy implementations**
 
-        The Python language requires the return value to be of type ``int``. Lazy implementations are therefore not able to return any kind of lazy/delayed object here and should raise a ``ValueError`` instead.
+        .. note::
+           Results must equal the results returned by the equivalent function :func:`~array_api.matmul`.
+
+        **Raises**
+
+        - if either ``self`` or ``other`` is a zero-dimensional array.
+        - if ``self`` is a one-dimensional array having shape ``(K,)``, ``other`` is a one-dimensional array having shape ``(L,)``, and ``K != L``.
+        - if ``self`` is a one-dimensional array having shape ``(K,)``, ``other`` is an array having shape ``(..., L, N)``, and ``K != L``.
+        - if ``self`` is an array having shape ``(..., M, K)``, ``other`` is a one-dimensional array having shape ``(L,)``, and ``K != L``.
+        - if ``self`` is an array having shape ``(..., M, K)``, ``other`` is an array having shape ``(..., L, N)``, and ``K != L``.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __mod__(self: TArray, other: int | float | TArray, /) -> TArray:
+        """
+        Evaluates ``self_i % other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        .. note::
+           For input arrays which promote to an integer data type, the result of division by zero is unspecified and thus implementation-defined.
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have a real-valued data type.
+        other: Union[int, float, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a real-valued data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. Each element-wise result must have the same sign as the respective element ``other_i``. The returned array must have a real-valued floating-point data type determined by :ref:`type-promotion`.
+
+
+        .. note::
+           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.remainder`.
+
+        """
+        ...
+
+    def __mul__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
+        """
+        Calculates the product for each element of an array instance with the respective element of the array ``other``.
+
+        .. note::
+           Floating-point multiplication is not always associative due to finite precision.
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have a numeric data type.
+        other: Union[int, float, complex, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise products. The returned array must have a data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+
+        .. note::
+           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.multiply`.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __ne__(self: TArray, other: int | float | complex | bool | TArray, /) -> TArray:  # type: ignore[override]
+        """
+        Computes the truth value of ``self_i != other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        Parameters
+        ----------
+        self: array
+            array instance. May have any data type.
+        other: Union[int, float, complex, bool, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). May have any data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have a data type of ``bool`` (i.e., must be a boolean array).
+
+
+        Notes
+        -----
+
+        .. note::
+           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.not_equal`.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __neg__(self: TArray, /) -> TArray:
+        """
+        Evaluates ``-self_i`` for each element of an array instance.
+
+        .. note::
+           For signed integer data types, the numerical negative of the minimum representable integer is implementation-dependent.
+
+        .. note::
+           If ``self`` has a complex floating-point data type, both the real and imaginary components for each ``self_i`` must be negated (a result which follows from the rules of complex number multiplication).
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have a numeric data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the evaluated result for each element in ``self``. The returned array must have a data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+
+        .. note::
+           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.negative`.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __or__(self: TArray, other: int | bool | TArray, /) -> TArray:
+        """
+        Evaluates ``self_i | other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have an integer or boolean data type.
+        other: Union[int, bool, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer or boolean data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
+
+
+        .. note::
+           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_or`.
+
+        """
+        ...
+
+    def __pos__(self: TArray, /) -> TArray:
+        """
+        Evaluates ``+self_i`` for each element of an array instance.
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have a numeric data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the evaluated result for each element. The returned array must have the same data type as ``self``.
+
+        Notes
+        -----
+
+        .. note::
+           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.positive`.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __pow__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
+        """
+        Calculates an implementation-dependent approximation of exponentiation by raising each element (the base) of an array instance to the power of ``other_i`` (the exponent), where ``other_i`` is the corresponding element of the array ``other``.
+
+        .. note::
+           If both ``self`` and ``other`` have integer data types, the result of ``__pow__`` when `other_i` is negative (i.e., less than zero) is unspecified and thus implementation-dependent.
+
+           If ``self`` has an integer data type and ``other`` has a floating-point data type, behavior is implementation-dependent, as type promotion between data type "kinds" (e.g., integer versus floating-point) is unspecified.
+
+        Parameters
+        ----------
+        self: array
+            array instance whose elements correspond to the exponentiation base. Should have a numeric data type.
+        other: Union[int, float, complex, array]
+            other array whose elements correspond to the exponentiation exponent. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+
+        .. note::
+           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.pow`.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __rshift__(self: TArray, other: int | TArray, /) -> TArray:
+        """
+        Evaluates ``self_i >> other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have an integer data type.
+        other: Union[int, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer data type. Each element must be greater than or equal to ``0``.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have the same data type as ``self``.
+
+
+        .. note::
+           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_right_shift`.
+
+        """
+        ...
+
+    def __setitem__(self: TArray, key: int | slice | TEllipsis | tuple[int | slice | TEllipsis, ...] | TArray, value: int | float | complex | bool | TArray, /) -> None:
+        """
+        Sets ``self[key]`` to ``value``.
+
+        See :ref:`indexing` for details on supported indexing semantics.
+
+        Parameters
+        ----------
+        self: array
+            array instance.
+        key: Union[int, slice, ellipsis, Tuple[Union[int, slice, ellipsis], ...], array]
+            index key.
+        value: Union[int, float, complex, bool, array]
+            value(s) to set. Must be compatible with ``self[key]`` (see :ref:`broadcasting`).
+
+
+        .. note::
+
+           Setting array values must not affect the data type of ``self``.
+
+           When ``value`` is a Python scalar (i.e., ``int``, ``float``, ``bool``), behavior must follow specification guidance on mixing arrays with Python scalars (see :ref:`type-promotion`).
+
+           When ``value`` is an ``array`` of a different data type than ``self``, how values are cast to the data type of ``self`` is implementation defined.
+
+        """
+        ...
+
+    def __sub__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
+        """
+        Calculates the difference for each element of an array instance with the respective element of the array ``other``.
+
+        The result of ``self_i - other_i`` must be the same as ``self_i + (-other_i)`` and must be governed by the same floating-point rules as addition (see :meth:`array.__add__`).
+
+        Parameters
+        ----------
+        self: array
+            array instance (minuend array). Should have a numeric data type.
+        other: Union[int, float, complex, array]
+            subtrahend array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise differences. The returned array must have a data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+
+        .. note::
+           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.subtract`.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __truediv__(self: TArray, other: int | float | complex | TArray, /) -> TArray:
+        """
+        Evaluates ``self_i / other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        .. note::
+           If one or both of ``self`` and ``other`` have integer data types, the result is implementation-dependent, as type promotion between data type "kinds" (e.g., integer versus floating-point) is unspecified.
+
+           Specification-compliant libraries may choose to raise an error or return an array containing the element-wise results. If an array is returned, the array must have a real-valued floating-point data type.
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have a numeric data type.
+        other: Union[int, float, complex, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array should have a floating-point data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+
+        .. note::
+           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.divide`.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __xor__(self: TArray, other: int | bool | TArray, /) -> TArray:
+        """
+        Evaluates ``self_i ^ other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        Parameters
+        ----------
+        self: array
+            array instance. Should have an integer or boolean data type.
+        other: Union[int, bool, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer or boolean data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
+
+
+        .. note::
+           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_xor`.
+
+        """
+        ...
+
+    def to_device(self: TArray, device: TDevice, /, *, stream: int | Any | None = None) -> TArray:
+        """
+        Copy the array from the device on which it currently resides to the specified ``device``.
+
+        Parameters
+        ----------
+        self: array
+            array instance.
+        device: device
+            a ``device`` object (see :ref:`device-support`).
+        stream: Optional[Union[int, Any]]
+            stream object to use during copy. In addition to the types supported in :meth:`array.__dlpack__`, implementations may choose to support any library-specific stream object with the caveat that any code using such an object would not be portable.
+
+        Returns
+        -------
+        out: array
+            an array with the same data and data type as ``self`` and located on the specified ``device``.
+
+
+        Notes
+        -----
+        -   When a provided ``device`` object corresponds to the same device on which an array instance resides, implementations may choose to perform an explicit copy or return ``self``.
+        -   If ``stream`` is provided, the copy operation should be enqueued on the provided ``stream``; otherwise, the copy operation should be enqueued on the default stream/queue. Whether the copy is performed synchronously or asynchronously is implementation-dependent. Accordingly, if synchronization is required to guarantee data safety, this must be clearly explained in a conforming array library's documentation.
 
         .. versionchanged:: 2023.12
-            Allowed lazy implementations to error.
+           Clarified behavior when a provided ``device`` object corresponds to the device on which an array instance resides.
 
         """
         ...
@@ -1936,7 +1936,7 @@ class arange[TArray: Array, TDevice, TDtype](Protocol):
 
 
 @runtime_checkable
-class asarray[TSupportsbufferprotocol, TArray: Array, TDevice, TDtype](Protocol):
+class asarray[TArray: Array, TDevice, TDtype, TSupportsbufferprotocol](Protocol):
     r"""
     Convert the input to an array.
 
@@ -6697,7 +6697,7 @@ class any[TArray: Array](Protocol):
 
 
 @runtime_checkable
-class __array_namespace_info__[TCapabilities, TDatatypes, TDefaultdatatypes, TArray: Array, TDevice, TDtype](Protocol):
+class __array_namespace_info__[TArray: Array, TCapabilities, TDatatypes, TDefaultdatatypes, TDevice, TDtype](Protocol):
     """
     Returns a namespace with Array API namespace inspection utilities.
 
@@ -6726,7 +6726,7 @@ class __array_namespace_info__[TCapabilities, TDatatypes, TDefaultdatatypes, TAr
     """
 
     @abstractmethod
-    def __call__(self, /) -> Info[TCapabilities, TDatatypes, TDefaultdatatypes, TArray, TDevice, TDtype]: ...
+    def __call__(self, /) -> Info[TArray, TCapabilities, TDatatypes, TDefaultdatatypes, TDevice, TDtype]: ...
 
 
 @runtime_checkable
@@ -8235,7 +8235,7 @@ class ArrayNamespace[TCapabilities, TDatatypes, TDefaultdatatypes, TSupportsbuff
     "Calculates the variance of the input array ``x``.\n\nParameters\n----------\nx: array\n    input array. Should have a real-valued floating-point data type.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis or axes along which variances must be computed. By default, the variance must be computed over the entire array. If a tuple of integers, variances must be computed over multiple axes. Default: ``None``.\ncorrection: Union[int, float]\n    degrees of freedom adjustment. Setting this parameter to a value other than ``0`` has the effect of adjusting the divisor during the calculation of the variance according to ``N-c`` where ``N`` corresponds to the total number of elements over which the variance is computed and ``c`` corresponds to the provided degrees of freedom adjustment. When computing the variance of a population, setting this parameter to ``0`` is the standard choice (i.e., the provided array contains data constituting an entire population). When computing the unbiased sample variance, setting this parameter to ``1`` is the standard choice (i.e., the provided array contains data sampled from a larger population; this is commonly referred to as Bessel's correction). Default: ``0``.\nkeepdims: bool\n    if ``True``, the reduced axes (dimensions) must be included in the result as singleton dimensions, and, accordingly, the result must be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) must not be included in the result. Default: ``False``.\n\nReturns\n-------\nout: array\n    if the variance was computed over the entire array, a zero-dimensional array containing the variance; otherwise, a non-zero-dimensional array containing the variances. The returned array must have the same data type as ``x``.\n\n\n.. note::\n   While this specification recommends that this function only accept input arrays having a real-valued floating-point data type, specification-compliant array libraries may choose to accept input arrays having an integer data type. While mixed data type promotion is implementation-defined, if the input array ``x`` has an integer data type, the returned array must have the default real-valued floating-point data type.\n\nNotes\n-----\n\n**Special Cases**\n\nLet ``N`` equal the number of elements over which to compute the variance.\n\n-   If ``N - correction`` is less than or equal to ``0``, the variance is ``NaN``.\n-   If ``x_i`` is ``NaN``, the variance is ``NaN`` (i.e., ``NaN`` values propagate)."
     arange: arange[TArray, TDevice, TDtype]
     "Returns evenly spaced values within the half-open interval ``[start, stop)`` as a one-dimensional array.\n\nParameters\n----------\nstart: Union[int, float]\n    if ``stop`` is specified, the start of interval (inclusive); otherwise, the end of the interval (exclusive). If ``stop`` is not specified, the default starting value is ``0``.\nstop: Optional[Union[int, float]]\n    the end of the interval. Default: ``None``.\nstep: Union[int, float]\n    the distance between two adjacent elements (``out[i+1] - out[i]``). Must not be ``0``; may be negative, this results in an empty array if ``stop >= start``. Default: ``1``.\ndtype: Optional[dtype]\n    output array data type. If ``dtype`` is ``None``, the output array data type must be inferred from ``start``, ``stop`` and ``step``. If those are all integers, the output array dtype must be the default integer dtype; if one or more have type ``float``, then the output array dtype must be the default real-valued floating-point data type. Default: ``None``.\ndevice: Optional[device]\n    device on which to place the created array. Default: ``None``.\n\n\n.. note::\n   This function cannot guarantee that the interval does not include the ``stop`` value in those cases where ``step`` is not an integer and floating-point rounding errors affect the length of the output array.\n\nReturns\n-------\nout: array\n    a one-dimensional array containing evenly spaced values. The length of the output array must be ``ceil((stop-start)/step)`` if ``stop - start`` and ``step`` have the same sign, and length ``0`` otherwise."
-    asarray: asarray[TSupportsbufferprotocol, TArray, TDevice, TDtype]
+    asarray: asarray[TArray, TDevice, TDtype, TSupportsbufferprotocol]
     "Convert the input to an array.\n\nParameters\n----------\nobj: Union[array, bool, int, float, complex, NestedSequence[bool | int | float | complex], SupportsBufferProtocol]\n    object to be converted to an array. May be a Python scalar, a (possibly nested) sequence of Python scalars, or an object supporting the Python buffer protocol.\n\n    .. admonition:: Tip\n       :class: important\n\n       An object supporting the buffer protocol can be turned into a memoryview through ``memoryview(obj)``.\n\ndtype: Optional[dtype]\n    output array data type. If ``dtype`` is ``None``, the output array data type must be inferred from the data type(s) in ``obj``. If all input values are Python scalars, then, in order of precedence,\n\n    -   if all values are of type ``bool``, the output data type must be ``bool``.\n    -   if all values are of type ``int`` or are a mixture of ``bool`` and ``int``, the output data type must be the default integer data type.\n    -   if one or more values are ``complex`` numbers, the output data type must be the default complex floating-point data type.\n    -   if one or more values are ``float``\\s, the output data type must be the default real-valued floating-point data type.\n\n    Default: ``None``.\n\n    .. admonition:: Note\n       :class: note\n\n       If ``dtype`` is not ``None``, then array conversions should obey :ref:`type-promotion` rules. Conversions not specified according to :ref:`type-promotion` rules may or may not be permitted by a conforming array library. To perform an explicit cast, use :func:`array_api.astype`.\n\n    .. note::\n       If an input value exceeds the precision of the resolved output array data type, behavior is left unspecified and, thus, implementation-defined.\n\ndevice: Optional[device]\n    device on which to place the created array. If ``device`` is ``None`` and ``obj`` is an array, the output array device must be inferred from ``obj``. Default: ``None``.\ncopy: Optional[bool]\n    boolean indicating whether or not to copy the input. If ``True``, the function must always copy. If ``False``, the function must never copy for input which supports the buffer protocol and must raise a ``ValueError`` in case a copy would be necessary. If ``None``, the function must reuse existing memory buffer if possible and copy otherwise. Default: ``None``.\n\nReturns\n-------\nout: array\n    an array containing the data from ``obj``.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support."
     empty: empty[TArray, TDevice, TDtype]
     "Returns an uninitialized array having a specified `shape`.\n\nParameters\n----------\nshape: Union[int, Tuple[int, ...]]\n    output array shape.\ndtype: Optional[dtype]\n    output array data type. If ``dtype`` is ``None``, the output array data type must be the default real-valued floating-point data type. Default: ``None``.\ndevice: Optional[device]\n    device on which to place the created array. Default: ``None``.\n\nReturns\n-------\nout: array\n    an array containing uninitialized data."
@@ -8413,7 +8413,7 @@ class ArrayNamespace[TCapabilities, TDatatypes, TDefaultdatatypes, TSupportsbuff
     "Tests whether all input array elements evaluate to ``True`` along a specified axis.\n\n.. note::\n   Positive infinity, negative infinity, and NaN must evaluate to ``True``.\n\n.. note::\n   If ``x`` has a complex floating-point data type, elements having a non-zero component (real or imaginary) must evaluate to ``True``.\n\n.. note::\n   If ``x`` is an empty array or the size of the axis (dimension) along which to evaluate elements is zero, the test result must be ``True``.\n\nParameters\n----------\nx: array\n    input array.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis or axes along which to perform a logical AND reduction. By default, a logical AND reduction must be performed over the entire array. If a tuple of integers, logical AND reductions must be performed over multiple axes. A valid ``axis`` must be an integer on the interval ``[-N, N)``, where ``N`` is the rank (number of dimensions) of ``x``. If an ``axis`` is specified as a negative integer, the function must determine the axis along which to perform a reduction by counting backward from the last dimension (where ``-1`` refers to the last dimension). If provided an invalid ``axis``, the function must raise an exception. Default: ``None``.\nkeepdims: bool\n    If ``True``, the reduced axes (dimensions) must be included in the result as singleton dimensions, and, accordingly, the result must be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) must not be included in the result. Default: ``False``.\n\nReturns\n-------\nout: array\n    if a logical AND reduction was performed over the entire array, the returned array must be a zero-dimensional array containing the test result; otherwise, the returned array must be a non-zero-dimensional array containing the test results. The returned array must have a data type of ``bool``.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support."
     any: any[TArray,]
     "Tests whether any input array element evaluates to ``True`` along a specified axis.\n\n.. note::\n   Positive infinity, negative infinity, and NaN must evaluate to ``True``.\n\n.. note::\n   If ``x`` has a complex floating-point data type, elements having a non-zero component (real or imaginary) must evaluate to ``True``.\n\n.. note::\n   If ``x`` is an empty array or the size of the axis (dimension) along which to evaluate elements is zero, the test result must be ``False``.\n\nParameters\n----------\nx: array\n    input array.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis or axes along which to perform a logical OR reduction. By default, a logical OR reduction must be performed over the entire array. If a tuple of integers, logical OR reductions must be performed over multiple axes. A valid ``axis`` must be an integer on the interval ``[-N, N)``, where ``N`` is the rank (number of dimensions) of ``x``. If an ``axis`` is specified as a negative integer, the function must determine the axis along which to perform a reduction by counting backward from the last dimension (where ``-1`` refers to the last dimension). If provided an invalid ``axis``, the function must raise an exception. Default: ``None``.\nkeepdims: bool\n    If ``True``, the reduced axes (dimensions) must be included in the result as singleton dimensions, and, accordingly, the result must be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) must not be included in the result. Default: ``False``.\n\nReturns\n-------\nout: array\n    if a logical OR reduction was performed over the entire array, the returned array must be a zero-dimensional array containing the test result; otherwise, the returned array must be a non-zero-dimensional array containing the test results. The returned array must have a data type of ``bool``.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support."
-    __array_namespace_info__: __array_namespace_info__[TCapabilities, TDatatypes, TDefaultdatatypes, TArray, TDevice, TDtype]
+    __array_namespace_info__: __array_namespace_info__[TArray, TCapabilities, TDatatypes, TDefaultdatatypes, TDevice, TDtype]
     "Returns a namespace with Array API namespace inspection utilities.\n\nSee :ref:`inspection` for a list of inspection APIs.\n\nReturns\n-------\nout: Info\n    An object containing Array API namespace inspection utilities.\n\nNotes\n-----\n\nThe returned object may be either a namespace or a class, so long as an Array API user can access inspection utilities as follows:\n\n::\n\n  info = xp.__array_namespace_info__()\n  info.capabilities()\n  info.devices()\n  info.dtypes()\n  info.default_dtypes()\n  # ...\n\n.. versionadded: 2023.12"
     take: take[TArray,]
     "Returns elements of an array along an axis.\n\n.. note::\n   Conceptually, ``take(x, indices, axis=3)`` is equivalent to ``x[:,:,:,indices,...]``; however, explicit indexing via arrays of indices is not currently supported in this specification due to concerns regarding ``__setitem__`` and array mutation semantics.\n\nParameters\n----------\nx: array\n    input array.\nindices: array\n    array indices. The array must be one-dimensional and have an integer data type.\n\n    .. note::\n       This specification does not require bounds checking. The behavior for out-of-bounds indices is left unspecified.\n\naxis: Optional[int]\n    axis over which to select values. If ``axis`` is negative, the function must determine the axis along which to select values by counting from the last dimension.\n\n    If ``x`` is a one-dimensional array, providing an ``axis`` is optional; however, if ``x`` has more than one dimension, providing an ``axis`` is required.\n\nReturns\n-------\nout: array\n    an array having the same data type as ``x``. The output array must have the same rank (i.e., number of dimensions) as ``x`` and must have the same shape as ``x``, except for the axis specified by ``axis`` whose size must equal the number of elements in ``indices``.\n\nNotes\n-----\n\n.. versionadded:: 2022.12\n\n.. versionchanged:: 2023.12\n   Out-of-bounds behavior is explicitly left unspecified."
@@ -8570,6 +8570,6 @@ class FftNamespace[TArray: Array, TDevice](Protocol):
 
 
 @runtime_checkable
-class ArrayNamespaceFull[TCapabilities, TDatatypes, TDefaultdatatypes, TSupportsbufferprotocol, TArray: Array, TDevice, TDtype](ArrayNamespace[TCapabilities, TDatatypes, TDefaultdatatypes, TSupportsbufferprotocol, TArray, TDevice, TDtype], Protocol):
+class ArrayNamespaceFull[TArray: Array, TCapabilities, TDatatypes, TDefaultdatatypes, TDevice, TDtype, TSupportsbufferprotocol](ArrayNamespace[TCapabilities, TDatatypes, TDefaultdatatypes, TSupportsbufferprotocol, TArray, TDevice, TDtype], Protocol):
     linalg: LinalgNamespace[TArray, TDtype]
     fft: FftNamespace[TArray, TDevice]
