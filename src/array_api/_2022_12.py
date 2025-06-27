@@ -5,9 +5,15 @@ from collections.abc import Buffer as SupportsBufferProtocol
 from collections.abc import Sequence
 from enum import Enum
 from types import EllipsisType as ellipsis
-from typing import Any, Literal, Protocol, runtime_checkable
+from typing import (
+    Any,
+    Literal,
+    Protocol,
+    runtime_checkable,
+)
 
 from typing_extensions import CapsuleType as PyCapsule
+from typing_extensions import Self
 
 inf = float("inf")
 
@@ -42,7 +48,7 @@ class finfo_object[TDtype](Protocol):
 
 
 @runtime_checkable
-class Array[TArray: Array, TDtype, TDevice](Protocol):
+class Array[TDtype, TDevice](Protocol):
     def __init__(self) -> None:
         """Initialize the attributes for the array object class."""
         ...
@@ -74,7 +80,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         ...
 
     @property
-    def mT(self) -> TArray:
+    def mT(self) -> Self:
         """
         Transpose of a matrix (or a stack of matrices).
 
@@ -142,7 +148,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         ...
 
     @property
-    def T(self) -> TArray:
+    def T(self) -> Self:
         """
         Transpose of the array.
 
@@ -160,7 +166,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __abs__(self, /) -> TArray:
+    def __abs__(self, /) -> Self:
         """
         Calculates the absolute value for each element of an array instance.
 
@@ -191,7 +197,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __add__(self, other: int | float | complex | TArray, /) -> TArray:
+    def __add__(self, other: int | float | complex | Self, /) -> Self:
         """
         Calculates the sum for each element of an array instance with the respective element of the array ``other``.
 
@@ -219,7 +225,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __and__(self, other: int | bool | TArray, /) -> TArray:
+    def __and__(self, other: int | bool | Self, /) -> Self:
         """
         Evaluates ``self_i & other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -242,7 +248,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __array_namespace__(self, /, *, api_version: str | None = None) -> Any:
+    def __array_namespace__(self, /, *, api_version: str | None = None) -> ArrayNamespace[Self, TDtype, TDevice]:
         """
         Returns an object that has all the array API functions on it.
 
@@ -427,7 +433,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __eq__(self, other: int | float | complex | bool | TArray, /) -> TArray:  # type: ignore[override]
+    def __eq__(self, other: int | float | complex | bool | Self, /) -> Self:  # type: ignore[override]
         """
         Computes the truth value of ``self_i == other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -485,7 +491,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __floordiv__(self, other: int | float | TArray, /) -> TArray:
+    def __floordiv__(self, other: int | float | Self, /) -> Self:
         """
         Evaluates ``self_i // other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -511,7 +517,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __ge__(self, other: int | float | TArray, /) -> TArray:
+    def __ge__(self, other: int | float | Self, /) -> Self:
         """
         Computes the truth value of ``self_i >= other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -537,7 +543,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __getitem__(self, key: int | slice | ellipsis | None | tuple[int | slice | ellipsis | None, ...] | TArray, /) -> TArray:
+    def __getitem__(self, key: int | slice | ellipsis | None | tuple[int | slice | ellipsis | None, ...] | Self, /) -> Self:
         """
         Returns ``self[key]``.
 
@@ -558,7 +564,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __gt__(self, other: int | float | TArray, /) -> TArray:
+    def __gt__(self, other: int | float | Self, /) -> Self:
         """
         Computes the truth value of ``self_i > other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -645,7 +651,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __invert__(self, /) -> TArray:
+    def __invert__(self, /) -> Self:
         """
         Evaluates ``~self_i`` for each element of an array instance.
 
@@ -666,7 +672,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __le__(self, other: int | float | TArray, /) -> TArray:
+    def __le__(self, other: int | float | Self, /) -> Self:
         """
         Computes the truth value of ``self_i <= other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -692,7 +698,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __lshift__(self, other: int | TArray, /) -> TArray:
+    def __lshift__(self, other: int | Self, /) -> Self:
         """
         Evaluates ``self_i << other_i`` for each element of an array instance with the respective element  of the array ``other``.
 
@@ -715,7 +721,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __lt__(self, other: int | float | TArray, /) -> TArray:
+    def __lt__(self, other: int | float | Self, /) -> Self:
         """
         Computes the truth value of ``self_i < other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -741,7 +747,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __matmul__(self, other: TArray, /) -> TArray:
+    def __matmul__(self, other: Self, /) -> Self:
         """
         Computes the matrix product.
 
@@ -791,7 +797,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __mod__(self, other: int | float | TArray, /) -> TArray:
+    def __mod__(self, other: int | float | Self, /) -> Self:
         """
         Evaluates ``self_i % other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -817,7 +823,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __mul__(self, other: int | float | complex | TArray, /) -> TArray:
+    def __mul__(self, other: int | float | complex | Self, /) -> Self:
         """
         Calculates the product for each element of an array instance with the respective element of the array ``other``.
 
@@ -848,7 +854,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __ne__(self, other: int | float | complex | bool | TArray, /) -> TArray:  # type: ignore[override]
+    def __ne__(self, other: int | float | complex | bool | Self, /) -> Self:  # type: ignore[override]
         """
         Computes the truth value of ``self_i != other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -876,7 +882,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __neg__(self, /) -> TArray:
+    def __neg__(self, /) -> Self:
         """
         Evaluates ``-self_i`` for each element of an array instance.
 
@@ -908,7 +914,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __or__(self, other: int | bool | TArray, /) -> TArray:
+    def __or__(self, other: int | bool | Self, /) -> Self:
         """
         Evaluates ``self_i | other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -933,7 +939,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __pos__(self, /) -> TArray:
+    def __pos__(self, /) -> Self:
         """
         Evaluates ``+self_i`` for each element of an array instance.
 
@@ -954,7 +960,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __pow__(self, other: int | float | complex | TArray, /) -> TArray:
+    def __pow__(self, other: int | float | complex | Self, /) -> Self:
         """
         Calculates an implementation-dependent approximation of exponentiation by raising each element (the base) of an array instance to the power of ``other_i`` (the exponent), where ``other_i`` is the corresponding element of the array ``other``.
 
@@ -987,7 +993,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __rshift__(self, other: int | TArray, /) -> TArray:
+    def __rshift__(self, other: int | Self, /) -> Self:
         """
         Evaluates ``self_i >> other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -1010,7 +1016,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __setitem__(self, key: int | slice | ellipsis | tuple[int | slice | ellipsis, ...] | TArray, value: int | float | complex | bool | TArray, /) -> None:
+    def __setitem__(self, key: int | slice | ellipsis | tuple[int | slice | ellipsis, ...] | Self, value: int | float | complex | bool | Self, /) -> None:
         """
         Sets ``self[key]`` to ``value``.
 
@@ -1037,7 +1043,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __sub__(self, other: int | float | complex | TArray, /) -> TArray:
+    def __sub__(self, other: int | float | complex | Self, /) -> Self:
         """
         Calculates the difference for each element of an array instance with the respective element of the array ``other``.
 
@@ -1067,7 +1073,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __truediv__(self, other: int | float | complex | TArray, /) -> TArray:
+    def __truediv__(self, other: int | float | complex | Self, /) -> Self:
         """
         Evaluates ``self_i / other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -1100,7 +1106,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __xor__(self, other: int | bool | TArray, /) -> TArray:
+    def __xor__(self, other: int | bool | Self, /) -> Self:
         """
         Evaluates ``self_i ^ other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -1123,7 +1129,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def to_device(self, device: TDevice, /, *, stream: int | Any | None = None) -> TArray:
+    def to_device(self, device: TDevice, /, *, stream: int | Any | None = None) -> Self:
         """
         Copy the array from the device on which it currently resides to the specified ``device``.
 
@@ -7724,3 +7730,12 @@ class FftNamespace[TArray: Array, TDevice](Protocol):
 class ArrayNamespaceFull[TArray: Array, TDtype, TDevice](ArrayNamespace[TArray, TDtype, TDevice], Protocol):
     linalg: LinalgNamespace[TArray, TDtype]
     fft: FftNamespace[TArray, TDevice]
+
+
+@runtime_checkable
+class ShapedArray[*T, TDevice, TDtype](Array[TDevice, TDtype], Protocol):
+    @property
+    def shape(self) -> tuple[*T]: ...  # type: ignore[override]
+
+
+type ShapedAnyArray[*T] = ShapedArray[*T, Any, Any]

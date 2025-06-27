@@ -89,6 +89,20 @@ assert isinstance(array_api_strict, ArrayNamespace)
 assert not isinstance(array_api_strict, ArrayNamespaceFull)
 ```
 
+## Notes on the design concepts
+
+### Regarding not supporting shape typing
+
+#### Typing only ndim
+
+Typing only the number of dimensions (ndim), as Numpy currently does, can be accomplished like `Array[tuple[int, int, int]]` or `Array[int, int, int]`.
+
+However
+
+- This approach requires many number of characters
+- Requires (`2 * max_ndim` type overloads for each function) or (`2` type overloads for each function and `max_ndim` Protocol, and moreover user has to use these Protocols everywhere in their code) due to
+- Tt does not indicate the meaning of each dimension (e.g., batch axis, vector axis, matrix axis, etc.).
+
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):

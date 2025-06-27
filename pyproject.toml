@@ -38,6 +38,7 @@ urls.Changelog = "https://github.com/34j/types-array-api/blob/main/CHANGELOG.md"
 urls.documentation = "https://array-api.readthedocs.io"
 urls.repository = "https://github.com/34j/types-array-api"
 scripts.array-api = "array_api.cli:app"
+scripts.types-array-api = "array_api.cli:app"
 
 [dependency-groups]
 dev = [
