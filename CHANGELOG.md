@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.3-rc.1 (2025-06-27)
+
+### Bug fixes
+
+- Fix `typevar`s for `array`, fix `__array_namespace__` not typed, fix `typevar`s for `info`, add shapedarray ([`a920f1c`](https://github.com/34j/types-array-api/commit/a920f1c26ce17042a97094c8e845ecc9bbe2ce00))
+
 ## v1.1.2 (2025-06-16)
 
 ### Bug fixes
