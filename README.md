@@ -70,7 +70,7 @@ There are multiple ways to type functions:
 - This is the simplest way to enjoy autocompletion for `Array`. Practically this should be enough for most use cases.
 
   ```python
-  from array_api._2024_12 import Array, ShapedAnyArray
+  from array_api._2024_12 import Array
 
   def simple(x: Array) -> Array:
       return x + 1
