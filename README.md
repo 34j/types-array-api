@@ -63,9 +63,9 @@ xp = array_api_compat.array_namespace(x)
 ![Screenshot 1](https://raw.githubusercontent.com/34j/array-api/main/docs/_static/screenshot1.png)
 ![Screenshot 2](https://raw.githubusercontent.com/34j/array-api/main/docs/_static/screenshot2.png)
 
-### Typineg your function using `Array`
+### Typing your function using `Array`
 
-There are multiple ways to type your functions:
+There are multiple ways to type functions:
 
 - This is the simplest way to enjoy autocompletion for `Array`. Practically this should be enough for most use cases.
 
@@ -76,7 +76,7 @@ There are multiple ways to type your functions:
       return x + 1
   ```
 
-- If you want to make sure that the same type of array (`ndarray`→`ndarray`, `Tensor`→`Tensor`) is returned, you can use `Array` with a type variable.
+- To make sure that the same type of array is returned (`ndarray`→`ndarray`, `Tensor`→`Tensor`), a `TypeVar` bound to `Array` can be used:
 
   ```python
   def generic[TArray: Array](x: TArray) -> TArray:
@@ -87,7 +87,7 @@ There are multiple ways to type your functions:
 
 ### Namespace Type
 
-You can test if an object matches the Protocol by:
+You can test if an object matches the Protocol as they are [`runtime-checkable`](https://docs.python.org/3/library/typing.html#typing.runtime_checkable):
 
 ```python
 import array_api_strict
@@ -103,7 +103,7 @@ assert not isinstance(array_api_strict, ArrayNamespaceFull)
 
 ### Shape Typing
 
-- If you want to make sure about the input and output shapes, you can use `ShapedArray`:
+- To clarify the input and output shapes, you can use `ShapedArray`:
 
   ```python
   from array_api._2024_12 import ShapedAnyArray as Array
