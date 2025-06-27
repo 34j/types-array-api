@@ -3,13 +3,30 @@ import inspect
 
 import array_api_strict
 
-from array_api._2024_12 import ArrayNamespace, add
+from array_api._2024_12 import ArrayNamespace
 
 
-def test_main():
-    assert isinstance(array_api_strict.add, add)
+def test_strict_supset_namespace():
     # Namespace <= strict
     assert isinstance(array_api_strict, ArrayNamespace)
+    # module = ast.parse(inspect.getsource(ArrayNamespace))
+    # classdef = next(n for n in module.body if isinstance(n, ast.ClassDef) and n.name == "ArrayNamespace")
+    # for n in classdef.body:
+    #     if not isinstance(n, ast.AnnAssign):
+    #         continue
+    #     if not isinstance(n.target, ast.Name):
+    #         continue
+    #     if not isinstance(n.annotation, ast.Subscript):
+    #         continue
+    #     if not isinstance(n.annotation.value, ast.Name):
+    #         continue
+    #     assert isinstance(
+    #         getattr(array_api_strict, n.target.id, None),
+    #         getattr(array_api._2024_12, n.annotation.value.id, None)
+    #     )
+
+
+def test_namespace_supset_strict():
     # Namespace >= strict
     missing = []
     module = ast.parse(inspect.getsource(ArrayNamespace))

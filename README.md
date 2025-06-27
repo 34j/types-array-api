@@ -52,7 +52,7 @@ pip install types-array-api
 
 ### Type stubs
 
-Provices type stubs for [`array-api-compat`](https://data-apis.org/array-api-compat/).
+Autocompletion for [`array-api-compat`](https://data-apis.org/array-api-compat/) is available in your IDE **just by installing** this package.
 
 ```python
 import array_api_compat
@@ -63,19 +63,31 @@ xp = array_api_compat.array_namespace(x)
 ![Screenshot 1](https://raw.githubusercontent.com/34j/array-api/main/docs/_static/screenshot1.png)
 ![Screenshot 2](https://raw.githubusercontent.com/34j/array-api/main/docs/_static/screenshot2.png)
 
-### Array Type
+### Typing functions using `Array`
 
-```python
-from array_api._2024_12 import Array
+There are multiple ways to type functions:
 
+- ```python
+  from array_api._2024_12 import Array
 
-def my_function[TArray: Array](x: TArray) -> TArray:
-    return x + 1
-```
+  def simple(x: Array) -> Array:
+      return x + 1
+  ```
+
+  The simplest way to enjoy autocompletion for `Array`. This should be enough for most use cases.
+
+- To make sure that the same type of array is returned (`ndarray`→`ndarray`, `Tensor`→`Tensor`), a `TypeVar` bound to `Array` can be used:
+
+  ```python
+  def generic[TArray: Array](x: TArray) -> TArray:
+      return x + 1
+  ```
+
+## Advanced Usage
 
 ### Namespace Type
 
-You can test if an object matches the Protocol by:
+You can test if an object matches the Protocol as they are [`runtime-checkable`](https://docs.python.org/3/library/typing.html#typing.runtime_checkable):
 
 ```python
 import array_api_strict
@@ -88,6 +100,47 @@ assert isinstance(array_api_strict, ArrayNamespace)
 # fft and linalg are not included by default in array_api_strict
 assert not isinstance(array_api_strict, ArrayNamespaceFull)
 ```
+
+### Shape Typing
+
+- To clarify the input and output shapes, `ShapedArray` and `ShapedAnyArray` can be used:
+
+  ```python
+  from array_api._2024_12 import ShapedAnyArray as Array
+
+  def sum_last_axis[*TShape](x: Array[*TShape, Any]) -> Array[*TShape]:
+      return xp.sum(x, axis=-1)
+  ```
+
+  More complex example using [NewType](https://docs.python.org/3/library/typing.html#newtype) or [type aliases](https://docs.python.org/3/library/typing.html#type-aliases):
+
+  ```python
+  RTheta = NewType("RTheta", int)
+  XY = NewType("XY", int)
+  def polar_coordinates[*TShape](randtheta: Array[*TShape, RTheta]) -> Array[*TShape, XY]:
+      """Convert polar coordinates to Cartesian coordinates."""
+      r = randtheta[..., 0]
+      theta = randtheta[..., 1]
+      x = r * xp.cos(theta)
+      y = r * xp.sin(theta)
+      return xp.stack((x, y), axis=-1)
+  ```
+
+  Note that `ShapedAnyArray` exists only for **documentation purposes** and internally it is treated as `Array`.
+  Using both generic and shaped are impossible due to [python/typing#548](https://github.com/python/typing/issues/548).
+
+- Note that the below example is ideal but impossible due to Python specification.
+
+  ```python
+  def impossible[
+      TDtype,
+      TDevice,
+      *TShapeFormer: int,
+      *TShapeLatter: int,
+      TArray: Array
+  ](x: TArray[*TShapeFormer, *TShapeLatter | Literal[1], TDtype, TDevice], y: TArray[*TShapeLatter | Literal[1], TDtype, TDevice]) -> TArray[*TShapeFormer, *TShapeLatter, TDtype, TDevice]:
+      return x + y # broadcasting
+  ```
 
 ## Contributors ✨
 

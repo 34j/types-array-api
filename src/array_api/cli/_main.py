@@ -73,7 +73,7 @@ def _function_to_protocol(stmt: ast.FunctionDef, typevars: Sequence[TypeVarInfo]
         stmt.returns = ast.Subscript(
             value=ast.Name(id="Info"),
             slice=ast.Tuple(
-                elts=[ast.Name(id=t.name) for t in typevars if t.name in ["Capabilities", "DefaultDataTypes", "DataTypes", "array", "device", "dtype"]],
+                elts=[ast.Name(id=t.name) for t in typevars if t.name in ["device"]],
                 ctx=ast.Load(),
             ),
         )
@@ -115,7 +115,15 @@ def _class_to_protocol(stmt: ast.ClassDef, typevars: Sequence[TypeVarInfo]) -> P
 
     """
     unp = ast.unparse(stmt)
-    typevars = [typevar for typevar in typevars if typevar.name in unp]
+    # extract type variables from the class definition
+    typevars = [typevar for typevar in typevars if f": {typevar.name}" in unp or f"-> {typevar.name}" in unp or f"[{typevar.name}]" in unp]
+    # Array must not be a generic of itself
+    if stmt.name == "_array":
+        typevars = [t for t in typevars if t.name != "array"]
+        for node in ast.walk(stmt):
+            if isinstance(node, ast.Name) and node.id == "array":
+                node.id = "Self"
+        stmt.name = "_array"
     stmt.bases = [
         ast.Name(id="Protocol"),
     ]
@@ -127,6 +135,14 @@ def _class_to_protocol(stmt: ast.ClassDef, typevars: Sequence[TypeVarInfo]) -> P
                 b.body.append(ast.Expr(value=ast.Constant(value=Ellipsis)))
             if b.name in ["__eq__", "__ne__"]:
                 b.type_comment = "ignore[override]"
+            if b.name == "__array_namespace__":
+                b.returns = ast.Subscript(
+                    value=ast.Name(id="ArrayNamespace"),
+                    slice=ast.Tuple(
+                        elts=[ast.Name(x) for x in ("Self", "dtype", "device")],
+                        ctx=ast.Load(),
+                    ),
+                )
     stmt.type_params = [ast.TypeVar(name=t.name, bound=ast.Name(id=t.bound) if t.bound else None) for t in typevars]
     stmt.decorator_list = [ast.Name(id="runtime_checkable")]
     return ProtocolData(
@@ -329,15 +345,25 @@ from typing import (
     Tuple,
     List,
     runtime_checkable,
-    TypedDict
+    TypedDict,
 )
 from types import EllipsisType as ellipsis
 from typing_extensions import CapsuleType as PyCapsule
+from typing_extensions import Self
 from collections.abc import Buffer as SupportsBufferProtocol
 inf = float("inf")
 
 """
         + text
+        + """
+@runtime_checkable
+class ShapedArray[*T, TDevice, TDtype](Array[TDevice, TDtype], Protocol):
+    @property
+    def shape(self) -> tuple[*T]: ...  # type: ignore[override]
+
+
+type ShapedAnyArray[*T] = ShapedArray[*T, Any, Any]
+"""
     )
 
     # Fix self-references in typing
