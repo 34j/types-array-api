@@ -67,14 +67,14 @@ xp = array_api_compat.array_namespace(x)
 
 There are multiple ways to type functions:
 
-- This is the simplest way to enjoy autocompletion for `Array`. Practically this should be enough for most use cases.
-
-  ```python
+- ```python
   from array_api._2024_12 import Array
 
   def simple(x: Array) -> Array:
       return x + 1
   ```
+
+  The simplest way to enjoy autocompletion for `Array`. This should be enough for most use cases.
 
 - To make sure that the same type of array is returned (`ndarray`→`ndarray`, `Tensor`→`Tensor`), a `TypeVar` bound to `Array` can be used:
 
