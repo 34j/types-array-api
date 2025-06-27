@@ -103,7 +103,7 @@ assert not isinstance(array_api_strict, ArrayNamespaceFull)
 
 ### Shape Typing
 
-- To clarify the input and output shapes, `ShapedArray` can be used:
+- To clarify the input and output shapes, `ShapedArray` and `ShapedAnyArray` can be used:
 
   ```python
   from array_api._2024_12 import ShapedAnyArray as Array
