@@ -52,7 +52,7 @@ pip install types-array-api
 
 ### Type stubs
 
-Provices type stubs for [`array-api-compat`](https://data-apis.org/array-api-compat/).
+Autocompletion for [`array-api-compat`](https://data-apis.org/array-api-compat/) is available in your IDE **just by installing** this package.
 
 ```python
 import array_api_compat
@@ -63,15 +63,27 @@ xp = array_api_compat.array_namespace(x)
 ![Screenshot 1](https://raw.githubusercontent.com/34j/array-api/main/docs/_static/screenshot1.png)
 ![Screenshot 2](https://raw.githubusercontent.com/34j/array-api/main/docs/_static/screenshot2.png)
 
-### Array Type
+### Typineg your function using `Array`
 
-```python
-from array_api._2024_12 import Array
+There are multiple ways to type your functions:
 
+- This is the simplest way to enjoy autocompletion for `Array`. Practically this should be enough for most use cases.
 
-def my_function[TArray: Array](x: TArray) -> TArray:
-    return x + 1
-```
+  ```python
+  from array_api._2024_12 import Array, ShapedAnyArray
+
+  def simple(x: Array) -> Array:
+      return x + 1
+  ```
+
+- If you want to make sure that the same type of array (`ndarray`→`ndarray`, `Tensor`→`Tensor`) is returned, you can use `Array` with a type variable.
+
+  ```python
+  def generic[TArray: Array](x: TArray) -> TArray:
+      return x + 1
+  ```
+
+## Advanced Usage
 
 ### Namespace Type
 
@@ -89,19 +101,46 @@ assert isinstance(array_api_strict, ArrayNamespace)
 assert not isinstance(array_api_strict, ArrayNamespaceFull)
 ```
 
-## Notes on the design concepts
+### Shape Typing
 
-### Regarding not supporting shape typing
+- If you want to make sure about the input and output shapes, you can use `ShapedArray`:
 
-#### Typing only ndim
+  ```python
+  from array_api._2024_12 import ShapedAnyArray as Array
 
-Typing only the number of dimensions (ndim), as Numpy currently does, can be accomplished like `Array[tuple[int, int, int]]` or `Array[int, int, int]`.
+  def sum_last_axis[*TShape](x: Array[*TShape, Any]) -> Array[*TShape]:
+      return xp.sum(x, axis=-1)
+  ```
 
-However
+  More complex example using [NewType](https://docs.python.org/3/library/typing.html#newtype) or [type aliases](https://docs.python.org/3/library/typing.html#type-aliases):
 
-- This approach requires many number of characters
-- Requires (`2 * max_ndim` type overloads for each function) or (`2` type overloads for each function and `max_ndim` Protocol, and moreover user has to use these Protocols everywhere in their code) due to
-- Tt does not indicate the meaning of each dimension (e.g., batch axis, vector axis, matrix axis, etc.).
+  ```python
+  RTheta = NewType("RTheta", int)
+  XY = NewType("XY", int)
+  def polar_coordinates[*TShape](randtheta: Array[*TShape, RTheta]) -> Array[*TShape, XY]:
+      """Convert polar coordinates to Cartesian coordinates."""
+      r = randtheta[..., 0]
+      theta = randtheta[..., 1]
+      x = r * xp.cos(theta)
+      y = r * xp.sin(theta)
+      return xp.stack((x, y), axis=-1)
+  ```
+
+  Note that `ShapedAnyArray` exists only for **documentation purposes** and internally it is treated as `Array`.
+  Using both generic and shaped are impossible due to [python/typing#548](https://github.com/python/typing/issues/548).
+
+- Note that the below example is ideal but impossible due to Python specification.
+
+  ```python
+  def impossible[
+      TDtype,
+      TDevice,
+      *TShapeFormer: int,
+      *TShapeLatter: int,
+      TArray: Array
+  ](x: TArray[*TShapeFormer, *TShapeLatter | Literal[1], TDtype, TDevice], y: TArray[*TShapeLatter | Literal[1], TDtype, TDevice]) -> TArray[*TShapeFormer, *TShapeLatter, TDtype, TDevice]:
+      return x + y # broadcasting
+  ```
 
 ## Contributors ✨
 
