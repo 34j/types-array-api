@@ -5,9 +5,17 @@ from collections.abc import Buffer as SupportsBufferProtocol
 from collections.abc import Sequence
 from enum import Enum
 from types import EllipsisType as ellipsis
-from typing import Any, Literal, Optional, Protocol, TypedDict, runtime_checkable
+from typing import (
+    Any,
+    Literal,
+    Optional,
+    Protocol,
+    TypedDict,
+    runtime_checkable,
+)
 
 from typing_extensions import CapsuleType as PyCapsule
+from typing_extensions import Self
 
 inf = float("inf")
 
@@ -34,7 +42,7 @@ DefaultDataTypes = TypedDict("DefaultDataTypes", {"real floating": Any, "complex
 
 
 @runtime_checkable
-class Info[TArray: Array, TDtype, TDevice](Protocol):
+class Info[TDevice](Protocol):
     """Namespace returned by `__array_namespace_info__`."""
 
     def capabilities(self) -> Capabilities: ...
@@ -78,7 +86,7 @@ class finfo_object[TDtype](Protocol):
 
 
 @runtime_checkable
-class Array[TArray: Array, TDtype, TDevice](Protocol):
+class Array[TDtype, TDevice](Protocol):
     def __init__(self) -> None:
         """Initialize the attributes for the array object class."""
         ...
@@ -110,7 +118,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         ...
 
     @property
-    def mT(self) -> TArray:
+    def mT(self) -> Self:
         """
         Transpose of a matrix (or a stack of matrices).
 
@@ -178,7 +186,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         ...
 
     @property
-    def T(self) -> TArray:
+    def T(self) -> Self:
         """
         Transpose of the array.
 
@@ -196,7 +204,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __abs__(self, /) -> TArray:
+    def __abs__(self, /) -> Self:
         """
         Calculates the absolute value for each element of an array instance.
 
@@ -227,7 +235,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __add__(self, other: int | float | complex | TArray, /) -> TArray:
+    def __add__(self, other: int | float | complex | Self, /) -> Self:
         """
         Calculates the sum for each element of an array instance with the respective element of the array ``other``.
 
@@ -253,7 +261,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __and__(self, other: int | bool | TArray, /) -> TArray:
+    def __and__(self, other: int | bool | Self, /) -> Self:
         """
         Evaluates ``self_i & other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -276,7 +284,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __array_namespace__(self, /, *, api_version: str | None = None) -> Any:
+    def __array_namespace__(self, /, *, api_version: str | None = None) -> ArrayNamespace[Self, TDtype, TDevice]:
         """
         Returns an object that has all the array API functions on it.
 
@@ -576,7 +584,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __eq__(self, other: int | float | complex | bool | TArray, /) -> TArray:  # type: ignore[override]
+    def __eq__(self, other: int | float | complex | bool | Self, /) -> Self:  # type: ignore[override]
         """
         Computes the truth value of ``self_i == other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -645,7 +653,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __floordiv__(self, other: int | float | TArray, /) -> TArray:
+    def __floordiv__(self, other: int | float | Self, /) -> Self:
         """
         Evaluates ``self_i // other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -671,7 +679,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __ge__(self, other: int | float | TArray, /) -> TArray:
+    def __ge__(self, other: int | float | Self, /) -> Self:
         """
         Computes the truth value of ``self_i >= other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -699,7 +707,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __getitem__(self, key: int | slice | ellipsis | None | tuple[int | slice | ellipsis | TArray | None, ...] | TArray, /) -> TArray:
+    def __getitem__(self, key: int | slice | ellipsis | None | tuple[int | slice | ellipsis | Self | None, ...] | Self, /) -> Self:
         """
         Returns ``self[key]``.
 
@@ -726,7 +734,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __gt__(self, other: int | float | TArray, /) -> TArray:
+    def __gt__(self, other: int | float | Self, /) -> Self:
         """
         Computes the truth value of ``self_i > other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -833,7 +841,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __invert__(self, /) -> TArray:
+    def __invert__(self, /) -> Self:
         """
         Evaluates ``~self_i`` for each element of an array instance.
 
@@ -854,7 +862,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __le__(self, other: int | float | TArray, /) -> TArray:
+    def __le__(self, other: int | float | Self, /) -> Self:
         """
         Computes the truth value of ``self_i <= other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -882,7 +890,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __lshift__(self, other: int | TArray, /) -> TArray:
+    def __lshift__(self, other: int | Self, /) -> Self:
         """
         Evaluates ``self_i << other_i`` for each element of an array instance with the respective element  of the array ``other``.
 
@@ -905,7 +913,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __lt__(self, other: int | float | TArray, /) -> TArray:
+    def __lt__(self, other: int | float | Self, /) -> Self:
         """
         Computes the truth value of ``self_i < other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -933,7 +941,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __matmul__(self, other: TArray, /) -> TArray:
+    def __matmul__(self, other: Self, /) -> Self:
         """
         Computes the matrix product.
 
@@ -983,7 +991,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __mod__(self, other: int | float | TArray, /) -> TArray:
+    def __mod__(self, other: int | float | Self, /) -> Self:
         """
         Evaluates ``self_i % other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -1007,7 +1015,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __mul__(self, other: int | float | complex | TArray, /) -> TArray:
+    def __mul__(self, other: int | float | complex | Self, /) -> Self:
         """
         Calculates the product for each element of an array instance with the respective element of the array ``other``.
 
@@ -1036,7 +1044,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __ne__(self, other: int | float | complex | bool | TArray, /) -> TArray:  # type: ignore[override]
+    def __ne__(self, other: int | float | complex | bool | Self, /) -> Self:  # type: ignore[override]
         """
         Computes the truth value of ``self_i != other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -1066,7 +1074,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __neg__(self, /) -> TArray:
+    def __neg__(self, /) -> Self:
         """
         Evaluates ``-self_i`` for each element of an array instance.
 
@@ -1098,7 +1106,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __or__(self, other: int | bool | TArray, /) -> TArray:
+    def __or__(self, other: int | bool | Self, /) -> Self:
         """
         Evaluates ``self_i | other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -1121,7 +1129,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __pos__(self, /) -> TArray:
+    def __pos__(self, /) -> Self:
         """
         Evaluates ``+self_i`` for each element of an array instance.
 
@@ -1147,7 +1155,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __pow__(self, other: int | float | complex | TArray, /) -> TArray:
+    def __pow__(self, other: int | float | complex | Self, /) -> Self:
         """
         Calculates an implementation-dependent approximation of exponentiation by raising each element (the base) of an array instance to the power of ``other_i`` (the exponent), where ``other_i`` is the corresponding element of the array ``other``.
 
@@ -1175,7 +1183,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __rshift__(self, other: int | TArray, /) -> TArray:
+    def __rshift__(self, other: int | Self, /) -> Self:
         """
         Evaluates ``self_i >> other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -1198,7 +1206,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __setitem__(self, key: int | slice | ellipsis | tuple[int | slice | ellipsis | TArray, ...] | TArray, value: int | float | complex | bool | TArray, /) -> None:
+    def __setitem__(self, key: int | slice | ellipsis | tuple[int | slice | ellipsis | Self, ...] | Self, value: int | float | complex | bool | Self, /) -> None:
         """
         Sets ``self[key]`` to ``value``.
 
@@ -1225,7 +1233,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __sub__(self, other: int | float | complex | TArray, /) -> TArray:
+    def __sub__(self, other: int | float | complex | Self, /) -> Self:
         """
         Calculates the difference for each element of an array instance with the respective element of the array ``other``.
 
@@ -1252,7 +1260,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __truediv__(self, other: int | float | complex | TArray, /) -> TArray:
+    def __truediv__(self, other: int | float | complex | Self, /) -> Self:
         """
         Evaluates ``self_i / other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -1282,7 +1290,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def __xor__(self, other: int | bool | TArray, /) -> TArray:
+    def __xor__(self, other: int | bool | Self, /) -> Self:
         """
         Evaluates ``self_i ^ other_i`` for each element of an array instance with the respective element of the array ``other``.
 
@@ -1305,7 +1313,7 @@ class Array[TArray: Array, TDtype, TDevice](Protocol):
         """
         ...
 
-    def to_device(self, device: TDevice, /, *, stream: int | Any | None = None) -> TArray:
+    def to_device(self, device: TDevice, /, *, stream: int | Any | None = None) -> Self:
         """
         Copy the array from the device on which it currently resides to the specified ``device``.
 
@@ -4423,7 +4431,7 @@ class clip[TArray: Array](Protocol):
     - This function is conceptually equivalent to ``maximum(minimum(x, max), min)`` when ``x``, ``min``, and ``max`` have the same data type.
     - If both ``min`` and ``max`` are ``None``, the elements of the returned array must equal the respective elements in ``x``.
     - If a broadcasted element in ``min`` is greater than a corresponding broadcasted element in ``max``, behavior is unspecified and thus implementation-dependent.
-    - For scalar ``min`` and/or ``max``, the scalar values should follow type promotion rules for operations involving arrays and scalar operands (see :ref:`type-promotion`). Hence, if ``x`` and either ``min`` or ``max`` have different data type kinds (e.g., integer versus floating-point), behavior is unspecified and thus implementation-dependent.
+    - For scalar ``min`` and/or ``max``, the scalar values should follow type promotion rules for operations involving arrays and scalar operands (see :ref:`type-promotion`).
     - If ``x`` has an integral data type and a broadcasted element in ``min`` or ``max`` is outside the bounds of the data type of ``x``, behavior is unspecified and thus implementation-dependent.
     - If either ``min`` or ``max`` is an array having a different data type than ``x``, behavior is unspecified and thus implementation-dependent.
 
@@ -7144,7 +7152,7 @@ class diff[TArray: Array](Protocol):
 
 
 @runtime_checkable
-class __array_namespace_info__[TArray: Array, TDtype, TDevice](Protocol):
+class __array_namespace_info__[TDevice](Protocol):
     """
     Returns a namespace with Array API namespace inspection utilities.
 
@@ -7173,7 +7181,7 @@ class __array_namespace_info__[TArray: Array, TDtype, TDevice](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, /) -> Info[TArray, TDtype, TDevice]: ...
+    def __call__(self, /) -> Info[TDevice,]: ...
 
 
 @runtime_checkable
@@ -8797,7 +8805,7 @@ class ArrayNamespace[TArray: Array, TDtype, TDevice](Protocol):
     ceil: ceil[TArray,]
     "Rounds each element ``x_i`` of the input array ``x`` to the smallest (i.e., closest to ``-infinity``) integer-valued number that is not less than ``x_i``.\n\nParameters\n----------\nx: array\n    input array. Should have a real-valued data type.\n\nReturns\n-------\nout: array\n    an array containing the rounded result for each element in ``x``. The returned array must have the same data type as ``x``.\n\nNotes\n-----\n\n**Special cases**\n\n- If ``x_i`` is already integer-valued, the result is ``x_i``.\n\nFor floating-point operands,\n\n- If ``x_i`` is ``+infinity``, the result is ``+infinity``.\n- If ``x_i`` is ``-infinity``, the result is ``-infinity``.\n- If ``x_i`` is ``+0``, the result is ``+0``.\n- If ``x_i`` is ``-0``, the result is ``-0``.\n- If ``x_i`` is ``NaN``, the result is ``NaN``."
     clip: clip[TArray,]
-    "Clamps each element ``x_i`` of the input array ``x`` to the range ``[min, max]``.\n\nParameters\n----------\nx: array\n  input array. Should have a real-valued data type.\nmin: Optional[Union[int, float, array]]\n  lower-bound of the range to which to clamp. If ``None``, no lower bound must be applied. Must be compatible with ``x`` and ``max`` (see :ref:`broadcasting`). Should have the same data type as ``x``. Default: ``None``.\nmax: Optional[Union[int, float, array]]\n  upper-bound of the range to which to clamp. If ``None``, no upper bound must be applied. Must be compatible with ``x`` and ``min`` (see :ref:`broadcasting`). Should have the same data type as ``x``. Default: ``None``.\n\nReturns\n-------\nout: array\n  an array containing element-wise results. The returned array should have the same data type as ``x``.\n\nNotes\n-----\n\n- This function is conceptually equivalent to ``maximum(minimum(x, max), min)`` when ``x``, ``min``, and ``max`` have the same data type.\n- If both ``min`` and ``max`` are ``None``, the elements of the returned array must equal the respective elements in ``x``.\n- If a broadcasted element in ``min`` is greater than a corresponding broadcasted element in ``max``, behavior is unspecified and thus implementation-dependent.\n- For scalar ``min`` and/or ``max``, the scalar values should follow type promotion rules for operations involving arrays and scalar operands (see :ref:`type-promotion`). Hence, if ``x`` and either ``min`` or ``max`` have different data type kinds (e.g., integer versus floating-point), behavior is unspecified and thus implementation-dependent.\n- If ``x`` has an integral data type and a broadcasted element in ``min`` or ``max`` is outside the bounds of the data type of ``x``, behavior is unspecified and thus implementation-dependent.\n- If either ``min`` or ``max`` is an array having a different data type than ``x``, behavior is unspecified and thus implementation-dependent.\n\n**Special cases**\n\n- If ``x_i`` is ``NaN``, the result is ``NaN``.\n- If ``min_i`` is ``NaN``, the result is ``NaN``.\n- If ``max_i`` is ``NaN``, the result is ``NaN``.\n\n.. versionadded:: 2023.12\n\n.. versionchanged:: 2024.12\n   Added special case behavior when one of the operands is ``NaN``.\n\n.. versionchanged:: 2024.12\n   Clarified that behavior is only defined when ``x``, ``min``, and ``max`` resolve to arrays having the same data type.\n\n.. versionchanged:: 2024.12\n   Clarified that behavior is only defined when elements of ``min`` and ``max`` are inside the bounds of the input array data type."
+    "Clamps each element ``x_i`` of the input array ``x`` to the range ``[min, max]``.\n\nParameters\n----------\nx: array\n  input array. Should have a real-valued data type.\nmin: Optional[Union[int, float, array]]\n  lower-bound of the range to which to clamp. If ``None``, no lower bound must be applied. Must be compatible with ``x`` and ``max`` (see :ref:`broadcasting`). Should have the same data type as ``x``. Default: ``None``.\nmax: Optional[Union[int, float, array]]\n  upper-bound of the range to which to clamp. If ``None``, no upper bound must be applied. Must be compatible with ``x`` and ``min`` (see :ref:`broadcasting`). Should have the same data type as ``x``. Default: ``None``.\n\nReturns\n-------\nout: array\n  an array containing element-wise results. The returned array should have the same data type as ``x``.\n\nNotes\n-----\n\n- This function is conceptually equivalent to ``maximum(minimum(x, max), min)`` when ``x``, ``min``, and ``max`` have the same data type.\n- If both ``min`` and ``max`` are ``None``, the elements of the returned array must equal the respective elements in ``x``.\n- If a broadcasted element in ``min`` is greater than a corresponding broadcasted element in ``max``, behavior is unspecified and thus implementation-dependent.\n- For scalar ``min`` and/or ``max``, the scalar values should follow type promotion rules for operations involving arrays and scalar operands (see :ref:`type-promotion`).\n- If ``x`` has an integral data type and a broadcasted element in ``min`` or ``max`` is outside the bounds of the data type of ``x``, behavior is unspecified and thus implementation-dependent.\n- If either ``min`` or ``max`` is an array having a different data type than ``x``, behavior is unspecified and thus implementation-dependent.\n\n**Special cases**\n\n- If ``x_i`` is ``NaN``, the result is ``NaN``.\n- If ``min_i`` is ``NaN``, the result is ``NaN``.\n- If ``max_i`` is ``NaN``, the result is ``NaN``.\n\n.. versionadded:: 2023.12\n\n.. versionchanged:: 2024.12\n   Added special case behavior when one of the operands is ``NaN``.\n\n.. versionchanged:: 2024.12\n   Clarified that behavior is only defined when ``x``, ``min``, and ``max`` resolve to arrays having the same data type.\n\n.. versionchanged:: 2024.12\n   Clarified that behavior is only defined when elements of ``min`` and ``max`` are inside the bounds of the input array data type."
     conj: conj[TArray,]
     "Returns the complex conjugate for each element ``x_i`` of the input array ``x``.\n\nFor complex numbers of the form\n\n.. math::\n   a + bj\n\nthe complex conjugate is defined as\n\n.. math::\n   a - bj\n\nHence, the returned complex conjugates must be computed by negating the imaginary component of each element ``x_i``.\n\nParameters\n----------\nx: array\n    input array. Must have a numeric data type.\n\nReturns\n-------\nout: array\n    an array containing the element-wise results. The returned array must have the same data type as ``x``.\n\nNotes\n-----\n\n-   Whether the returned array and the input array share the same underlying memory is unspecified and thus implementation-defined.\n\n.. versionadded:: 2022.12\n\n.. versionchanged:: 2024.12\n   Added support for real-valued arrays."
     copysign: copysign[TArray,]
@@ -8916,7 +8924,7 @@ class ArrayNamespace[TArray: Array, TDtype, TDevice](Protocol):
     "Tests whether any input array element evaluates to ``True`` along a specified axis.\n\n.. note::\n   Positive infinity, negative infinity, and NaN must evaluate to ``True``.\n\n.. note::\n   If ``x`` has a complex floating-point data type, elements having a non-zero component (real or imaginary) must evaluate to ``True``.\n\n.. note::\n   If ``x`` is an empty array or the size of the axis (dimension) along which to evaluate elements is zero, the test result must be ``False``.\n\nParameters\n----------\nx: array\n    input array.\naxis: Optional[Union[int, Tuple[int, ...]]]\n    axis or axes along which to perform a logical OR reduction. By default, a logical OR reduction must be performed over the entire array. If a tuple of integers, logical OR reductions must be performed over multiple axes. A valid ``axis`` must be an integer on the interval ``[-N, N)``, where ``N`` is the rank (number of dimensions) of ``x``. If an ``axis`` is specified as a negative integer, the function must determine the axis along which to perform a reduction by counting backward from the last dimension (where ``-1`` refers to the last dimension). If provided an invalid ``axis``, the function must raise an exception. Default: ``None``.\nkeepdims: bool\n    If ``True``, the reduced axes (dimensions) must be included in the result as singleton dimensions, and, accordingly, the result must be compatible with the input array (see :ref:`broadcasting`). Otherwise, if ``False``, the reduced axes (dimensions) must not be included in the result. Default: ``False``.\n\nReturns\n-------\nout: array\n    if a logical OR reduction was performed over the entire array, the returned array must be a zero-dimensional array containing the test result; otherwise, the returned array must be a non-zero-dimensional array containing the test results. The returned array must have a data type of ``bool``.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support."
     diff: diff[TArray,]
     "Calculates the n-th discrete forward difference along a specified axis.\n\nParameters\n----------\nx: array\n    input array. Should have a numeric data type.\naxis: int\n    axis along which to compute differences. A valid ``axis`` must be an integer on the interval ``[-N, N)``, where ``N`` is the rank (number of dimensions) of ``x``. If an ``axis`` is specified as a negative integer, the function must determine the axis along which to compute differences by counting backward from the last dimension (where ``-1`` refers to the last dimension). If provided an invalid ``axis``, the function must raise an exception. Default: ``-1``.\nn: int\n    number of times to recursively compute differences. Default: ``1``.\nprepend: Optional[array]\n    values to prepend to a specified axis prior to computing differences. Must have the same shape as ``x``, except for the axis specified by ``axis`` which may have any size. Should have the same data type as ``x``. Default: ``None``.\nappend: Optional[array]\n    values to append to a specified axis prior to computing differences. Must have the same shape as ``x``, except for the axis specified by ``axis`` which may have any size. Should have the same data type as ``x``. Default: ``None``.\n\nReturns\n-------\nout: array\n    an array containing the n-th differences. Should have the same data type as ``x``. Must have the same shape as ``x``, except for the axis specified by ``axis`` which must have a size determined as follows:\n\n    -   Let ``M`` be the number of elements along an axis specified by ``axis``.\n    -   Let ``N1`` be the number of prepended values along an axis specified by ``axis``.\n    -   Let ``N2`` be the number of appended values along an axis specified by ``axis``.\n    -   The final size of the axis specified by ``axis`` must be ``M + N1 + N2 - n``.\n\nNotes\n-----\n\n-   The first-order differences are given by ``out[i] = x[i+1] - x[i]`` along a specified axis. Higher-order differences must be calculated recursively (e.g., by calling ``diff(out, axis=axis, n=n-1)``).\n-   If a conforming implementation chooses to support ``prepend`` and ``append`` arrays which have a different data type than ``x``, behavior is unspecified and thus implementation-defined. Implementations may choose to type promote (:ref:`type-promotion`), cast ``prepend`` and/or ``append`` to the same data type as ``x``, or raise an exception.\n\n.. versionadded:: 2024.12"
-    __array_namespace_info__: __array_namespace_info__[TArray, TDtype, TDevice]
+    __array_namespace_info__: __array_namespace_info__[TDevice,]
     "Returns a namespace with Array API namespace inspection utilities.\n\nSee :ref:`inspection` for a list of inspection APIs.\n\nReturns\n-------\nout: Info\n    An object containing Array API namespace inspection utilities.\n\nNotes\n-----\n\nThe returned object may be either a namespace or a class, so long as an Array API user can access inspection utilities as follows:\n\n::\n\n  info = xp.__array_namespace_info__()\n  info.capabilities()\n  info.devices()\n  info.dtypes()\n  info.default_dtypes()\n  # ...\n\n.. versionadded: 2023.12"
     take: take[TArray,]
     "Returns elements of an array along an axis.\n\nParameters\n----------\nx: array\n    input array. Should have one or more dimensions (axes).\nindices: array\n    array indices. The array must be one-dimensional and have an integer data type. If an index is negative, the function must determine the element to select along a specified axis (dimension) by counting from the last element (where ``-1`` refers to the last element).\naxis: Optional[int]\n    axis over which to select values. If ``axis`` is negative, the function must determine the axis along which to select values by counting from the last dimension (where ``-1`` refers to the last dimension).\n\n    If ``x`` is a one-dimensional array, providing an ``axis`` is optional; however, if ``x`` has more than one dimension, providing an ``axis`` is required.\n\nReturns\n-------\nout: array\n    an array having the same data type as ``x``. The output array must have the same rank (i.e., number of dimensions) as ``x`` and must have the same shape as ``x``, except for the axis specified by ``axis`` whose size must equal the number of elements in ``indices``.\n\nNotes\n-----\n\n-   Conceptually, ``take(x, indices, axis=3)`` is equivalent to ``x[:,:,:,indices,...]``; however, explicit indexing via arrays of indices is not currently supported in this specification due to concerns regarding ``__setitem__`` and array mutation semantics.\n-   This specification does not require bounds checking. The behavior for out-of-bounds indices is left unspecified.\n-   When ``x`` is a zero-dimensional array, behavior is unspecified and thus implementation-defined.\n\n.. versionadded:: 2022.12\n\n.. versionchanged:: 2023.12\n   Out-of-bounds behavior is explicitly left unspecified.\n\n.. versionchanged:: 2024.12\n   Behavior when provided a zero-dimensional input array is explicitly left unspecified.\n\n.. versionchanged:: 2024.12\n   Clarified support for negative indices."
@@ -9078,3 +9086,12 @@ class FftNamespace[TArray: Array, TDtype, TDevice](Protocol):
 class ArrayNamespaceFull[TArray: Array, TDtype, TDevice](ArrayNamespace[TArray, TDtype, TDevice], Protocol):
     linalg: LinalgNamespace[TArray, TDtype]
     fft: FftNamespace[TArray, TDtype, TDevice]
+
+
+@runtime_checkable
+class ShapedArray[*T, TDevice, TDtype](Array[TDevice, TDtype], Protocol):
+    @property
+    def shape(self) -> tuple[*T]: ...  # type: ignore[override]
+
+
+type ShapedAnyArray[*T] = ShapedArray[*T, Any, Any]
