@@ -63,7 +63,7 @@ xp = array_api_compat.array_namespace(x)
 ![Screenshot 1](https://raw.githubusercontent.com/34j/array-api/main/docs/_static/screenshot1.png)
 ![Screenshot 2](https://raw.githubusercontent.com/34j/array-api/main/docs/_static/screenshot2.png)
 
-### Typing your function using `Array`
+### Typing functions using `Array`
 
 There are multiple ways to type functions:
 
@@ -103,7 +103,7 @@ assert not isinstance(array_api_strict, ArrayNamespaceFull)
 
 ### Shape Typing
 
-- To clarify the input and output shapes, you can use `ShapedArray`:
+- To clarify the input and output shapes, `ShapedArray` can be used:
 
   ```python
   from array_api._2024_12 import ShapedAnyArray as Array
