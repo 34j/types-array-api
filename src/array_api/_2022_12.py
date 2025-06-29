@@ -1154,6 +1154,380 @@ class Array[TDtype, TDevice](Protocol):
         """
         ...
 
+    def __radd__(self, other: int | float | complex | Self, /) -> Self:
+        """
+        Calculates the sum for each element of an array instance with the respective element of the array ``other``.
+
+        Parameters
+        ----------
+        self
+            array instance (augend array). Should have a numeric data type.
+        other: Union[int, float, complex, array]
+            addend array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise sums. The returned array must have a data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+
+        .. note::
+           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.add`.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __rand__(self, other: int | bool | Self, /) -> Self:
+        """
+        Evaluates ``self_i & other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        Parameters
+        ----------
+        self
+            array instance. Should have an integer or boolean data type.
+        other: Union[int, bool, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer or boolean data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
+
+
+        .. note::
+           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_and`.
+
+        """
+        ...
+
+    def __rfloordiv__(self, other: int | float | Self, /) -> Self:
+        """
+        Evaluates ``self_i // other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        .. note::
+           For input arrays which promote to an integer data type, the result of division by zero is unspecified and thus implementation-defined.
+
+        Parameters
+        ----------
+        self
+            array instance. Should have a real-valued data type.
+        other: Union[int, float, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a real-valued data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
+
+
+        .. note::
+           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.floor_divide`.
+
+        """
+        ...
+
+    def __rlshift__(self, other: int | Self, /) -> Self:
+        """
+        Evaluates ``self_i << other_i`` for each element of an array instance with the respective element  of the array ``other``.
+
+        Parameters
+        ----------
+        self
+            array instance. Should have an integer data type.
+        other: Union[int, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer data type. Each element must be greater than or equal to ``0``.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have the same data type as ``self``.
+
+
+        .. note::
+           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_left_shift`.
+
+        """
+        ...
+
+    def __rmatmul__(self, other: Self, /) -> Self:
+        """
+        Computes the matrix product.
+
+        .. note::
+           The ``matmul`` function must implement the same semantics as the built-in ``@`` operator (see `PEP 465 <https://www.python.org/dev/peps/pep-0465>`_).
+
+        Parameters
+        ----------
+        self
+            array instance. Should have a numeric data type. Must have at least one dimension. If ``self`` is one-dimensional having shape ``(M,)`` and ``other`` has more than one dimension, ``self`` must be promoted to a two-dimensional array by prepending ``1`` to its dimensions (i.e., must have shape ``(1, M)``). After matrix multiplication, the prepended dimensions in the returned array must be removed. If ``self`` has more than one dimension (including after vector-to-matrix promotion), ``shape(self)[:-2]`` must be compatible with ``shape(other)[:-2]`` (after vector-to-matrix promotion) (see :ref:`broadcasting`). If ``self`` has shape ``(..., M, K)``, the innermost two dimensions form matrices on which to perform matrix multiplication.
+        other: array
+            other array. Should have a numeric data type. Must have at least one dimension. If ``other`` is one-dimensional having shape ``(N,)`` and ``self`` has more than one dimension, ``other`` must be promoted to a two-dimensional array by appending ``1`` to its dimensions (i.e., must have shape ``(N, 1)``). After matrix multiplication, the appended dimensions in the returned array must be removed. If ``other`` has more than one dimension (including after vector-to-matrix promotion), ``shape(other)[:-2]`` must be compatible with ``shape(self)[:-2]`` (after vector-to-matrix promotion) (see :ref:`broadcasting`). If ``other`` has shape ``(..., K, N)``, the innermost two dimensions form matrices on which to perform matrix multiplication.
+
+
+        .. note::
+           If either ``x1`` or ``x2`` has a complex floating-point data type, neither argument must be complex-conjugated or transposed. If conjugation and/or transposition is desired, these operations should be explicitly performed prior to computing the matrix product.
+
+        Returns
+        -------
+        out: array
+            -   if both ``self`` and ``other`` are one-dimensional arrays having shape ``(N,)``, a zero-dimensional array containing the inner product as its only element.
+            -   if ``self`` is a two-dimensional array having shape ``(M, K)`` and ``other`` is a two-dimensional array having shape ``(K, N)``, a two-dimensional array containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ and having shape ``(M, N)``.
+            -   if ``self`` is a one-dimensional array having shape ``(K,)`` and ``other`` is an array having shape ``(..., K, N)``, an array having shape ``(..., N)`` (i.e., prepended dimensions during vector-to-matrix promotion must be removed) and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_.
+            -   if ``self`` is an array having shape ``(..., M, K)`` and ``other`` is a one-dimensional array having shape ``(K,)``, an array having shape ``(..., M)`` (i.e., appended dimensions during vector-to-matrix promotion must be removed) and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_.
+            -   if ``self`` is a two-dimensional array having shape ``(M, K)`` and ``other`` is an array having shape ``(..., K, N)``, an array having shape ``(..., M, N)`` and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.
+            -   if ``self`` is an array having shape ``(..., M, K)`` and ``other`` is a two-dimensional array having shape ``(K, N)``, an array having shape ``(..., M, N)`` and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.
+            -   if either ``self`` or ``other`` has more than two dimensions, an array having a shape determined by :ref:`broadcasting` ``shape(self)[:-2]`` against ``shape(other)[:-2]`` and containing the `conventional matrix product <https://en.wikipedia.org/wiki/Matrix_multiplication>`_ for each stacked matrix.
+            -   The returned array must have a data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+
+        .. note::
+           Results must equal the results returned by the equivalent function :func:`~array_api.matmul`.
+
+        **Raises**
+
+        - if either ``self`` or ``other`` is a zero-dimensional array.
+        - if ``self`` is a one-dimensional array having shape ``(K,)``, ``other`` is a one-dimensional array having shape ``(L,)``, and ``K != L``.
+        - if ``self`` is a one-dimensional array having shape ``(K,)``, ``other`` is an array having shape ``(..., L, N)``, and ``K != L``.
+        - if ``self`` is an array having shape ``(..., M, K)``, ``other`` is a one-dimensional array having shape ``(L,)``, and ``K != L``.
+        - if ``self`` is an array having shape ``(..., M, K)``, ``other`` is an array having shape ``(..., L, N)``, and ``K != L``.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __rmod__(self, other: int | float | Self, /) -> Self:
+        """
+        Evaluates ``self_i % other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        .. note::
+           For input arrays which promote to an integer data type, the result of division by zero is unspecified and thus implementation-defined.
+
+        Parameters
+        ----------
+        self
+            array instance. Should have a real-valued data type.
+        other: Union[int, float, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a real-valued data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. Each element-wise result must have the same sign as the respective element ``other_i``. The returned array must have a real-valued floating-point data type determined by :ref:`type-promotion`.
+
+
+        .. note::
+           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.remainder`.
+
+        """
+        ...
+
+    def __rmul__(self, other: int | float | complex | Self, /) -> Self:
+        """
+        Calculates the product for each element of an array instance with the respective element of the array ``other``.
+
+        .. note::
+           Floating-point multiplication is not always associative due to finite precision.
+
+        Parameters
+        ----------
+        self
+            array instance. Should have a numeric data type.
+        other: Union[int, float, complex, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise products. The returned array must have a data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+
+        .. note::
+           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.multiply`.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __ror__(self, other: int | bool | Self, /) -> Self:
+        """
+        Evaluates ``self_i | other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        Parameters
+        ----------
+        self
+            array instance. Should have an integer or boolean data type.
+        other: Union[int, bool, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer or boolean data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+
+        .. note::
+           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_or`.
+
+        """
+        ...
+
+    def __rpow__(self, other: int | float | complex | Self, /) -> Self:
+        """
+        Calculates an implementation-dependent approximation of exponentiation by raising each element (the base) of an array instance to the power of ``other_i`` (the exponent), where ``other_i`` is the corresponding element of the array ``other``.
+
+        .. note::
+           If both ``self`` and ``other`` have integer data types, the result of ``__pow__`` when `other_i` is negative (i.e., less than zero) is unspecified and thus implementation-dependent.
+
+           If ``self`` has an integer data type and ``other`` has a floating-point data type, behavior is implementation-dependent, as type promotion between data type "kinds" (e.g., integer versus floating-point) is unspecified.
+
+        Parameters
+        ----------
+        self
+            array instance whose elements correspond to the exponentiation base. Should have a numeric data type.
+        other: Union[int, float, complex, array]
+            other array whose elements correspond to the exponentiation exponent. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+
+        .. note::
+           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.pow`.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __rrshift__(self, other: int | Self, /) -> Self:
+        """
+        Evaluates ``self_i >> other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        Parameters
+        ----------
+        self
+            array instance. Should have an integer data type.
+        other: Union[int, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer data type. Each element must be greater than or equal to ``0``.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have the same data type as ``self``.
+
+
+        .. note::
+           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_right_shift`.
+
+        """
+        ...
+
+    def __rsub__(self, other: int | float | complex | Self, /) -> Self:
+        """
+        Calculates the difference for each element of an array instance with the respective element of the array ``other``.
+
+        The result of ``self_i - other_i`` must be the same as ``self_i + (-other_i)`` and must be governed by the same floating-point rules as addition (see :meth:`array.__add__`).
+
+        Parameters
+        ----------
+        self
+            array instance (minuend array). Should have a numeric data type.
+        other: Union[int, float, complex, array]
+            subtrahend array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise differences. The returned array must have a data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+
+        .. note::
+           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.subtract`.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __rtruediv__(self, other: int | float | complex | Self, /) -> Self:
+        """
+        Evaluates ``self_i / other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        .. note::
+           If one or both of ``self`` and ``other`` have integer data types, the result is implementation-dependent, as type promotion between data type "kinds" (e.g., integer versus floating-point) is unspecified.
+
+           Specification-compliant libraries may choose to raise an error or return an array containing the element-wise results. If an array is returned, the array must have a real-valued floating-point data type.
+
+        Parameters
+        ----------
+        self
+            array instance. Should have a numeric data type.
+        other: Union[int, float, complex, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have a numeric data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array should have a floating-point data type determined by :ref:`type-promotion`.
+
+        Notes
+        -----
+
+        .. note::
+           Element-wise results, including special cases, must equal the results returned by the equivalent element-wise function :func:`~array_api.divide`.
+
+        .. versionchanged:: 2022.12
+            Added complex data type support.
+
+        """
+        ...
+
+    def __rxor__(self, other: int | bool | Self, /) -> Self:
+        """
+        Evaluates ``self_i ^ other_i`` for each element of an array instance with the respective element of the array ``other``.
+
+        Parameters
+        ----------
+        self
+            array instance. Should have an integer or boolean data type.
+        other: Union[int, bool, array]
+            other array. Must be compatible with ``self`` (see :ref:`broadcasting`). Should have an integer or boolean data type.
+
+        Returns
+        -------
+        out: array
+            an array containing the element-wise results. The returned array must have a data type determined by :ref:`type-promotion`.
+
+
+        .. note::
+           Element-wise results must equal the results returned by the equivalent element-wise function :func:`~array_api.bitwise_xor`.
+
+        """
+        ...
+
 
 @runtime_checkable
 class astype[TArray: Array, TDtype](Protocol):

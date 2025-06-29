@@ -127,6 +127,7 @@ def _class_to_protocol(stmt: ast.ClassDef, typevars: Sequence[TypeVarInfo]) -> P
     stmt.bases = [
         ast.Name(id="Protocol"),
     ]
+    to_extend = []
     for b in stmt.body:
         if isinstance(b, ast.FunctionDef):
             if getattr(b.body[-1].value, "value", None) is Ellipsis:  # type: ignore[attr-defined]
@@ -143,6 +144,26 @@ def _class_to_protocol(stmt: ast.ClassDef, typevars: Sequence[TypeVarInfo]) -> P
                         ctx=ast.Load(),
                     ),
                 )
+            hasr = [
+                "add",
+                "sub",
+                "mul",
+                "truediv",
+                "floordiv",
+                "pow",
+                "mod",
+                "matmul",
+                "and",
+                "or",
+                "xor",
+                "lshift",
+                "rshift",
+            ]
+            if (clean_name := b.name.replace("__", "", 2)) in hasr:
+                b = deepcopy(b)
+                b.name = f"__r{clean_name}__"
+                to_extend.append(b)
+    stmt.body.extend(to_extend)
     stmt.type_params = [ast.TypeVar(name=t.name, bound=ast.Name(id=t.bound) if t.bound else None) for t in typevars]
     stmt.decorator_list = [ast.Name(id="runtime_checkable")]
     return ProtocolData(
