@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.4-rc.1 (2025-06-29)
+
+### Bug fixes
+
+- Add right operators ([`c1f371f`](https://github.com/34j/types-array-api/commit/c1f371f861bb3af136d0f92158721e7933cd803b))
+
 ## v1.1.3 (2025-06-27)
 
 ### Bug fixes
