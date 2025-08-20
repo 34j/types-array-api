@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.1.5-rc.1 (2025-08-20)
+
+### Bug fixes
+
+- Fix requires-python ([`75773a6`](https://github.com/34j/types-array-api/commit/75773a6347a6c87fe66b7a671e8fab79fc6f22bb))
+- Fix requires-python ([`201a170`](https://github.com/34j/types-array-api/commit/201a1706ed44eb3f9662db22db7398e66fd91a2f))
+
 ## v1.1.4 (2025-06-29)
 
 ### Bug fixes
