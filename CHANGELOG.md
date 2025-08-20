@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.5 (2025-08-20)
+
+### Bug fixes
+
+- Drop python 3.11 ([`7cf041b`](https://github.com/34j/types-array-api/commit/7cf041bef7b4dacfe8f0c2951d2f3d2947630803))
+
 ## v1.1.4 (2025-06-29)
 
 ### Bug fixes
