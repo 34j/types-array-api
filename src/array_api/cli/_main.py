@@ -251,7 +251,7 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
     # Create Protocols with __call__, representing functions
     for submodule, body in body_module.items():
         for i, b in enumerate(body):
-            if isinstance(b, (ast.Import, ast.ImportFrom)):
+            if isinstance(b, ast.Import | ast.ImportFrom):
                 pass
             elif isinstance(b, ast.FunctionDef):
                 # implemented in object rather than Namespace

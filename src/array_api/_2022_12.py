@@ -9,11 +9,11 @@ from typing import (
     Any,
     Literal,
     Protocol,
+    Self,
     runtime_checkable,
 )
 
 from typing_extensions import CapsuleType as PyCapsule
-from typing_extensions import Self
 
 inf = float("inf")
 

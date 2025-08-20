@@ -8,18 +8,17 @@ from types import EllipsisType as ellipsis
 from typing import (
     Any,
     Literal,
-    Optional,
     Protocol,
+    Self,
     TypedDict,
     runtime_checkable,
 )
 
 from typing_extensions import CapsuleType as PyCapsule
-from typing_extensions import Self
 
 inf = float("inf")
 
-Capabilities = TypedDict("Capabilities", {"boolean indexing": bool, "data-dependent shapes": bool, "max rank": Optional[int]})
+Capabilities = TypedDict("Capabilities", {"boolean indexing": bool, "data-dependent shapes": bool, "max rank": int | None})
 
 
 class DataTypes(TypedDict, total=False):
