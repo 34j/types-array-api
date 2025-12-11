@@ -3,7 +3,7 @@ import inspect
 
 import array_api_strict
 
-from array_api._2024_12 import ArrayNamespace
+from array_api.latest import ArrayNamespace
 
 
 def test_strict_supset_namespace():

@@ -1,6 +1,6 @@
 from typing import Any, Literal
 
-from array_api._2024_12 import Array, ArrayNamespaceFull
+from array_api.latest import Array, ArrayNamespaceFull
 
 # return full namespace for convenience
 # because optional attributes are not supported

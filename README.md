@@ -68,7 +68,7 @@ xp = array_api_compat.array_namespace(x)
 There are multiple ways to type functions:
 
 - ```python
-  from array_api._2024_12 import Array
+  from array_api.latest import Array
 
   def simple(x: Array) -> Array:
       return x + 1
@@ -92,7 +92,7 @@ You can test if an object matches the Protocol as they are [`runtime-checkable`]
 ```python
 import array_api_strict
 
-from array_api._2024_12 import ArrayNamespace, ArrayNamespaceFull
+from array_api.latest import ArrayNamespace, ArrayNamespaceFull
 
 
 assert isinstance(array_api_strict, ArrayNamespace)
@@ -106,7 +106,7 @@ assert not isinstance(array_api_strict, ArrayNamespaceFull)
 - To clarify the input and output shapes, `ShapedArray` and `ShapedAnyArray` can be used:
 
   ```python
-  from array_api._2024_12 import ShapedAnyArray as Array
+  from array_api.latest import ShapedAnyArray as Array
 
   def sum_last_axis[*TShape](x: Array[*TShape, Any]) -> Array[*TShape]:
       return xp.sum(x, axis=-1)

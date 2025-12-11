@@ -27,8 +27,10 @@ extensions = [
     "myst_parser",
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
     "sphinx.ext.viewcode",
 ]
+autosummary_generate = True
 napoleon_google_docstring = False
 
 # The suffix of source filenames.
@@ -78,6 +80,7 @@ def run_apidoc(_: Any) -> None:
             "--force",
             "--module-first",
             "--private",
+            "--separate",
             "-o",
             docs_path.as_posix(),
             module_path.as_posix(),
