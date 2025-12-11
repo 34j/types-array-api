@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.2.0 (2025-12-11)
+
+### Features
+
+- Add `latest` attribute ([`2a0f531`](https://github.com/34j/types-array-api/commit/2a0f531ea3700974d854b7ab28ca6b76d7543404))
+
 ## v1.1.5 (2025-08-20)
 
 ### Bug fixes
