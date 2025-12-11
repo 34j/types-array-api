@@ -78,6 +78,7 @@ def run_apidoc(_: Any) -> None:
             "--force",
             "--module-first",
             "--private",
+            "--separate",
             "-o",
             docs_path.as_posix(),
             module_path.as_posix(),
