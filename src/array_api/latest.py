@@ -1,1 +1,1 @@
-from ._2024_12 import *  # noqa
+from ._2025_12 import *  # noqa

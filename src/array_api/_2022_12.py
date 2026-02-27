@@ -2099,7 +2099,7 @@ class arange[TArray: Array, TDtype, TDevice](Protocol):
 
 @runtime_checkable
 class asarray[TArray: Array, TDtype, TDevice](Protocol):
-    r"""
+    """
     Convert the input to an array.
 
     Parameters
@@ -2204,7 +2204,7 @@ class empty_like[TArray: Array, TDtype, TDevice](Protocol):
 
 @runtime_checkable
 class eye[TArray: Array, TDtype, TDevice](Protocol):
-    r"""
+    """
     Returns a two-dimensional array with ones on the ``k``\\th diagonal and zeros elsewhere.
 
     .. note::
@@ -2350,7 +2350,7 @@ class full_like[TArray: Array, TDtype, TDevice](Protocol):
 
 @runtime_checkable
 class linspace[TArray: Array, TDtype, TDevice](Protocol):
-    r"""
+    """
     Returns evenly spaced numbers over a specified interval.
 
     Let :math:`N` be the number of generated values (which is either ``num`` or ``num+1`` depending on whether ``endpoint`` is ``True`` or ``False``, respectively). For real-valued output arrays, the spacing between values is given by
@@ -2632,7 +2632,7 @@ class zeros_like[TArray: Array, TDtype, TDevice](Protocol):
 
 @runtime_checkable
 class cholesky[TArray: Array](Protocol):
-    r"""
+    """
     Returns the lower (upper) Cholesky decomposition of a complex Hermitian or real symmetric positive-definite matrix ``x``.
 
     If ``x`` is real-valued, let :math:`\\mathbb{K}` be the set of real numbers :math:`\\mathbb{R}`, and, if ``x`` is complex-valued, let :math:`\\mathbb{K}` be the set of complex numbers :math:`\\mathbb{C}`.
@@ -2784,7 +2784,7 @@ class diagonal[TArray: Array](Protocol):
 
 @runtime_checkable
 class eigh[TArray: Array](Protocol):
-    r"""
+    """
     Returns an eigenvalue decomposition of a complex Hermitian or real symmetric matrix (or a stack of matrices) ``x``.
 
     If ``x`` is real-valued, let :math:`\\mathbb{K}` be the set of real numbers :math:`\\mathbb{R}`, and, if ``x`` is complex-valued, let :math:`\\mathbb{K}` be the set of complex numbers :math:`\\mathbb{C}`.
@@ -2840,7 +2840,7 @@ class eigh[TArray: Array](Protocol):
 
 @runtime_checkable
 class eigvalsh[TArray: Array](Protocol):
-    r"""
+    """
     Returns the eigenvalues of a complex Hermitian or real symmetric matrix (or a stack of matrices) ``x``.
 
     If ``x`` is real-valued, let :math:`\\mathbb{K}` be the set of real numbers :math:`\\mathbb{R}`, and, if ``x`` is complex-valued, let :math:`\\mathbb{K}` be the set of complex numbers :math:`\\mathbb{C}`.
@@ -2888,7 +2888,7 @@ class eigvalsh[TArray: Array](Protocol):
 
 @runtime_checkable
 class inv[TArray: Array](Protocol):
-    r"""
+    """
     Returns the multiplicative inverse of a square matrix (or a stack of square matrices) ``x``.
 
     If ``x`` is real-valued, let :math:`\\mathbb{K}` be the set of real numbers :math:`\\mathbb{R}`, and, if ``x`` is complex-valued, let :math:`\\mathbb{K}` be the set of complex numbers :math:`\\mathbb{C}`.
@@ -3083,7 +3083,7 @@ class outer[TArray: Array](Protocol):
 
 @runtime_checkable
 class pinv[TArray: Array](Protocol):
-    r"""
+    """
     Returns the (Moore-Penrose) pseudo-inverse of a matrix (or a stack of matrices) ``x``.
 
     The pseudo-inverse of a matrix :math:`A`, denoted :math:`A^{+}`, is defined as the matrix that "solves" the least-squares problem :math:`Ax = b` (i.e., if :math:`\\overline{x}` is a solution, then :math:`A^{+}` is the matrix such that :math:`\\overline{x} = A^{+}b`).
@@ -3128,7 +3128,7 @@ class pinv[TArray: Array](Protocol):
 
 @runtime_checkable
 class qr[TArray: Array](Protocol):
-    r"""
+    """
     Returns the QR decomposition of a full column rank matrix (or a stack of matrices).
 
     If ``x`` is real-valued, let :math:`\\mathbb{K}` be the set of real numbers :math:`\\mathbb{R}`, and, if ``x`` is complex-valued, let :math:`\\mathbb{K}` be the set of complex numbers :math:`\\mathbb{C}`.
@@ -3196,7 +3196,7 @@ class qr[TArray: Array](Protocol):
 
 @runtime_checkable
 class slogdet[TArray: Array](Protocol):
-    r"""
+    """
     Returns the sign and the natural logarithm of the absolute value of the determinant of a square matrix (or a stack of square matrices) ``x``.
 
     .. note::
@@ -3256,7 +3256,7 @@ class slogdet[TArray: Array](Protocol):
 
 @runtime_checkable
 class solve[TArray: Array](Protocol):
-    r"""
+    """
     Returns the solution of a square system of linear equations with a unique solution.
 
     Let ``x1`` equal :math:`A` and ``x2`` equal :math:`B`. If the promoted data type of ``x1`` and ``x2`` is real-valued, let :math:`\\mathbb{K}` be the set of real numbers :math:`\\mathbb{R}`, and, if the promoted data type of ``x1`` and ``x2`` is complex-valued, let :math:`\\mathbb{K}` be the set of complex numbers :math:`\\mathbb{C}`.
@@ -3299,7 +3299,7 @@ class solve[TArray: Array](Protocol):
 
 @runtime_checkable
 class svd[TArray: Array](Protocol):
-    r"""
+    """
     Returns a singular value decomposition (SVD) of a matrix (or a stack of matrices) ``x``.
 
     If ``x`` is real-valued, let :math:`\\mathbb{K}` be the set of real numbers :math:`\\mathbb{R}`, and, if ``x`` is complex-valued, let :math:`\\mathbb{K}` be the set of complex numbers :math:`\\mathbb{C}`.
@@ -3449,7 +3449,7 @@ class trace[TArray: Array, TDtype](Protocol):
 
 @runtime_checkable
 class vector_norm[TArray: Array](Protocol):
-    r"""
+    """
     Computes the vector norm of a vector (or batch of vectors) ``x``.
 
     Parameters
@@ -3573,7 +3573,7 @@ class sort[TArray: Array](Protocol):
 
 @runtime_checkable
 class abs[TArray: Array](Protocol):
-    r"""
+    """
     Calculates the absolute value for each element ``x_i`` of the input array ``x``.
 
     For real-valued input arrays, the element-wise result has the same magnitude as the respective element in ``x`` but has positive sign.
@@ -3634,7 +3634,7 @@ class abs[TArray: Array](Protocol):
 
 @runtime_checkable
 class acos[TArray: Array](Protocol):
-    r"""
+    """
     Calculates an implementation-dependent approximation of the principal value of the inverse cosine for each element ``x_i`` of the input array ``x``.
 
     Each element-wise result is expressed in radians.
@@ -3707,7 +3707,7 @@ class acos[TArray: Array](Protocol):
 
 @runtime_checkable
 class acosh[TArray: Array](Protocol):
-    r"""
+    """
     Calculates an implementation-dependent approximation to the inverse hyperbolic cosine for each element ``x_i`` of the input array ``x``.
 
     .. note::
@@ -3857,7 +3857,7 @@ class add[TArray: Array](Protocol):
 
 @runtime_checkable
 class asin[TArray: Array](Protocol):
-    r"""
+    """
     Calculates an implementation-dependent approximation of the principal value of the inverse sine for each element ``x_i`` of the input array ``x``.
 
     Each element-wise result is expressed in radians.
@@ -3918,7 +3918,7 @@ class asin[TArray: Array](Protocol):
 
 @runtime_checkable
 class asinh[TArray: Array](Protocol):
-    r"""
+    """
     Calculates an implementation-dependent approximation to the inverse hyperbolic sine for each element ``x_i`` in the input array ``x``.
 
     .. note::
@@ -3987,7 +3987,7 @@ class asinh[TArray: Array](Protocol):
 
 @runtime_checkable
 class atan[TArray: Array](Protocol):
-    r"""
+    """
     Calculates an implementation-dependent approximation of the principal value of the inverse tangent for each element ``x_i`` of the input array ``x``.
 
     Each element-wise result is expressed in radians.
@@ -4103,7 +4103,7 @@ class atan2[TArray: Array](Protocol):
 
 @runtime_checkable
 class atanh[TArray: Array](Protocol):
-    r"""
+    """
     Calculates an implementation-dependent approximation to the inverse hyperbolic tangent for each element ``x_i`` of the input array ``x``.
 
     .. note::
@@ -4385,7 +4385,7 @@ class conj[TArray: Array](Protocol):
 
 @runtime_checkable
 class cos[TArray: Array](Protocol):
-    r"""
+    """
     Calculates an implementation-dependent approximation to the cosine for each element ``x_i`` of the input array ``x``.
 
     Each element ``x_i`` is assumed to be expressed in radians.
@@ -4436,7 +4436,7 @@ class cos[TArray: Array](Protocol):
 
 @runtime_checkable
 class cosh[TArray: Array](Protocol):
-    r"""
+    """
     Calculates an implementation-dependent approximation to the hyperbolic cosine for each element ``x_i`` in the input array ``x``.
 
     The mathematical definition of the hyperbolic cosine is
@@ -4503,7 +4503,7 @@ class cosh[TArray: Array](Protocol):
 
 @runtime_checkable
 class divide[TArray: Array](Protocol):
-    r"""
+    """
     Calculates the division of each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.
 
     .. note::
@@ -4796,7 +4796,7 @@ class floor[TArray: Array](Protocol):
 
 @runtime_checkable
 class floor_divide[TArray: Array](Protocol):
-    r"""
+    """
     Rounds the result of dividing each element ``x1_i`` of the input array ``x1`` by the respective element ``x2_i`` of the input array ``x2`` to the greatest (i.e., closest to `+infinity`) integer-value number that is not greater than the division result.
 
     .. note::
@@ -5105,7 +5105,7 @@ class less_equal[TArray: Array](Protocol):
 
 @runtime_checkable
 class log[TArray: Array](Protocol):
-    r"""
+    """
     Calculates an implementation-dependent approximation to the natural (base ``e``) logarithm for each element ``x_i`` of the input array ``x``.
 
     .. note::
@@ -5171,7 +5171,7 @@ class log[TArray: Array](Protocol):
 
 @runtime_checkable
 class log1p[TArray: Array](Protocol):
-    r"""
+    """
     Calculates an implementation-dependent approximation to ``log(1+x)``, where ``log`` refers to the natural (base ``e``) logarithm, for each element ``x_i`` of the input array ``x``.
 
     .. note::
@@ -5237,7 +5237,7 @@ class log1p[TArray: Array](Protocol):
 
 @runtime_checkable
 class log2[TArray: Array](Protocol):
-    r"""
+    """
     Calculates an implementation-dependent approximation to the base ``2`` logarithm for each element ``x_i`` of the input array ``x``.
 
     .. note::
@@ -5283,7 +5283,7 @@ class log2[TArray: Array](Protocol):
 
 @runtime_checkable
 class log10[TArray: Array](Protocol):
-    r"""
+    """
     Calculates an implementation-dependent approximation to the base ``10`` logarithm for each element ``x_i`` of the input array ``x``.
 
     .. note::
@@ -5464,7 +5464,7 @@ class logical_xor[TArray: Array](Protocol):
 
 @runtime_checkable
 class multiply[TArray: Array](Protocol):
-    r"""
+    """
     Calculates the product for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.
 
     .. note::
@@ -5642,7 +5642,7 @@ class positive[TArray: Array](Protocol):
 
 @runtime_checkable
 class pow[TArray: Array](Protocol):
-    r"""
+    """
     Calculates an implementation-dependent approximation of exponentiation by raising each element ``x1_i`` (the base) of the input array ``x1`` to the power of ``x2_i`` (the exponent), where ``x2_i`` is the corresponding element of the input array ``x2``.
 
     .. note::
@@ -5847,7 +5847,7 @@ class round[TArray: Array](Protocol):
 
 @runtime_checkable
 class sign[TArray: Array](Protocol):
-    r"""
+    """
     Returns an indication of the sign of a number for each element ``x_i`` of the input array ``x``.
 
     The sign function (also known as the **signum function**) of a number :math:`x_i` is defined as
@@ -5898,7 +5898,7 @@ class sign[TArray: Array](Protocol):
 
 @runtime_checkable
 class sin[TArray: Array](Protocol):
-    r"""
+    """
     Calculates an implementation-dependent approximation to the sine for each element ``x_i`` of the input array ``x``.
 
     Each element ``x_i`` is assumed to be expressed in radians.
@@ -5948,7 +5948,7 @@ class sin[TArray: Array](Protocol):
 
 @runtime_checkable
 class sinh[TArray: Array](Protocol):
-    r"""
+    """
     Calculates an implementation-dependent approximation to the hyperbolic sine for each element ``x_i`` of the input array ``x``.
 
     The mathematical definition of the hyperbolic sine is
@@ -6015,7 +6015,7 @@ class sinh[TArray: Array](Protocol):
 
 @runtime_checkable
 class square[TArray: Array](Protocol):
-    r"""
+    """
     Squares each element ``x_i`` of the input array ``x``.
 
     The square of a number ``x_i`` is defined as
@@ -6050,7 +6050,7 @@ class square[TArray: Array](Protocol):
 
 @runtime_checkable
 class sqrt[TArray: Array](Protocol):
-    r"""
+    """
     Calculates the principal square root for each element ``x_i`` of the input array ``x``.
 
     .. note::
@@ -6095,8 +6095,8 @@ class sqrt[TArray: Array](Protocol):
     - If ``a`` is either ``+0`` or ``-0`` and ``b`` is ``+0``, the result is ``+0 + 0j``.
     - If ``a`` is any value (including ``NaN``) and ``b`` is ``+infinity``, the result is ``+infinity + infinity j``.
     - If ``a`` is a finite number and ``b`` is ``NaN``, the result is ``NaN + NaN j``.
-    - If ``a`` ``-infinity`` and ``b`` is a positive (i.e., greater than ``0``) finite number, the result is ``NaN + NaN j``.
-    - If ``a`` is ``+infinity`` and ``b`` is a positive (i.e., greater than ``0``) finite number, the result is ``+0 + infinity j``.
+    - If ``a`` ``-infinity`` and ``b`` is a positive (i.e., greater than ``0``) finite number, the result is ``+0 + infinity j``.
+    - If ``a`` is ``+infinity`` and ``b`` is a positive (i.e., greater than ``0``) finite number, the result is ``+infinity + 0 j``.
     - If ``a`` is ``-infinity`` and ``b`` is ``NaN``, the result is ``NaN + infinity j`` (sign of the imaginary component is unspecified).
     - If ``a`` is ``+infinity`` and ``b`` is ``NaN``, the result is ``+infinity + NaN j``.
     - If ``a`` is ``NaN`` and ``b`` is any value, the result is ``NaN + NaN j``.
@@ -6144,7 +6144,7 @@ class subtract[TArray: Array](Protocol):
 
 @runtime_checkable
 class tan[TArray: Array](Protocol):
-    r"""
+    """
     Calculates an implementation-dependent approximation to the tangent for each element ``x_i`` of the input array ``x``.
 
     Each element ``x_i`` is assumed to be expressed in radians.
@@ -6194,7 +6194,7 @@ class tan[TArray: Array](Protocol):
 
 @runtime_checkable
 class tanh[TArray: Array](Protocol):
-    r"""
+    """
     Calculates an implementation-dependent approximation to the hyperbolic tangent for each element ``x_i`` of the input array ``x``.
 
     The mathematical definition of the hyperbolic tangent is
@@ -7290,7 +7290,7 @@ class tensordot[TArray: Array](Protocol):
 
 @runtime_checkable
 class vecdot[TArray: Array](Protocol):
-    r"""
+    """
     Computes the (vector) dot product of two arrays.
 
     Let :math:`\\mathbf{a}` be a vector in ``x1`` and :math:`\\mathbf{b}` be a corresponding vector in ``x2``. The dot product is defined as
@@ -7425,7 +7425,7 @@ class expand_dims[TArray: Array](Protocol):
     """
 
     @abstractmethod
-    def __call__(self, x: TArray, /, *, axis: int = 0) -> TArray: ...
+    def __call__(self, x: TArray, /, axis: int) -> TArray: ...
 
 
 @runtime_checkable
@@ -7933,7 +7933,7 @@ class ArrayNamespace[TArray: Array, TDtype, TDevice](Protocol):
     square: square[TArray,]
     "Squares each element ``x_i`` of the input array ``x``.\n\nThe square of a number ``x_i`` is defined as\n\n.. math::\n   x_i^2 = x_i \\cdot x_i\n\nParameters\n----------\nx: array\n    input array. Should have a numeric data type.\n\nReturns\n-------\nout: array\n    an array containing the evaluated result for each element in ``x``. The returned array must have a data type determined by :ref:`type-promotion`.\n\nNotes\n-----\n\n**Special cases**\n\nFor floating-point operands, special cases must be handled as if the operation is implemented as ``x * x`` (see :func:`~array_api.multiply`).\n\n.. versionchanged:: 2022.12\n   Added complex data type support."
     sqrt: sqrt[TArray,]
-    "Calculates the principal square root for each element ``x_i`` of the input array ``x``.\n\n.. note::\n   After rounding, each result must be indistinguishable from the infinitely precise result (as required by IEEE 754).\n\n.. note::\n   For complex floating-point operands, ``sqrt(conj(x))`` must equal ``conj(sqrt(x))``.\n\n.. note::\n   By convention, the branch cut of the square root is the negative real axis :math:`(-\\infty, 0)`.\n\n   The square root is a continuous function from above the branch cut, taking into account the sign of the imaginary component.\n\n   Accordingly, for complex arguments, the function returns the square root in the range of the right half-plane, including the imaginary axis (i.e., the plane defined by :math:`[0, +\\infty)` along the real axis and :math:`(-\\infty, +\\infty)` along the imaginary axis).\n\n   *Note: branch cuts follow C99 and have provisional status* (see :ref:`branch-cuts`).\n\nParameters\n----------\nx: array\n    input array. Should have a floating-point data type.\n\nReturns\n-------\nout: array\n    an array containing the square root of each element in ``x``. The returned array must have a floating-point data type determined by :ref:`type-promotion`.\n\nNotes\n-----\n\n**Special cases**\n\nFor real-valued floating-point operands,\n\n- If ``x_i`` is ``NaN``, the result is ``NaN``.\n- If ``x_i`` is less than ``0``, the result is ``NaN``.\n- If ``x_i`` is ``+0``, the result is ``+0``.\n- If ``x_i`` is ``-0``, the result is ``-0``.\n- If ``x_i`` is ``+infinity``, the result is ``+infinity``.\n\nFor complex floating-point operands, let ``a = real(x_i)``, ``b = imag(x_i)``, and\n\n- If ``a`` is either ``+0`` or ``-0`` and ``b`` is ``+0``, the result is ``+0 + 0j``.\n- If ``a`` is any value (including ``NaN``) and ``b`` is ``+infinity``, the result is ``+infinity + infinity j``.\n- If ``a`` is a finite number and ``b`` is ``NaN``, the result is ``NaN + NaN j``.\n- If ``a`` ``-infinity`` and ``b`` is a positive (i.e., greater than ``0``) finite number, the result is ``NaN + NaN j``.\n- If ``a`` is ``+infinity`` and ``b`` is a positive (i.e., greater than ``0``) finite number, the result is ``+0 + infinity j``.\n- If ``a`` is ``-infinity`` and ``b`` is ``NaN``, the result is ``NaN + infinity j`` (sign of the imaginary component is unspecified).\n- If ``a`` is ``+infinity`` and ``b`` is ``NaN``, the result is ``+infinity + NaN j``.\n- If ``a`` is ``NaN`` and ``b`` is any value, the result is ``NaN + NaN j``.\n- If ``a`` is ``NaN`` and ``b`` is ``NaN``, the result is ``NaN + NaN j``.\n\n.. versionchanged:: 2022.12\n   Added complex data type support."
+    "Calculates the principal square root for each element ``x_i`` of the input array ``x``.\n\n.. note::\n   After rounding, each result must be indistinguishable from the infinitely precise result (as required by IEEE 754).\n\n.. note::\n   For complex floating-point operands, ``sqrt(conj(x))`` must equal ``conj(sqrt(x))``.\n\n.. note::\n   By convention, the branch cut of the square root is the negative real axis :math:`(-\\infty, 0)`.\n\n   The square root is a continuous function from above the branch cut, taking into account the sign of the imaginary component.\n\n   Accordingly, for complex arguments, the function returns the square root in the range of the right half-plane, including the imaginary axis (i.e., the plane defined by :math:`[0, +\\infty)` along the real axis and :math:`(-\\infty, +\\infty)` along the imaginary axis).\n\n   *Note: branch cuts follow C99 and have provisional status* (see :ref:`branch-cuts`).\n\nParameters\n----------\nx: array\n    input array. Should have a floating-point data type.\n\nReturns\n-------\nout: array\n    an array containing the square root of each element in ``x``. The returned array must have a floating-point data type determined by :ref:`type-promotion`.\n\nNotes\n-----\n\n**Special cases**\n\nFor real-valued floating-point operands,\n\n- If ``x_i`` is ``NaN``, the result is ``NaN``.\n- If ``x_i`` is less than ``0``, the result is ``NaN``.\n- If ``x_i`` is ``+0``, the result is ``+0``.\n- If ``x_i`` is ``-0``, the result is ``-0``.\n- If ``x_i`` is ``+infinity``, the result is ``+infinity``.\n\nFor complex floating-point operands, let ``a = real(x_i)``, ``b = imag(x_i)``, and\n\n- If ``a`` is either ``+0`` or ``-0`` and ``b`` is ``+0``, the result is ``+0 + 0j``.\n- If ``a`` is any value (including ``NaN``) and ``b`` is ``+infinity``, the result is ``+infinity + infinity j``.\n- If ``a`` is a finite number and ``b`` is ``NaN``, the result is ``NaN + NaN j``.\n- If ``a`` ``-infinity`` and ``b`` is a positive (i.e., greater than ``0``) finite number, the result is ``+0 + infinity j``.\n- If ``a`` is ``+infinity`` and ``b`` is a positive (i.e., greater than ``0``) finite number, the result is ``+infinity + 0 j``.\n- If ``a`` is ``-infinity`` and ``b`` is ``NaN``, the result is ``NaN + infinity j`` (sign of the imaginary component is unspecified).\n- If ``a`` is ``+infinity`` and ``b`` is ``NaN``, the result is ``+infinity + NaN j``.\n- If ``a`` is ``NaN`` and ``b`` is any value, the result is ``NaN + NaN j``.\n- If ``a`` is ``NaN`` and ``b`` is ``NaN``, the result is ``NaN + NaN j``.\n\n.. versionchanged:: 2022.12\n   Added complex data type support."
     subtract: subtract[TArray,]
     "Calculates the difference for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.\n\nThe result of ``x1_i - x2_i`` must be the same as ``x1_i + (-x2_i)`` and must be governed by the same floating-point rules as addition (see :meth:`add`).\n\nParameters\n----------\nx1: array\n    first input array. Should have a numeric data type.\nx2: array\n    second input array. Must be compatible with ``x1`` (see :ref:`broadcasting`). Should have a numeric data type.\n\nReturns\n-------\nout: array\n    an array containing the element-wise differences. The returned array must have a data type determined by :ref:`type-promotion`.\n\nNotes\n-----\n\n.. versionchanged:: 2022.12\n   Added complex data type support."
     tan: tan[TArray,]
