@@ -257,7 +257,7 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
                 # implemented in object rather than Namespace
                 if b.name == "__eq__":
                     continue
-                # info.py conntains functions which are not part of the Namespace (but Info class)
+                # info.py contains functions which are not part of the Namespace (but Info class)
                 if submodule == "info" and b.name != "__array_namespace_info__":
                     continue
                 data = _function_to_protocol(b, typevars)
@@ -292,7 +292,8 @@ def generate(body_module: dict[str, list[ast.stmt]], out_path: Path) -> None:
                     docstring_expr = body[i + 1]
                     if isinstance(docstring_expr, ast.Expr):
                         if isinstance(docstring_expr.value, ast.Constant):
-                            docstring = docstring_expr.value.value
+                            if isinstance(docstring_expr.value.value, str):
+                                docstring = docstring_expr.value.value
                 # add to module attributes
                 module_attributes[submodule].append(ModuleAttributes(id, ast.Name(id="array"), docstring, []))
             elif isinstance(b, ast.ClassDef):

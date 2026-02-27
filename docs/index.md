@@ -1,4 +1,6 @@
-# Welcome to Python array API standard typing documentation!
+```{include} ../README.md
+
+```
 
 ```{toctree}
 :caption: Installation & Usage
@@ -21,8 +23,4 @@ contributing
 :maxdepth: 2
 
 array_api
-```
-
-```{include} ../README.md
-
 ```

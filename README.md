@@ -2,13 +2,13 @@
 
 <p align="center">
   <a href="https://github.com/34j/types-array-api/actions/workflows/ci.yml?query=branch%3Amain">
-    <img src="https://img.shields.io/github/actions/workflow/status/34j/array-api/ci.yml?branch=main&label=CI&logo=github&style=flat-square" alt="CI Status" >
+    <img src="https://img.shields.io/github/actions/workflow/status/34j/types-array-api/ci.yml?branch=main&label=CI&logo=github&style=flat-square" alt="CI Status" >
   </a>
   <a href="https://array-api.readthedocs.io">
-    <img src="https://img.shields.io/readthedocs/array-api.svg?logo=read-the-docs&logoColor=fff&style=flat-square" alt="Documentation Status">
+    <img src="https://img.shields.io/readthedocs/types-array-api.svg?logo=read-the-docs&logoColor=fff&style=flat-square" alt="Documentation Status">
   </a>
-  <a href="https://codecov.io/gh/34j/array-api">
-    <img src="https://img.shields.io/codecov/c/github/34j/array-api.svg?logo=codecov&logoColor=fff&style=flat-square" alt="Test coverage percentage">
+  <a href="https://codecov.io/gh/34j/types-array-api">
+    <img src="https://img.shields.io/codecov/c/github/34j/types-array-api.svg?logo=codecov&logoColor=fff&style=flat-square" alt="Test coverage percentage">
   </a>
 </p>
 <p align="center">
@@ -23,11 +23,11 @@
   </a>
 </p>
 <p align="center">
-  <a href="https://pypi.org/project/array-api/">
-    <img src="https://img.shields.io/pypi/v/array-api.svg?logo=python&logoColor=fff&style=flat-square" alt="PyPI Version">
+  <a href="https://pypi.org/project/types-array-api/">
+    <img src="https://img.shields.io/pypi/v/types-array-api.svg?logo=python&logoColor=fff&style=flat-square" alt="PyPI Version">
   </a>
-  <img src="https://img.shields.io/pypi/pyversions/array-api.svg?style=flat-square&logo=python&amp;logoColor=fff" alt="Supported Python versions">
-  <img src="https://img.shields.io/pypi/l/array-api.svg?style=flat-square" alt="License">
+  <img src="https://img.shields.io/pypi/pyversions/types-array-api.svg?style=flat-square&logo=python&amp;logoColor=fff" alt="Supported Python versions">
+  <img src="https://img.shields.io/pypi/l/types-array-api.svg?style=flat-square" alt="License">
 </p>
 
 ---

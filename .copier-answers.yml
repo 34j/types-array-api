@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier
-_commit: 2e4f7d0
+_commit: af9b795
 _src_path: gh:34j/pypackage-template
 cli_name: array-api
 copyright_year: '2025'
@@ -11,6 +11,7 @@ has_cli: true
 initial_commit: false
 is_django_package: false
 open_source_license: Apache Software License 2.0
+open_with_editor: false
 package_name: array_api
 project_name: Python array API standard typing
 project_short_description: Typing for array API and array-api-compat

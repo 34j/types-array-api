@@ -1,6 +1,6 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
-exclude: "CHANGELOG.md|.copier-answers.yml|.all-contributorsrc|project"
+exclude: "CHANGELOG.md|.copier-answers.yml|.all-contributorsrc"
 default_stages: [pre-commit]
 
 ci:
@@ -51,17 +51,19 @@ repos:
       - id: prettier
         args: ["--tab-width", "2"]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.4
+    rev: v0.15.2
     hooks:
-      - id: ruff
-        args: [--fix, --unsafe-fixes, --exit-non-zero-on-fix]
+      - id: ruff-check
+        args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format
-  # - repo: https://github.com/codespell-project/codespell
-  #   rev: v2.4.1
-  #   hooks:
-  #     - id: codespell
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+      - id: codespell
+
+        exclude: "_draft.py"
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.16.1
+    rev: v1.19.1
     hooks:
       - id: mypy
         additional_dependencies: [attrs]
