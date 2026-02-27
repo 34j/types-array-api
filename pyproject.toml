@@ -76,6 +76,7 @@ lint.ignore = [
   "D107", # Missing docstring in `__init__`
   "D203", # 1 blank line required before class docstring
   "D212", # Multi-line docstring summary should start at the first line
+  "D301", # Use r""" if any backslashes in a docstring
   "D401", # First line of docstring should be in imperative mood
   "E501",
   "S603",

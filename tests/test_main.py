@@ -1,12 +1,22 @@
 import ast
 import inspect
+from typing import Any
 
 import array_api_strict
+import pytest
 
-from array_api.latest import ArrayNamespace
+import array_api._2024_12
+import array_api.latest
 
 
-def test_strict_supset_namespace():
+@pytest.mark.parametrize(
+    "ArrayNamespace",
+    [
+        array_api._2024_12.ArrayNamespace,
+        # array_api.latest.ArrayNamespace
+    ],
+)
+def test_strict_supset_namespace(ArrayNamespace: Any) -> None:
     # Namespace <= strict
     assert isinstance(array_api_strict, ArrayNamespace)
     # module = ast.parse(inspect.getsource(ArrayNamespace))
@@ -20,16 +30,17 @@ def test_strict_supset_namespace():
     #         continue
     #     if not isinstance(n.annotation.value, ast.Name):
     #         continue
+    #     print(n.target.id, n.annotation.value.id)
     #     assert isinstance(
     #         getattr(array_api_strict, n.target.id, None),
-    #         getattr(array_api._2024_12, n.annotation.value.id, None)
+    #         getattr(array_api.latest, n.annotation.value.id, None)
     #     )
 
 
-def test_namespace_supset_strict():
+def test_namespace_supset_strict() -> None:
     # Namespace >= strict
     missing = []
-    module = ast.parse(inspect.getsource(ArrayNamespace))
+    module = ast.parse(inspect.getsource(array_api.latest.ArrayNamespace))
     classdef = next(n for n in module.body if isinstance(n, ast.ClassDef) and n.name == "ArrayNamespace")
     names = [n.target.id for n in classdef.body if isinstance(n, ast.AnnAssign) and isinstance(n.target, ast.Name)]
     for attr in dir(array_api_strict):

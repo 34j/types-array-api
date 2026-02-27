@@ -1,15 +1,15 @@
 {
   "extends": [
     "config:best-practices",
-    ":pinOnlyDevDependencies",
     ":automergeAll",
-    ":enablePreCommit"
+    ":enablePreCommit",
+    "github>34j/renovate-scientific-python-spec-0",
+    "github>renovate-pyproject-fmt/max-supported-version"
   ],
   "packageRules": [
     {
-      "matchPackageNames": ["python"],
-      "rangeStrategy": "widen",
-      "separateMultipleMinor": true
+      "matchDepTypes": ["dependencies"],
+      "rangeStrategy": "bump"
     }
   ]
 }
