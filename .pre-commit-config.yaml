@@ -41,6 +41,10 @@ repos:
     rev: "v2.16.2"
     hooks:
       - id: pyproject-fmt
+  - repo: https://github.com/34j/sync-python-matrix
+    rev: "d114faa"
+    hooks:
+      - id: sync-python-matrix
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: 0.10.6
     hooks:
