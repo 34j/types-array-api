@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.3.0 (2026-02-28)
+
+### Bug fixes
+
+- Update array-api-strict ([`f135c94`](https://github.com/34j/types-array-api/commit/f135c94e28cb4f0990e53ebc7c187ed87adc46d2))
+- Run copier update ([`c892b36`](https://github.com/34j/types-array-api/commit/c892b369d655dce2a529f38eccbed3d540648d98))
+
+### Features
+
+- Support 2025 ([`5aef06f`](https://github.com/34j/types-array-api/commit/5aef06f66888ecad46a6654131bc60ece3671893))
+
 ## v1.2.0 (2025-12-11)
 
 ### Features
