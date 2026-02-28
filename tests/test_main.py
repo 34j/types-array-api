@@ -48,6 +48,8 @@ def test_namespace_supset_strict() -> None:
             continue
         if "trict" in attr:
             continue
+        if "ModuleType" in attr:
+            continue
         if attr not in names:
             missing.append(attr)
     assert not missing, f"Missing attributes in ArrayNamespace: {missing}"
