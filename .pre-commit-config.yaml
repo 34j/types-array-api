@@ -46,7 +46,7 @@ repos:
     hooks:
       - id: sync-python-matrix
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.10.8
+    rev: 0.10.9
     hooks:
       - id: uv-lock
   - repo: https://github.com/pre-commit/mirrors-prettier
