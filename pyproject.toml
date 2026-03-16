@@ -95,6 +95,22 @@ lint.per-file-ignores."tests/**/*" = [
 ]
 lint.isort.known-first-party = [ "array_api", "tests" ]
 
+[tool.mypy]
+check_untyped_defs = true
+disallow_any_generics = false
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+mypy_path = "src/"
+no_implicit_optional = true
+show_error_codes = true
+warn_unreachable = true
+warn_unused_ignores = true
+exclude = [
+  "docs/.*",
+  "setup.py",
+]
+overrides = [ { module = "tests.*", allow_untyped_defs = true }, { module = "docs.*", ignore_errors = true } ]
+
 [tool.pytest]
 ini_options.addopts = """\
     -v
@@ -114,22 +130,6 @@ report.exclude_lines = [
   "pragma: no cover",
   "raise NotImplementedError",
 ]
-
-[tool.mypy]
-check_untyped_defs = true
-disallow_any_generics = false
-disallow_incomplete_defs = true
-disallow_untyped_defs = true
-mypy_path = "src/"
-no_implicit_optional = true
-show_error_codes = true
-warn_unreachable = true
-warn_unused_ignores = true
-exclude = [
-  "docs/.*",
-  "setup.py",
-]
-overrides = [ { module = "tests.*", allow_untyped_defs = true }, { module = "docs.*", ignore_errors = true } ]
 
 [tool.semantic_release]
 version_toml = [ "pyproject.toml:project.version" ]
