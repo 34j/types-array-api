@@ -42,15 +42,15 @@ repos:
     hooks:
       - id: pyproject-fmt
   - repo: https://github.com/34j/sync-python-matrix
-    rev: "d114faa"
+    rev: "d114faafeb9c187a37379d34256d3efc6042e187"
     hooks:
       - id: sync-python-matrix
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.11.7
+    rev: 0.11.8
     hooks:
       - id: uv-lock
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.1.0
+    rev: v4.0.0-alpha.8
     hooks:
       - id: prettier
         args: ["--tab-width", "2"]
