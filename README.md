@@ -5,7 +5,7 @@
     <img src="https://img.shields.io/github/actions/workflow/status/34j/types-array-api/ci.yml?branch=main&label=CI&logo=github&style=flat-square" alt="CI Status" >
   </a>
   <a href="https://array-api.readthedocs.io">
-    <img src="https://img.shields.io/readthedocs/types-array-api.svg?logo=read-the-docs&logoColor=fff&style=flat-square" alt="Documentation Status">
+    <img src="https://img.shields.io/readthedocs/array-api.svg?logo=read-the-docs&logoColor=fff&style=flat-square" alt="Documentation Status">
   </a>
   <a href="https://codecov.io/gh/34j/types-array-api">
     <img src="https://img.shields.io/codecov/c/github/34j/types-array-api.svg?logo=codecov&logoColor=fff&style=flat-square" alt="Test coverage percentage">
