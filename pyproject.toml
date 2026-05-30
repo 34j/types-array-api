@@ -96,22 +96,23 @@ lint.per-file-ignores."tests/**/*" = [
 lint.isort.known-first-party = [ "array_api", "tests" ]
 
 [tool.mypy]
-check_untyped_defs = true
-disallow_any_generics = false
-disallow_incomplete_defs = true
-disallow_untyped_defs = true
 mypy_path = "src/"
-no_implicit_optional = true
-show_error_codes = true
-warn_unreachable = true
-warn_unused_ignores = true
 exclude = [
   "docs/.*",
   "setup.py",
 ]
+disallow_any_generics = false
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+warn_unused_ignores = true
+warn_unreachable = true
 overrides = [ { module = "tests.*", allow_untyped_defs = true }, { module = "docs.*", ignore_errors = true } ]
+no_implicit_optional = true
+show_error_codes = true
 
 [tool.pytest]
+ini_options.pythonpath = [ "src" ]
 ini_options.addopts = """\
     -v
     -Wdefault
@@ -119,7 +120,6 @@ ini_options.addopts = """\
     --cov-report=term
     --cov-report=xml
     """
-ini_options.pythonpath = [ "src" ]
 
 [tool.coverage]
 run.branch = true
@@ -132,11 +132,11 @@ report.exclude_lines = [
 ]
 
 [tool.semantic_release]
-version_toml = [ "pyproject.toml:project.version" ]
 version_variables = [
-  "src/array_api/__init__.py:__version__",
   "docs/conf.py:release",
+  "src/array_api/__init__.py:__version__",
 ]
+version_toml = [ "pyproject.toml:project.version" ]
 build_command = """
 pip install uv
 uv lock
@@ -146,6 +146,7 @@ uv build
 branches.main.match = "main"
 branches.noop.match = "(?!main$)"
 branches.noop.prerelease = true
+changelog.environment.keep_trailing_newline = true
 changelog.exclude_commit_patterns = [
   "chore(?:\\([^)]*?\\))?: .+",
   "ci(?:\\([^)]*?\\))?: .+",
@@ -156,4 +157,3 @@ changelog.exclude_commit_patterns = [
   "Merged? .*",
   "Initial [Cc]ommit.*",         # codespell:ignore
 ]
-changelog.environment.keep_trailing_newline = true
