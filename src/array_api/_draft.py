@@ -706,7 +706,7 @@ class Array[TDtype, TDevice](Protocol):
         """
         ...
 
-    def __getitem__(self, key: int | slice | ellipsis | None | tuple[int | slice | ellipsis | Self | None, ...] | Self, /) -> Self:
+    def __getitem__(self, key: int | slice | ellipsis | tuple[int | slice | ellipsis | Self | None, ...] | Self | None, /) -> Self:
         """
         Returns ``self[key]``.
 
