@@ -108,6 +108,7 @@ assert not isinstance(array_api_strict, ArrayNamespaceFull)
   ```python
   from array_api.latest import ShapedAnyArray as Array
 
+
   def sum_last_axis[*TShape](x: Array[*TShape, Any]) -> Array[*TShape]:
       return xp.sum(x, axis=-1)
   ```
@@ -117,6 +118,8 @@ assert not isinstance(array_api_strict, ArrayNamespaceFull)
   ```python
   RTheta = NewType("RTheta", int)
   XY = NewType("XY", int)
+
+
   def polar_coordinates[*TShape](randtheta: Array[*TShape, RTheta]) -> Array[*TShape, XY]:
       """Convert polar coordinates to Cartesian coordinates."""
       r = randtheta[..., 0]
