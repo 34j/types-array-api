@@ -4,6 +4,7 @@ from abc import abstractmethod
 from collections.abc import Buffer as SupportsBufferProtocol
 from collections.abc import Sequence
 from enum import Enum
+from types import CapsuleType as PyCapsule
 from types import EllipsisType as ellipsis
 from typing import (
     Any,
@@ -12,8 +13,6 @@ from typing import (
     Self,
     runtime_checkable,
 )
-
-from typing_extensions import CapsuleType as PyCapsule
 
 inf = float("inf")
 
